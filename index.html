@@ -1,79 +1,110 @@
 <!DOCTYPE html>
-<html>
-
-  <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Angular-vs-repeat : Virtual Scroll for AngularJS ngRepeat directive" />
-
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
-    <title>Angular-vs-repeat</title>
-  </head>
-
-  <body>
-
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/kamilkp/angular-vs-repeat">View on GitHub</a>
-
-          <h1 id="project_title">Angular-vs-repeat</h1>
-          <h2 id="project_tagline">Virtual Scroll for AngularJS ngRepeat directive</h2>
-
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/kamilkp/angular-vs-repeat/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/kamilkp/angular-vs-repeat/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
-
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
-
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
-
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
-
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
-
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
-
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
-      </section>
-    </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Angular-vs-repeat maintained by <a href="https://github.com/kamilkp">kamilkp</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
-
-    
-
-  </body>
+<html ng-app="app">
+	<head>
+		<title>angular-vs-repeat</title>
+		<link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<style>
+			body{
+				padding: 20px 50px;
+			}
+			.repeater-container{
+				height: 500px;
+				overflow: auto;
+				-webkit-overflow-scrolling: touch;
+			}
+			#dom-preview-container{
+				max-height: 500px;
+				overflow: auto;
+			}
+			#dom-preview-container pre{
+				font-size: 11px;
+			}
+			.repeater-container > .item-element{
+				margin: 0 !important;
+				width: 100%;
+				box-sizing: border-box;
+				-moz-box-sizing: border-box;
+			}
+			.array-switch-form{
+				width: 400px;
+				margin-top: 20px;
+			}
+			pre > code > span{
+				display: block;
+			}
+		</style>
+		<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
+		<script type="text/javascript" src="http://code.angularjs.org/1.2.16/angular.js"></script>
+		<script type="text/javascript" src="angular-vs-repeat.js"></script>
+		<script>
+			function getRegularArray(size){
+				var res = [];
+				for(var i=0;i<size;i++){
+					res.push({text: i});
+				}
+				return res;
+			}
+			function appController($scope){
+				$scope.items = getRegularArray(1000);
+				$scope.switchCollection = function(){
+					var parsed = parseInt($scope.newArray.size, 10);
+					if(!isNaN(parsed))
+						$scope.items = getRegularArray(parsed);
+				};
+				$scope.getDomElementsDesc = function(){
+					var arr = [];
+					$('.item-element[ng-repeat]').contents().each(function(ind, item){
+						arr.push($(item).text());
+					});
+					return arr;
+				}
+				$scope.newArray = {};
+				$scope.inputKeyDown = function(e){
+					if(e.keyCode == 13)
+						$scope.switchCollection();
+				};
+			}
+			angular.module('app', ['vs-repeat']);
+		</script>
+	</head>
+	<body ng-controller="appController">
+		<a href="https://github.com/kamilkp/angular-vs-repeat"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+		<div id="hh"></div>
+		<h1>
+			Angular-vs-repeat
+			<small>angular virtual scroll for ng-repeat</small>
+		</h1>
+		<div class="row">
+			<div class="col-xs-6">
+				<h3>
+					<small class="pull-right" style="line-height: 34px;"><span class="glyphicon glyphicon-resize-vertical"></span>scroll it vertically</small>
+					Array size: {{items.length}}
+				</h3>
+				<div class="repeater-container" vs-repeat="60">
+					<div class="item-element well" ng-repeat="item in items">{{item.text}}</div>
+				</div>
+			</div>
+			<div class="col-xs-6">
+				<h3>
+					Actual elements in DOM ({{getDomElementsDesc().length}}):
+				</h3>
+				<div id="dom-preview-container">
+					<pre>
+						<code style="white-space: pre-line;">
+							<div ng-repeat="el in getDomElementsDesc()"><br>{{el}}</div>
+						</code>
+					</pre>
+				</div>
+			</div>
+		</div>
+		<h3>
+			You can try different array sizes using the form below
+		</h3>
+		<div class="input-group array-switch-form">
+	      <span class="input-group-btn">
+	        <button class="btn btn-info" type="button" ng-click="switchCollection()">Replace array</button>
+	      </span>
+	      <input ng-model="newArray.size" type="text" class="form-control" placeholder="type new array size" ng-keydown="inputKeyDown($event)">
+	    </div>
+	</body>
 </html>
