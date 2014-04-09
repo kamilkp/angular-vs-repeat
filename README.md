@@ -4,7 +4,7 @@ angular-vs-repeat
 Virtual Scroll for AngularJS ngRepeat directive
 
 ###DESCRIPTION:
-vsRepeat directive stands for Virtual Scroll Repeat. It turns a standard ngRepeated set of elements in a scrollable container
+`vsRepeat` directive stands for **Virtual Scroll Repeat**. It turns a standard ngRepeated set of elements in a scrollable container
 into a component, where the user thinks he has all the elements rendered and all he needs to do is scroll (without any kind of
 pagination - which most users loath) and at the same time the browser isn't overloaded by that many elements/angular bindings etc.
 The directive renders only so many elements that can fit into current container's clientHeight.
@@ -15,7 +15,7 @@ The directive renders only so many elements that can fit into current container'
 - all rendered elements must have the same predefined height
 
 ###USAGE:
-First include 'vs-repeat' as a module dependency in your app.
+First include `vs-repeat` as a module dependency in your app.
 Then in order to use the vsRepeat directive you need to measure the single element's height (including all paddings and margins).
 You can use any kind of developer tools you like. Let's say that that height is 50px.
 example:
@@ -28,7 +28,7 @@ example:
 </div>
 ```
 
-- the vsRepeat directive must be applied to a direct parent of an element with ngRepeat
+- the vsRepeat directive must be applied to a direct parent of an element with `ngRepeat`
 - the value of vsRepeat attribute is the single element's height measured in pixels
 
 ###OPTIONAL PARAMETERS (attributes):
