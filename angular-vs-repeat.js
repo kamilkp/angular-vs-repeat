@@ -118,7 +118,6 @@
 							$scrollParent.on('wheel.vs-repeat', wheelHandler);
 						}
 						function wheelHandler(e){
-							console.log('wheel');
 							e.preventDefault();
 							$wheelHelper.show();
 						}

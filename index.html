@@ -3,6 +3,9 @@
 	<head>
 		<title>angular-vs-repeat</title>
 		<link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
+		<script type="text/javascript" src="http://code.angularjs.org/1.2.16/angular.js"></script>
+		<script type="text/javascript" src="angular-vs-repeat.js"></script>
 		<style>
 			body{
 				padding: 20px 50px;
@@ -12,11 +15,9 @@
 				overflow: auto;
 				-webkit-overflow-scrolling: touch;
 			}
-			#dom-preview-container{
+			#dom-preview-container pre{
 				max-height: 500px;
 				overflow: auto;
-			}
-			#dom-preview-container pre{
 				font-size: 11px;
 			}
 			.repeater-container > .item-element{
@@ -32,10 +33,11 @@
 			pre > code > span{
 				display: block;
 			}
+			pre{
+				padding-top: 0;
+				padding-bottom: 0;
+			}
 		</style>
-		<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
-		<script type="text/javascript" src="http://code.angularjs.org/1.2.16/angular.js"></script>
-		<script type="text/javascript" src="angular-vs-repeat.js"></script>
 		<script>
 			function getRegularArray(size){
 				var res = [];
@@ -53,8 +55,8 @@
 				};
 				$scope.getDomElementsDesc = function(){
 					var arr = [];
-					$('.item-element[ng-repeat]').contents().each(function(ind, item){
-						arr.push($(item).text());
+					$('.item-element[ng-repeat]').each(function(ind, item){
+						arr.push($(item)[0].outerHTML);
 					});
 					return arr;
 				}
@@ -90,8 +92,10 @@
 				</h3>
 				<div id="dom-preview-container">
 					<pre>
-						<code style="white-space: pre-line;">
-							<div ng-repeat="el in getDomElementsDesc()"><br>{{el}}</div>
+						<code style="white-space: pre-line;" class="language-html">
+							<div ng-repeat="el in getDomElementsDesc() track by $index">
+								{{el}}
+							</div>
 						</code>
 					</pre>
 				</div>
