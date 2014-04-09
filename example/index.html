@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html ng-app="app">
+	<head>
+		<title>angular-vs-repeat</title>
+		<link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/8.0/styles/default.min.css">
+		<style>
+			body{
+				padding: 20px 50px;
+			}
+			.repeater-container{
+				height: 500px;
+				overflow: auto;
+				-webkit-overflow-scrolling: touch;
+			}
+			#dom-preview-container{
+				max-height: 500px;
+				overflow: auto;
+			}
+			#dom-preview-container pre{
+				font-size: 11px;
+			}
+			.repeater-container > .item-element{
+				margin: 0 !important;
+				width: 100%;
+				box-sizing: border-box;
+				-moz-box-sizing: border-box;
+			}
+			.array-switch-form{
+				width: 400px;
+				margin-top: 20px;
+			}
+			pre > code > span{
+				display: block;
+			}
+		</style>
+		<script type="text/javascript" src="jquery.js"></script>
+		<script type="text/javascript" src="angular.js"></script>
+		<script type="text/javascript" src="angular-vs-repeat.js"></script>
+		<script>
+			function getRegularArray(size){
+				var res = [];
+				for(var i=0;i<size;i++){
+					res.push({text: i});
+				}
+				return res;
+			}
+			function appController($scope){
+				$scope.items = getRegularArray(1000);
+				$scope.switchCollection = function(){
+					var parsed = parseInt($scope.newArray.size, 10);
+					if(!isNaN(parsed))
+						$scope.items = getRegularArray(parsed);
+				};
+				$scope.getDomElementsDesc = function(){
+					var arr = [];
+					$('.item-element[ng-repeat]').contents().each(function(ind, item){
+						arr.push($(item).text());
+					});
+					return arr;
+				}
+				$scope.newArray = {};
+				$scope.inputKeyDown = function(e){
+					if(e.keyCode == 13)
+						$scope.switchCollection();
+				};
+			}
+			angular.module('app', ['vs-repeat']);
+		</script>
+	</head>
+	<body ng-controller="appController">
+		<div id="hh"></div>
+		<h1>
+			Angular-vs-repeat
+			<small>angular virtual scroll for ng-repeat</small>
+		</h1>
+		<div class="row">
+			<div class="col-xs-6">
+				<h3>
+					<small class="pull-right" style="line-height: 34px;"><span class="glyphicon glyphicon-resize-vertical"></span>scroll it vertically</small>
+					Array size: {{items.length}}
+				</h3>
+				<div class="repeater-container" vs-repeat="60">
+					<div class="item-element well" ng-repeat="item in items">{{item.text}}</div>
+				</div>
+			</div>
+			<div class="col-xs-6">
+				<h3>
+					Actual elements in DOM ({{getDomElementsDesc().length}}):
+				</h3>
+				<div id="dom-preview-container">
+					<pre>
+						<code style="white-space: pre-line;">
+							<div ng-repeat="el in getDomElementsDesc()"><br>{{el}}</div>
+						</code>
+					</pre>
+				</div>
+			</div>
+		</div>
+		<h3>
+			You can try different array sizes using the form below
+		</h3>
+		<div class="input-group array-switch-form">
+	      <span class="input-group-btn">
+	        <button class="btn btn-info" type="button" ng-click="switchCollection()">Replace array</button>
+	      </span>
+	      <input ng-model="newArray.size" type="text" class="form-control" placeholder="type new array size" ng-keydown="inputKeyDown($event)">
+	    </div>
+	</body>
+</html>
