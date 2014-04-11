@@ -2,6 +2,7 @@ angular-vs-repeat
 =================
 
 Virtual Scroll for AngularJS ngRepeat directive
+
 Demo: http://kamilkp.github.io/angular-vs-repeat/
 
 ###DESCRIPTION:
