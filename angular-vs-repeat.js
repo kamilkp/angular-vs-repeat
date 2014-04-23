@@ -69,6 +69,7 @@
 							if(!originalCollection || originalCollection.length < 1){
 								$scope[collectionName] = [];
 								originalLength = 0;
+								$fillElement.css({'height': 0});
 								return;
 							}
 							else{
