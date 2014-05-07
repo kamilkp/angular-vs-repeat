@@ -13,8 +13,7 @@
 	// - all rendered elements must have the same predefined height
 
 	// USAGE:
-	// First include 'vs-repeat' as a module dependency in your app.
-	// Then in order to use the vsRepeat directive you need to measure the single element's height (including all paddings and margins).
+	// In order to use the vsRepeat directive you need to measure the single element's height (including all paddings and margins).
 	// You can use any kind of developer tools you like. Let's say that that height is 50px.
 	// example:
 	// <div vs-repeat="50">
@@ -56,7 +55,7 @@
 					$fillElement;
 
 				$element.empty();
-				if(!window.getComputedStyle || window.getComputedStyle($element[0]).position === 'static')
+				if(!window.getComputedStyle || window.getComputedStyle($element[0]).position !== 'absolute')
 					$element.css('position', 'relative');
 				return {
 					pre: function($scope, $element, $attrs){
@@ -70,6 +69,7 @@
 							if(!originalCollection || originalCollection.length < 1){
 								$scope[collectionName] = [];
 								originalLength = 0;
+								$fillElement.css({'height': 0});
 								return;
 							}
 							else{
@@ -95,7 +95,7 @@
 								.on('wheel', function(e){
 									e.preventDefault();
 									e.stopPropagation();
-									$scrollParent[0].scrollTop -= e.originalEvent.wheelDeltaY;
+									$scrollParent[0].scrollTop += e.originalEvent.deltaY;
 								}).on('mousemove', function(e){
 									if(_prevMouse.x !== e.clientX || _prevMouse.y !== e.clientY)
 										$(this).hide();
