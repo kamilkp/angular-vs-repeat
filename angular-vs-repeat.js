@@ -36,7 +36,8 @@
 	// - 'vsRepeatTrigger' - an event the directive listens for to manually trigger reinitialization
 	// - 'vsRepeatReinitialized' - an event the directive emits upon reinitialization done
 
-	var isMacOS = navigator.appVersion.indexOf("Mac") != -1;
+	var isMacOS = navigator.appVersion.indexOf('Mac') != -1,
+		wheelEventName = typeof window.onwheel !== 'undefined' ? 'wheel' : typeof window.onmousewheel !== 'undefined' ? 'mousewheel' : 'DOMMouseScroll';
 	angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', function($compile){
 		return {
 			restrict: 'A',
@@ -92,7 +93,7 @@
 						if(isMacOS){
 							$wheelHelper = $('<div class="vs-repeat-wheel-helper"></div>')
 								.appendTo($fillElement)
-								.on('wheel', function(e){
+								.on(wheelEventName, function(e){
 									e.preventDefault();
 									e.stopPropagation();
 									$scrollParent[0].scrollTop += e.originalEvent.deltaY;
@@ -115,7 +116,7 @@
 						});
 
 						if(isMacOS){
-							$scrollParent.on('wheel.vs-repeat', wheelHandler);
+							$scrollParent.on(wheelEventName + '.vs-repeat', wheelHandler);
 						}
 						function wheelHandler(e){
 							e.preventDefault();
