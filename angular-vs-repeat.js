@@ -96,7 +96,7 @@
 								.on(wheelEventName, function(e){
 									e.preventDefault();
 									e.stopPropagation();
-									$scrollParent[0].scrollTop += e.originalEvent.deltaY;
+									$scrollParent[0].scrollTop += (e.originalEvent.deltaY || -e.originalEvent.wheelDeltaY);
 								}).on('mousemove', function(e){
 									if(_prevMouse.x !== e.clientX || _prevMouse.y !== e.clientY)
 										$(this).hide();
