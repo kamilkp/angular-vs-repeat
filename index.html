@@ -47,11 +47,15 @@
 				return res;
 			}
 			function appController($scope){
-				$scope.items = getRegularArray(1000);
+				$scope.items = {
+					collection: getRegularArray(1000)
+				};
 				$scope.switchCollection = function(){
 					var parsed = parseInt($scope.newArray.size, 10);
 					if(!isNaN(parsed))
-						$scope.items = getRegularArray(parsed);
+						$scope.items = {
+							collection: getRegularArray(parsed)
+						};
 				};
 				$scope.getDomElementsDesc = function(){
 					var arr = [];
@@ -83,7 +87,7 @@
 					Array size: {{items.length}}
 				</h3>
 				<div class="repeater-container" vs-repeat="60">
-					<div class="item-element well" ng-repeat="item in items">{{item.text}}</div>
+					<div class="item-element well" ng-repeat="item in items.collection">{{item.text}}</div>
 				</div>
 			</div>
 			<div class="col-xs-6">

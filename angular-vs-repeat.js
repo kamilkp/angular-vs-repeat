@@ -49,7 +49,7 @@
 					lhs = expressionMatches[1],
 					rhs = expressionMatches[2],
 					rhsSuffix = expressionMatches[3],
-					collectionName = '$vs_' + rhs,
+					collectionName = '$vs_collection',
 					originalCollection = [],
 					originalLength,
 					$wheelHelper,
