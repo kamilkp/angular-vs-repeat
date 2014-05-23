@@ -11,9 +11,17 @@
 				padding: 20px 50px;
 			}
 			.repeater-container{
-				height: 500px;
+				height: 454px;
 				overflow: auto;
+				box-shadow: 0 0 10px;
+				border-radius: 5px;
 				-webkit-overflow-scrolling: touch;
+			}
+			.enclosing-ng-repeat .repeater-container{
+				height: 216px;
+			}
+			.enclosing-ng-repeat .repeater-container:first-child{
+				margin-bottom: 20px;
 			}
 			#dom-preview-container pre{
 				max-height: 500px;
@@ -37,6 +45,9 @@
 				padding-top: 0;
 				padding-bottom: 0;
 			}
+			ul.nav > li{
+				cursor: pointer;
+			}
 		</style>
 		<script>
 			function getRegularArray(size){
@@ -59,8 +70,10 @@
 				};
 				$scope.getDomElementsDesc = function(){
 					var arr = [];
-					$('.item-element[ng-repeat]').each(function(ind, item){
-						arr.push($(item)[0].outerHTML);
+					var elems = document.querySelectorAll('.item-element[ng-repeat]');
+					elems = Array.prototype.slice.call(elems);
+					elems.forEach(function(item){
+						arr.push(item.outerHTML);
 					});
 					return arr;
 				}
@@ -69,6 +82,8 @@
 					if(e.keyCode == 13)
 						$scope.switchCollection();
 				};
+
+				$scope.outerArray = getRegularArray(2);
 			}
 			angular.module('app', ['vs-repeat']);
 		</script>
@@ -84,10 +99,27 @@
 			<div class="col-xs-6">
 				<h3>
 					<small class="pull-right" style="line-height: 34px;"><span class="glyphicon glyphicon-resize-vertical"></span>scroll it vertically</small>
-					Array size: {{items.length}}
+					Array size: {{items.collection.length}}
 				</h3>
-				<div class="repeater-container" vs-repeat="60">
-					<div class="item-element well" ng-repeat="item in items.collection">{{item.text}}</div>
+				<ul class="nav nav-tabs" style="margin-bottom: 5px;" ng-init="tab = '1'">
+				  <li ng-class="{active: tab === '1'}"><a ng-click="tab = '1'">Single vsRepeat</a></li>
+				  <li ng-class="{active: tab === '2'}"><a ng-click="tab = '2'">Nested inside another ngRepeat</a></li>
+				</ul>
+				<div ng-if="tab === '1'">
+					<div class="repeater-container" vs-repeat="60">
+						<div class="item-element well" ng-repeat="item in items.collection">
+							{{item.text}}
+						</div>
+					</div>
+				</div>
+				<div ng-if="tab === '2'">
+					<div ng-repeat="foo in outerArray" class="enclosing-ng-repeat">
+						<div class="repeater-container" vs-repeat="60">
+							<div class="item-element well" ng-repeat="item in items.collection">
+								{{item.text}}
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 			<div class="col-xs-6">

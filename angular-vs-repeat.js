@@ -43,23 +43,26 @@
 			restrict: 'A',
 			scope: true,
 			compile: function($element, $attrs){
-				var childClone = $element.children().eq(0).clone(),
-					ngRepeatExpression = childClone.attr('ng-repeat'),
+				var ngRepeatChild = $element.children().eq(0),
+					ngRepeatExpression = ngRepeatChild.attr('ng-repeat'),
+					childCloneHtml = ngRepeatChild[0].outerHTML,
 					expressionMatches = /^\s*(\S+)\s+in\s+(\S+)\s*(track\s+by\s+\S+)?/.exec(ngRepeatExpression),
 					lhs = expressionMatches[1],
 					rhs = expressionMatches[2],
 					rhsSuffix = expressionMatches[3],
-					collectionName = '$vs_collection',
-					originalCollection = [],
-					originalLength,
-					$wheelHelper,
-					$fillElement;
+					collectionName = '$vs_collection';
 
 				$element.empty();
 				if(!window.getComputedStyle || window.getComputedStyle($element[0]).position !== 'absolute')
 					$element.css('position', 'relative');
 				return {
 					pre: function($scope, $element, $attrs){
+						var childClone = angular.element(childCloneHtml),
+							originalCollection = [],
+							originalLength,
+							$wheelHelper,
+							$fillElement;
+
 						$scope.elementHeight = parseInt($attrs.vsRepeat, 10);
 						var $scrollParent = $attrs.vsScrollParent ? $element.closest($attrs.vsScrollParent) : $element;
 						$scope.topOffset = $attrs.vsTopOffset ? parseInt($attrs.vsTopOffset, 10) : 0;
@@ -85,26 +88,26 @@
 						$compile(childClone)($scope);
 						$element.append(childClone);
 
-						$fillElement = $('<div class="vs-repeat-fill-element"></div>')
-							.prependTo($element)
+						$fillElement = angular.element('<div class="vs-repeat-fill-element"></div>')
 							.css({'position':'relative'});
+						$element.prepend($fillElement);
 
 						var _prevMouse = {};
 						if(isMacOS){
-							$wheelHelper = $('<div class="vs-repeat-wheel-helper"></div>')
-								.appendTo($fillElement)
+							$wheelHelper = angular.element('<div class="vs-repeat-wheel-helper"></div>')
 								.on(wheelEventName, function(e){
 									e.preventDefault();
 									e.stopPropagation();
 									$scrollParent[0].scrollTop += (e.originalEvent.deltaY || -e.originalEvent.wheelDeltaY);
 								}).on('mousemove', function(e){
 									if(_prevMouse.x !== e.clientX || _prevMouse.y !== e.clientY)
-										$(this).hide();
+										angular.element(this).css('display', 'none');
 									_prevMouse = {
 										x: e.clientX,
 										y: e.clientY
 									};
-								}).hide();
+								}).css('display', 'none');
+							$fillElement.append($wheelHelper);
 						}
 
 						$scope.startIndex = 0;
@@ -120,7 +123,7 @@
 						}
 						function wheelHandler(e){
 							e.preventDefault();
-							$wheelHelper.show();
+							$wheelHelper.css('display', 'block');
 						}
 
 						function onWindowResize(){
@@ -128,10 +131,10 @@
 								$scope.$apply();
 						}
 
-						$(window).on('resize', onWindowResize);
+						angular.element(window).on('resize', onWindowResize);
 
 						$scope.$on('$destroy', function(){
-							$(window).off('resize', onWindowResize);
+							angular.element(window).off('resize', onWindowResize);
 						});
 
 						$scope.$on('vsRepeatTrigger', reinitialize);
@@ -193,7 +196,7 @@
 		};
 	}]);
 
-	$('head').append([
+	angular.element(document.head).append([
 		'<style>' +
 		'.vs-repeat-wheel-helper{' +
 		'	position: absolute;' +
