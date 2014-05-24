@@ -3,7 +3,6 @@
 	<head>
 		<title>angular-vs-repeat</title>
 		<link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-		<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
 		<script type="text/javascript" src="http://code.angularjs.org/1.2.16/angular.js"></script>
 		<script type="text/javascript" src="angular-vs-repeat.js"></script>
 		<style>
@@ -23,12 +22,25 @@
 			.enclosing-ng-repeat .repeater-container:first-child{
 				margin-bottom: 20px;
 			}
+			.ranges-inner-wrapper{
+				padding: 10px 20px;
+				width: 100%;
+			}
+			.repeater-container.ranges{
+				height: 345px;
+				margin-top: 20px;
+				background: hsl(60, 100%, 90%);
+			}
+			.repeater-container.horizontal .item-element{
+				width: 50px;
+				height: 100%;
+			}
 			#dom-preview-container pre{
 				max-height: 500px;
 				overflow: auto;
 				font-size: 11px;
 			}
-			.repeater-container > .item-element{
+			.repeater-container .item-element{
 				margin: 0 !important;
 				width: 100%;
 				box-sizing: border-box;
@@ -70,7 +82,7 @@
 				};
 				$scope.getDomElementsDesc = function(){
 					var arr = [];
-					var elems = document.querySelectorAll('.item-element[ng-repeat]');
+					var elems = document.querySelectorAll('.item-element.well');
 					elems = Array.prototype.slice.call(elems);
 					elems.forEach(function(item){
 						arr.push(item.outerHTML);
@@ -96,14 +108,19 @@
 			<small>angular virtual scroll for ng-repeat</small>
 		</h1>
 		<div class="row">
-			<div class="col-xs-6">
+			<div class="col-xs-7">
 				<h3>
-					<small class="pull-right" style="line-height: 34px;"><span class="glyphicon glyphicon-resize-vertical"></span>scroll it vertically</small>
+					<small class="pull-right" style="line-height: 34px;">
+						<span ng-show="tab !== '4'"><span class="glyphicon glyphicon-resize-vertical"></span>scroll it vertically</span>
+						<span ng-show="tab === '4'"><span class="glyphicon glyphicon-resize-horizontal"></span>&nbsp;scroll it horizontally</span>
+					</small>
 					Array size: {{items.collection.length}}
 				</h3>
 				<ul class="nav nav-tabs" style="margin-bottom: 5px;" ng-init="tab = '1'">
 				  <li ng-class="{active: tab === '1'}"><a ng-click="tab = '1'">Single vsRepeat</a></li>
 				  <li ng-class="{active: tab === '2'}"><a ng-click="tab = '2'">Nested inside another ngRepeat</a></li>
+				  <li ng-class="{active: tab === '3'}"><a ng-click="tab = '3'">With offsets</a></li>
+				  <li ng-class="{active: tab === '4'}"><a ng-click="tab = '4'">Horizontal</a></li>
 				</ul>
 				<div ng-if="tab === '1'">
 					<div class="repeater-container" vs-repeat="60">
@@ -121,8 +138,36 @@
 						</div>
 					</div>
 				</div>
+				<div ng-if="tab === '3'" ng-init="beforeOffset = 50; afterOffset = 50;">
+					<div>
+						<span>
+							Top offset:
+						</span>
+						<input type="range" min="0" max="100" step="1" value="50" ng-model="beforeOffset" />
+					</div>
+					<div>
+						<span>
+							Bottom offset:
+						</span>
+						<input type="range" min="0" max="100" step="1" value="50" ng-model="afterOffset" />
+					</div>
+					<div class="repeater-container ranges" vs-repeat="80" vs-offset-before="{{beforeOffset}}" vs-offset-after="{{afterOffset}}">
+						<div class="ranges-inner-wrapper" ng-repeat="item in items.collection">
+							<div class="item-element well">
+								{{item.text}}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div ng-if="tab === '4'">
+					<div class="repeater-container horizontal" vs-repeat="50" vs-horizontal>
+						<div class="item-element well" ng-repeat="item in items.collection">
+							{{item.text}}
+						</div>
+					</div>
+				</div>
 			</div>
-			<div class="col-xs-6">
+			<div class="col-xs-5">
 				<h3>
 					Actual elements in DOM ({{getDomElementsDesc().length}}):
 				</h3>
