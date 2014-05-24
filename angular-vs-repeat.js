@@ -1,3 +1,8 @@
+//
+// Copyright Kamil Pękala http://github.com/kamilkp
+// Angular Virtual Scroll Repeat v0.2 2014/05/25
+//
+
 (function(window, angular){
 	'use strict';
 
