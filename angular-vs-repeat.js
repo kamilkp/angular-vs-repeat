@@ -13,9 +13,8 @@
 	// The directive renders only so many elements that can fit into current container's clientHeight/clientWidth.
 
 	// LIMITATIONS:
-	// - current version works only for vertically stacked elements
 	// - current version only supports an Array as a right-hand-side object for ngRepeat
-	// - all rendered elements must have the same predefined height
+	// - all rendered elements must have the same predefined height/width
 
 	// USAGE:
 	// In order to use the vsRepeat directive you need to measure the single element's height/width (including all paddings and margins).
