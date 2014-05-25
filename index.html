@@ -35,6 +35,16 @@
 				width: 50px;
 				height: 100%;
 			}
+			.repeater-container.horizontal.combined{
+				height: 145px;
+			}
+			.repeater-container.horizontal.combined .item-element{
+				width: 70px;
+				text-align: center;
+			}
+			.third-array-ng-repeat{
+				padding: 10px 20px;
+			}
 			#dom-preview-container pre{
 				max-height: 500px;
 				overflow: auto;
@@ -69,7 +79,7 @@
 				}
 				return res;
 			}
-			function appController($scope){
+			function appController($scope, $location){
 				$scope.items = {
 					collection: getRegularArray(1000)
 				};
@@ -85,7 +95,7 @@
 					var elems = document.querySelectorAll('.item-element.well');
 					elems = Array.prototype.slice.call(elems);
 					elems.forEach(function(item){
-						arr.push(item.outerHTML);
+						arr.push(item.innerHTML.trim());
 					});
 					return arr;
 				}
@@ -96,6 +106,18 @@
 				};
 
 				$scope.outerArray = getRegularArray(2);
+				$scope.thirdArray = getRegularArray(30);
+
+				$scope.$watch(function(){
+					return $location.search();
+				}, function(obj){
+					if(obj.tab)
+						$scope.tab = obj.tab + '';
+				}, true);
+
+				$scope.$watch('tab', function(tab){
+					$location.search({tab: tab});
+				});
 			}
 			angular.module('app', ['vs-repeat']);
 		</script>
@@ -111,21 +133,26 @@
 			<div class="col-xs-7">
 				<h3>
 					<small class="pull-right" style="line-height: 34px;">
-						<span ng-show="tab !== '4'"><span class="glyphicon glyphicon-resize-vertical"></span>scroll it vertically</span>
+						<span ng-show="tab !== '4' && tab !== '5'"><span class="glyphicon glyphicon-resize-vertical"></span>scroll it vertically</span>
 						<span ng-show="tab === '4'"><span class="glyphicon glyphicon-resize-horizontal"></span>&nbsp;scroll it horizontally</span>
+						<span ng-show="tab === '5'">
+							<span class="glyphicon glyphicon-resize-vertical"></span>
+							<span class="glyphicon glyphicon-resize-horizontal"></span>
+						&nbsp;scroll it in both directions</span>
 					</small>
-					Array size: {{items.collection.length}}
+					Array size: <span ng-show="tab === '5'">30 x </span>{{items.collection.length}}
 				</h3>
 				<ul class="nav nav-tabs" style="margin-bottom: 5px;" ng-init="tab = '1'">
-				  <li ng-class="{active: tab === '1'}"><a ng-click="tab = '1'">Single vsRepeat</a></li>
-				  <li ng-class="{active: tab === '2'}"><a ng-click="tab = '2'">Nested inside another ngRepeat</a></li>
+				  <li ng-class="{active: tab === '1'}"><a ng-click="tab = '1'">Simple</a></li>
+				  <li ng-class="{active: tab === '2'}"><a ng-click="tab = '2'">Nested</a></li>
 				  <li ng-class="{active: tab === '3'}"><a ng-click="tab = '3'">With offsets</a></li>
 				  <li ng-class="{active: tab === '4'}"><a ng-click="tab = '4'">Horizontal</a></li>
+				  <li ng-class="{active: tab === '5'}"><a ng-click="tab = '5'">Combined</a></li>
 				</ul>
 				<div ng-if="tab === '1'">
 					<div class="repeater-container" vs-repeat="60">
 						<div class="item-element well" ng-repeat="item in items.collection">
-							{{item.text}}
+							<span>{{item.text}}</span>
 						</div>
 					</div>
 				</div>
@@ -133,7 +160,7 @@
 					<div ng-repeat="foo in outerArray" class="enclosing-ng-repeat">
 						<div class="repeater-container" vs-repeat="60">
 							<div class="item-element well" ng-repeat="item in items.collection">
-								{{item.text}}
+								<span>{{item.text}}</span>
 							</div>
 						</div>
 					</div>
@@ -154,7 +181,7 @@
 					<div class="repeater-container ranges" vs-repeat="80" vs-offset-before="{{beforeOffset}}" vs-offset-after="{{afterOffset}}">
 						<div class="ranges-inner-wrapper" ng-repeat="item in items.collection">
 							<div class="item-element well">
-								{{item.text}}
+								<span>{{item.text}}</span>
 							</div>
 						</div>
 					</div>
@@ -162,7 +189,20 @@
 				<div ng-if="tab === '4'">
 					<div class="repeater-container horizontal" vs-repeat="50" vs-horizontal>
 						<div class="item-element well" ng-repeat="item in items.collection">
-							{{item.text}}
+							<span>{{item.text}}</span>
+						</div>
+					</div>
+				</div>
+				<div ng-if="tab === '5'">
+					<div style="overflow: auto; height: 454px;" vs-repeat="150" class="combined-vs" vs-offset-after="20">
+						<div ng-repeat="foo in thirdArray" class="third-array-ng-repeat">
+							<div>
+								<div class="repeater-container horizontal combined" vs-repeat="70" vs-horizontal vs-scroll-parent=".combined-vs">
+									<div class="item-element well" ng-repeat="item in items.collection">
+										<span>{{item.text}}</span>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>

@@ -1,3 +1,8 @@
+//
+// Copyright Kamil Pękala http://github.com/kamilkp
+// Angular Virtual Scroll Repeat v0.2 2014/05/25
+//
+
 (function(window, angular){
 	'use strict';
 
@@ -5,15 +10,14 @@
 	// vsRepeat directive stands for Virtual Scroll Repeat. It turns a standard ngRepeated set of elements in a scrollable container
 	// into a component, where the user thinks he has all the elements rendered and all he needs to do is scroll (without any kind of
 	// pagination - which most users loath) and at the same time the browser isn't overloaded by that many elements/angular bindings etc.
-	// The directive renders only so many elements that can fit into current container's clientHeight.
+	// The directive renders only so many elements that can fit into current container's clientHeight/clientWidth.
 
 	// LIMITATIONS:
-	// - current version works only for vertically stacked elements
 	// - current version only supports an Array as a right-hand-side object for ngRepeat
-	// - all rendered elements must have the same predefined height
+	// - all rendered elements must have the same predefined height/width
 
 	// USAGE:
-	// In order to use the vsRepeat directive you need to measure the single element's height (including all paddings and margins).
+	// In order to use the vsRepeat directive you need to measure the single element's height/width (including all paddings and margins).
 	// You can use any kind of developer tools you like. Let's say that that height is 50px.
 	// example:
 	// <div vs-repeat="50">
@@ -23,12 +27,12 @@
 	// </div>
 	// 
 	// - the vsRepeat directive must be applied to a direct parent of an element with ngRepeat
-	// - the value of vsRepeat attribute is the single element's height measured in pixels
+	// - the value of vsRepeat attribute is the single element's height/width measured in pixels
 	
 	// OPTIONAL PARAMETERS (attributes):
-	// vs-horizontal - stack repeated elements horizontally instead of vertically
 	// vs-scroll-parent="selector" - selector to the scrollable container. The directive will look for a closest parent matching
 	//								he given selector (defaults to the current element)
+	// vs-horizontal - stack repeated elements horizontally instead of vertically
 	// vs-offset-before="value" - top/left offset in pixels (defaults to 0)
 	// vs-offset-after="value" - bottom/right offset in pixels (defaults to 0)
 	// vs-excess="value" - an integer number representing the number of elements to be rendered outside of the current container's viewport
@@ -39,11 +43,36 @@
 	// - 'vsRepeatReinitialized' - an event the directive emits upon reinitialization done
 
 	var isMacOS = navigator.appVersion.indexOf('Mac') != -1,
-		wheelEventName = typeof window.onwheel !== 'undefined' ? 'wheel' : typeof window.onmousewheel !== 'undefined' ? 'mousewheel' : 'DOMMouseScroll';
+		wheelEventName = typeof window.onwheel !== 'undefined' ? 'wheel' : typeof window.onmousewheel !== 'undefined' ? 'mousewheel' : 'DOMMouseScroll',
+		matchingFunction = document.documentElement.matches ? 'matches' :
+							document.documentElement.matchesSelector ? 'matchesSelector' :
+							document.documentElement.webkitMatches ? 'webkitMatches' :
+							document.documentElement.webkitMatchesSelector ? 'webkitMatchesSelector' :
+							document.documentElement.msMatches ? 'msMatches' :
+							document.documentElement.msMatchesSelector ? 'msMatchesSelector' :
+							document.documentElement.mozMatches ? 'mozMatches' :
+							document.documentElement.mozMatchesSelector ? 'mozMatchesSelector' : null;
+
+	var closestElement = angular.element.prototype.closest || function (selector){
+		var el = this[0].parentNode;
+		while(el !== document.documentElement && !el[matchingFunction](selector))
+			el = el.parentNode;
+
+		if(el[matchingFunction](selector))
+			return angular.element(el);
+		else
+			return angular.element();
+	}
+
 	angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', function($compile){
 		return {
 			restrict: 'A',
 			scope: true,
+			require: '?^vsRepeat',
+			controller: ['$scope', function($scope){
+				this.$scrollParent = $scope.$scrollParent;
+				this.$fillElement = $scope.$fillElement;
+			}],
 			compile: function($element, $attrs){
 				var ngRepeatChild = $element.children().eq(0),
 					ngRepeatExpression = ngRepeatChild.attr('ng-repeat'),
@@ -64,17 +93,19 @@
 				if(!window.getComputedStyle || window.getComputedStyle($element[0]).position !== 'absolute')
 					$element.css('position', 'relative');
 				return {
-					pre: function($scope, $element, $attrs){
+					pre: function($scope, $element, $attrs, $ctrl){
 						var childClone = angular.element(childCloneHtml),
 							originalCollection = [],
 							originalLength,
 							$$horizontal = typeof $attrs.vsHorizontal !== "undefined",
 							$wheelHelper,
 							$fillElement,
-							$scrollParent = $attrs.vsScrollParent ? $element.closest($attrs.vsScrollParent) : $element,
+							$scrollParent = $attrs.vsScrollParent ? closestElement.call($element, $attrs.vsScrollParent) : $element,
 							positioningProperty = $$horizontal ? 'left' : 'top',
 							clientSize =  $$horizontal ? 'clientWidth' : 'clientHeight',
 							scrollPos =  $$horizontal ? 'scrollLeft' : 'scrollTop';
+
+						$scope.$scrollParent = $scrollParent;
 
 						Object.keys(attributesDictionary).forEach(function(key){
 							if(typeof $attrs[key] !== "undefined"){
@@ -95,15 +126,7 @@
 							if(!originalCollection || originalCollection.length < 1){
 								$scope[collectionName] = [];
 								originalLength = 0;
-								if($$horizontal)
-									$fillElement.css({
-										'width': $scope.offsetBefore + $scope.offsetAfter + 'px',
-										'height': '100%'
-									});
-								else
-									$fillElement.css({
-										'height': $scope.offsetBefore + $scope.offsetAfter + 'px'
-									});
+								resizeFillElement(0);
 								return;
 							}
 							else{
@@ -119,8 +142,14 @@
 						$element.append(childClone);
 
 						$fillElement = angular.element('<div class="vs-repeat-fill-element"></div>')
-							.css({'position':'relative'});
+							.css({
+								'position':'relative',
+								'min-height': '100%',
+								'min-width': '100%'
+							});
 						$element.append($fillElement);
+						$compile($fillElement)($scope);
+						$scope.$fillElement = $fillElement;
 
 						var _prevMouse = {};
 						if(isMacOS){
@@ -129,10 +158,8 @@
 									e.preventDefault();
 									e.stopPropagation();
 									if(e.originalEvent) e = e.originalEvent;
-									if($$horizontal)
-										$scrollParent[0].scrollLeft += (e.deltaX || -e.wheelDeltaX);
-									else
-										$scrollParent[0].scrollTop += (e.deltaY || -e.wheelDeltaY);
+									$scrollParent[0].scrollLeft += (e.deltaX || -e.wheelDeltaX);
+									$scrollParent[0].scrollTop += (e.deltaY || -e.wheelDeltaY);
 								}).on('mousemove', function(e){
 									if(_prevMouse.x !== e.clientX || _prevMouse.y !== e.clientY)
 										angular.element(this).css('display', 'none');
@@ -156,8 +183,9 @@
 							$scrollParent.on(wheelEventName, wheelHandler);
 						}
 						function wheelHandler(e){
-							e.preventDefault();
-							$wheelHelper.css('display', 'block');
+							var elem = e.currentTarget;
+							if(elem.scrollWidth > elem.clientWidth || elem.scrollHeight > elem.clientHeight)
+								$wheelHelper.css('display', 'block');
 						}
 
 						function onWindowResize(){
@@ -178,16 +206,37 @@
 							_prevStartIndex = void 0;
 							_prevEndIndex = void 0;
 							updateInnerCollection();
-							if($$horizontal)
+							resizeFillElement($scope.elementSize*originalLength);
+							$scope.$emit('vsRepeatReinitialized');
+						}
+
+						function resizeFillElement(size){
+							if($$horizontal){
 								$fillElement.css({
-									'width': ($scope.offsetBefore + $scope.elementSize*originalLength + $scope.offsetAfter) + 'px',
+									'width': $scope.offsetBefore + size + $scope.offsetAfter + 'px',
 									'height': '100%'
 								});
-							else
+								if($ctrl && $ctrl.$fillElement){
+									var referenceElement = $ctrl.$fillElement[0].parentNode.querySelector('[ng-repeat]');
+									if(referenceElement)
+										$ctrl.$fillElement.css({
+											'width': referenceElement.scrollWidth + 'px'
+										});
+								}
+							}
+							else{
 								$fillElement.css({
-									'height': ($scope.offsetBefore + $scope.elementSize*originalLength + $scope.offsetAfter) + 'px'
+									'height': $scope.offsetBefore + size + $scope.offsetAfter + 'px',
+									'width': '100%'
 								});
-							$scope.$emit('vsRepeatReinitialized');
+								if($ctrl && $ctrl.$fillElement){
+									referenceElement = $ctrl.$fillElement[0].parentNode.querySelector('[ng-repeat]');
+									if(referenceElement)
+										$ctrl.$fillElement.css({
+											'height': referenceElement.scrollHeight + 'px'
+										});
+								}
+							}
 						}
 
 						var _prevClientSize;
@@ -195,7 +244,7 @@
 							var ch = $scrollParent[0][clientSize];
 							if(ch !== _prevClientSize){
 								reinitialize();
-								if(!$scope.$root.$$phase)
+								if($scope.$root && !$scope.$root.$$phase)
 									$scope.$digest();
 							}
 							_prevClientSize = ch;
