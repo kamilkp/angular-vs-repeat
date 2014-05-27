@@ -4,6 +4,7 @@ angular-vs-repeat
 Virtual Scroll for AngularJS ngRepeat directive
 
 Demo: http://kamilkp.github.io/angular-vs-repeat/
+Changelog: https://github.com/kamilkp/angular-vs-repeat/blob/master/CHANGELOG.md
 
 ###DESCRIPTION:
 `vsRepeat` directive stands for **Virtual Scroll Repeat**. It turns a standard ngRepeated set of elements in a scrollable container
