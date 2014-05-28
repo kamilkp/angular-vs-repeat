@@ -5,6 +5,8 @@ Virtual Scroll for AngularJS ngRepeat directive
 
 Demo: http://kamilkp.github.io/angular-vs-repeat/
 
+You can find the source code for this demo on branch "gh-pages".
+
 Changelog: https://github.com/kamilkp/angular-vs-repeat/blob/master/CHANGELOG.md
 
 ###DESCRIPTION:
