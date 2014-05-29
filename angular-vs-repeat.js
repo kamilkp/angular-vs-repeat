@@ -136,8 +136,8 @@
 						});
 
 						childClone.attr('ng-repeat', lhs + ' in ' + collectionName + (rhsSuffix ? ' ' + rhsSuffix : ''))
-								.attr('ng-style', '{' + positioningProperty + ': (($index + startIndex) * elementSize + offsetBefore) + "px"}')
-								.attr('style', 'position: absolute;');
+								.attr('ng-style', '{' + positioningProperty + ': (($index + startIndex) * elementSize + offsetBefore) + "px"}')		
+								.addClass('vs-repeat-repeated-element');
 						$compile(childClone)($scope);
 						$element.append(childClone);
 
@@ -297,6 +297,10 @@
 		'	right: 0;' +
 		'	z-index: 99999;' +
 		'	background: rgba(0, 0, 0, 0);' +
+		'}' +
+		'.vs-repeat-repeated-element{' +
+		'	position: absolute;' +
+		'	z-index: 1;' +
 		'}' +
 		'</style>'
 	].join(''));
