@@ -45,6 +45,16 @@
 			.third-array-ng-repeat{
 				padding: 10px 20px;
 			}
+			.item-element{
+				-webkit-transition: background-color 0.5s ease;
+				-moz-transition: background-color 0.5s ease;
+				-ms-transition: background-color 0.5s ease;
+				-o-transition: background-color 0.5s ease;
+				ransition: background-color 0.5s ease;
+			}
+			.item-element:hover{
+				background-color: hsla(180, 100%, 50%, 0.3);
+			}
 			#dom-preview-container pre{
 				max-height: 500px;
 				overflow: auto;
@@ -147,7 +157,7 @@
 				  <li ng-class="{active: tab === '2'}"><a ng-click="tab = '2'">Nested</a></li>
 				  <li ng-class="{active: tab === '3'}"><a ng-click="tab = '3'">With offsets</a></li>
 				  <li ng-class="{active: tab === '4'}"><a ng-click="tab = '4'">Horizontal</a></li>
-				  <li ng-class="{active: tab === '5'}"><a ng-click="tab = '5'">Combined</a></li>
+				  <li ng-class="{active: tab === '5'}"><a ng-click="tab = '5'">Two dimensional</a></li>
 				</ul>
 				<div ng-if="tab === '1'">
 					<div class="repeater-container" vs-repeat="60">
