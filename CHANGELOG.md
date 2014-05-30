@@ -1,3 +1,12 @@
+Version 0.3 (2014/05/30)
+=================
+
+###FEATURES
+- support for automatic computation of repeated elements' `height`/`width`
+
+###BREAKING CHANGE:
+- specifying the single element's size as a value of the `vs-repeat` attribute is no longer required. If it isn't provided the directive will calculate it automatically (once, the first time it renders at least one element). If for some reason you want to override that size, you can still provide is as a value of the `vs-repeat` attribute.
+
 Version 0.2 (2014/05/25)
 =================
 
