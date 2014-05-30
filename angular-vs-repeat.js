@@ -1,10 +1,12 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v0.2 2014/05/25
+// Angular Virtual Scroll Repeat v0.3 2014/05/30
 //
 
 (function(window, angular){
 	'use strict';
+	/* jshint eqnull:true */
+	/* jshint -W038 */
 
 	// DESCRIPTION:
 	// vsRepeat directive stands for Virtual Scroll Repeat. It turns a standard ngRepeated set of elements in a scrollable container
@@ -14,20 +16,31 @@
 
 	// LIMITATIONS:
 	// - current version only supports an Array as a right-hand-side object for ngRepeat
-	// - all rendered elements must have the same predefined height/width
+	// - all rendered elements must have the same height/width
 
 	// USAGE:
-	// In order to use the vsRepeat directive you need to measure the single element's height/width (including all paddings and margins).
-	// You can use any kind of developer tools you like. Let's say that that height is 50px.
+	// In order to use the vsRepeat directive you need to place a vs-repeat attribute on a direct parent of an element with ng-repeat
 	// example:
-	// <div vs-repeat="50">
+	// <div vs-repeat>
 	//		<div ng-repeat="item in someArray">
 	//			<!-- content -->
 	//		</div>
 	// </div>
 	// 
+	// You can also measure the single element's height/width (including all paddings and margins), and then speficy it as a value
+	// of the attribute 'vs-repeat'. This can be used if one wants to override the automatically computed element size.
+	// example:
+	// <div vs-repeat="50"> <!-- the specified element height is 50px -->
+	//		<div ng-repeat="item in someArray">
+	//			<!-- content -->
+	//		</div>
+	// </div>
+	// 
+	// IMPORTANT! 
+	// 
 	// - the vsRepeat directive must be applied to a direct parent of an element with ngRepeat
-	// - the value of vsRepeat attribute is the single element's height/width measured in pixels
+	// - the value of vsRepeat attribute is the single element's height/width measured in pixels. If none provided, the directive
+	//		will compute it automatically
 	
 	// OPTIONAL PARAMETERS (attributes):
 	// vs-scroll-parent="selector" - selector to the scrollable container. The directive will look for a closest parent matching
@@ -62,7 +75,7 @@
 			return angular.element(el);
 		else
 			return angular.element();
-	}
+	};
 
 	angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', function($compile){
 		return {
@@ -100,26 +113,30 @@
 							$$horizontal = typeof $attrs.vsHorizontal !== "undefined",
 							$wheelHelper,
 							$fillElement,
+							autoSize = !$attrs.vsRepeat,
 							$scrollParent = $attrs.vsScrollParent ? closestElement.call($element, $attrs.vsScrollParent) : $element,
 							positioningProperty = $$horizontal ? 'left' : 'top',
 							clientSize =  $$horizontal ? 'clientWidth' : 'clientHeight',
+							offsetSize =  $$horizontal ? 'offsetWidth' : 'offsetHeight',
 							scrollPos =  $$horizontal ? 'scrollLeft' : 'scrollTop';
 
 						$scope.$scrollParent = $scrollParent;
 
+						//initial defaults
+						$scope.elementSize = $scrollParent[0][clientSize];
+						$scope.offsetBefore = 0;
+						$scope.offsetAfter = 0;
+						$scope.excess = 2;
+
 						Object.keys(attributesDictionary).forEach(function(key){
-							if(typeof $attrs[key] !== "undefined"){
+							if($attrs[key]){
 								$attrs.$observe(key, function(value){
-									$scope[attributesDictionary[key]] = Number(value);
+									$scope[attributesDictionary[key]] = +value;
 									reinitialize();
 								});
 							}
 						});
 
-						$scope.elementSize = parseInt($attrs.vsRepeat, 10);
-						$scope.offsetBefore = $attrs.vsOffsetBefore ? parseInt($attrs.vsOffsetBefore, 10) : 0;
-						$scope.offsetAfter = $attrs.vsOffsetAfter ? parseInt($attrs.vsOffsetAfter, 10) : 0;
-						$scope.excess = $attrs.vsExcess ? parseInt($attrs.vsExcess, 10) : 2;
 
 						$scope.$watchCollection(rhs, function(coll){
 							originalCollection = coll || [];
@@ -131,6 +148,21 @@
 							}
 							else{
 								originalLength = originalCollection.length;
+								if(autoSize){
+									$scope.$$postDigest(function(){
+										var children = $element.children(),
+											i = 0;
+										while(i < children.length){
+											if(children[i].attributes['ng-repeat'] != null){
+												$scope.elementSize = children[i][offsetSize];
+												reinitialize();
+												autoSize = false;
+												break;
+											}
+											i++;
+										}
+									});
+								}
 							}
 							reinitialize();
 						});

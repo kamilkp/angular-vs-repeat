@@ -46,11 +46,11 @@
 				padding: 10px 20px;
 			}
 			.item-element{
-				-webkit-transition: background-color 0.5s ease;
-				-moz-transition: background-color 0.5s ease;
-				-ms-transition: background-color 0.5s ease;
-				-o-transition: background-color 0.5s ease;
-				ransition: background-color 0.5s ease;
+				-webkit-transition: background-color 0.3s ease;
+				-moz-transition: background-color 0.3s ease;
+				-ms-transition: background-color 0.3s ease;
+				-o-transition: background-color 0.3s ease;
+				transition: background-color 0.3s ease;
 			}
 			.item-element:hover{
 				background-color: hsla(180, 100%, 50%, 0.3);
@@ -128,6 +128,11 @@
 				$scope.$watch('tab', function(tab){
 					$location.search({tab: tab});
 				});
+
+				$scope.$on('vsRepeatReinitialized', function(){
+					if(!$scope.$root.$$phase)
+						$scope.$apply();
+				});
 			}
 			angular.module('app', ['vs-repeat']);
 		</script>
@@ -160,7 +165,7 @@
 				  <li ng-class="{active: tab === '5'}"><a ng-click="tab = '5'">Two dimensional</a></li>
 				</ul>
 				<div ng-if="tab === '1'">
-					<div class="repeater-container" vs-repeat="60">
+					<div class="repeater-container" vs-repeat>
 						<div class="item-element well" ng-repeat="item in items.collection">
 							<span>{{item.text}}</span>
 						</div>
@@ -168,7 +173,7 @@
 				</div>
 				<div ng-if="tab === '2'">
 					<div ng-repeat="foo in outerArray" class="enclosing-ng-repeat">
-						<div class="repeater-container" vs-repeat="60">
+						<div class="repeater-container" vs-repeat>
 							<div class="item-element well" ng-repeat="item in items.collection">
 								<span>{{item.text}}</span>
 							</div>
@@ -188,7 +193,7 @@
 						</span>
 						<input type="range" min="0" max="100" step="1" value="50" ng-model="afterOffset" />
 					</div>
-					<div class="repeater-container ranges" vs-repeat="80" vs-offset-before="{{beforeOffset}}" vs-offset-after="{{afterOffset}}">
+					<div class="repeater-container ranges" vs-repeat vs-offset-before="{{beforeOffset}}" vs-offset-after="{{afterOffset}}">
 						<div class="ranges-inner-wrapper" ng-repeat="item in items.collection">
 							<div class="item-element well">
 								<span>{{item.text}}</span>
@@ -197,17 +202,17 @@
 					</div>
 				</div>
 				<div ng-if="tab === '4'">
-					<div class="repeater-container horizontal" vs-repeat="50" vs-horizontal>
+					<div class="repeater-container horizontal" vs-repeat vs-horizontal>
 						<div class="item-element well" ng-repeat="item in items.collection">
 							<span>{{item.text}}</span>
 						</div>
 					</div>
 				</div>
 				<div ng-if="tab === '5'">
-					<div style="overflow: auto; height: 454px;" vs-repeat="150" class="combined-vs" vs-offset-after="20">
+					<div style="overflow: auto; height: 454px;" vs-repeat class="combined-vs" vs-offset-after="20">
 						<div ng-repeat="foo in thirdArray" class="third-array-ng-repeat">
 							<div>
-								<div class="repeater-container horizontal combined" vs-repeat="70" vs-horizontal vs-scroll-parent=".combined-vs">
+								<div class="repeater-container horizontal combined" vs-repeat vs-horizontal vs-scroll-parent=".combined-vs">
 									<div class="item-element well" ng-repeat="item in items.collection">
 										<span>{{item.text}}</span>
 									</div>
