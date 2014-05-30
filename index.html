@@ -128,11 +128,6 @@
 				$scope.$watch('tab', function(tab){
 					$location.search({tab: tab});
 				});
-
-				$scope.$on('vsRepeatReinitialized', function(){
-					if(!$scope.$root.$$phase)
-						$scope.$apply();
-				});
 			}
 			angular.module('app', ['vs-repeat']);
 		</script>

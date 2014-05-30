@@ -157,6 +157,7 @@
 												$scope.elementSize = children[i][offsetSize];
 												reinitialize();
 												autoSize = false;
+												if(!$scope.$root.$$phase) $scope.$apply();
 												break;
 											}
 											i++;
