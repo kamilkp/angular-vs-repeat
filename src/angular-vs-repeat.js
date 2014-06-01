@@ -123,7 +123,7 @@
 						$scope.$scrollParent = $scrollParent;
 
 						//initial defaults
-						$scope.elementSize = $scrollParent[0][clientSize];
+						$scope.elementSize = $scrollParent[0][clientSize] || 50;
 						$scope.offsetBefore = 0;
 						$scope.offsetAfter = 0;
 						$scope.excess = 2;
