@@ -80,6 +80,46 @@
 			ul.nav > li{
 				cursor: pointer;
 			}
+			li.imp a{
+				color: crimson;
+				font-weight: bold;
+			}
+			li.imp.active a{
+				color: hsl(0, 100%, 35%);
+				font-weight: bold;
+			}
+			li.imp a:hover{
+				color: hsl(0, 100%, 45%);
+			}
+			li.imp.active a:hover{
+				color: hsl(0, 100%, 35%);
+			}
+			.perf-container{
+				overflow: auto;
+				max-height: 300px;
+				min-height: 50px;
+				background-color: hsla(210, 75%, 50%, 0.2);
+			}
+			.perf-elem{
+				padding: 10px 15px;
+				border-bottom: 1px solid hsla(0, 0%, 0%, 0.1);
+				width: 100%;
+				box-sizing: border-box;
+			}
+			.perf-elem small{
+				letter-spacing: 5px;
+				color: hsla(0, 0%, 0%, 0.5);
+			}
+			.perf-summary{
+				padding: 10px 0;
+				font-size: 18px;
+			}
+			.danger{
+				color: crimson;
+			}
+			.success{
+				color: hsl(160, 100%, 35%);
+			}
 		</style>
 		<script>
 			function getRegularArray(size){
@@ -93,12 +133,15 @@
 				$scope.items = {
 					collection: getRegularArray(1000)
 				};
+				$scope.$root.arraySize = 1000;
 				$scope.switchCollection = function(){
 					var parsed = parseInt($scope.newArray.size, 10);
-					if(!isNaN(parsed))
+					if(!isNaN(parsed)){
+						$scope.$root.arraySize = parsed;
 						$scope.items = {
 							collection: getRegularArray(parsed)
 						};
+					}
 				};
 				$scope.getDomElementsDesc = function(){
 					var arr = [];
@@ -129,6 +172,29 @@
 					$location.search({tab: tab});
 				});
 			}
+			function PerfController($scope){
+				function getArray(size){
+					var arr = [];
+					for(var i=0;i<size;i++){
+						arr.push({
+							a: '',
+							b: ''
+						})
+					}
+					return arr;
+				}
+				$scope.$watch('arraySize', function(s){
+					$scope.bar = getArray(+s);
+				});
+				var interval = setInterval(function interval(){
+					var t1 = Date.now();
+					$scope.$digest();
+					$scope.digestDuration = (Date.now() - t1);
+				}, 1000);
+				$scope.$on('$destroy', function(){
+					clearInterval(interval);
+				});
+			}
 			angular.module('app', ['vs-repeat']);
 		</script>
 	</head>
@@ -139,34 +205,35 @@
 			Angular-vs-repeat
 			<small>angular virtual scroll for ng-repeat</small>
 		</h1>
-		<div class="row">
-			<div class="col-xs-7">
+		<div class="row" ng-init="tab = 6">
+			<div ng-class="{'col-xs-7': tab != 6, 'col-xs-12': tab == 6}">
 				<h3>
-					<small class="pull-right" style="line-height: 34px;">
-						<span ng-show="tab !== '4' && tab !== '5'"><span class="glyphicon glyphicon-resize-vertical"></span>scroll it vertically</span>
-						<span ng-show="tab === '4'"><span class="glyphicon glyphicon-resize-horizontal"></span>&nbsp;scroll it horizontally</span>
-						<span ng-show="tab === '5'">
+					<small class="pull-right" style="line-height: 34px;" ng-show="tab < 6">
+						<span ng-show="tab != 4 && tab != 5"><span class="glyphicon glyphicon-resize-vertical"></span>scroll it vertically</span>
+						<span ng-show="tab == 4"><span class="glyphicon glyphicon-resize-horizontal"></span>&nbsp;scroll it horizontally</span>
+						<span ng-show="tab == 5">
 							<span class="glyphicon glyphicon-resize-vertical"></span>
 							<span class="glyphicon glyphicon-resize-horizontal"></span>
 						&nbsp;scroll it in both directions</span>
 					</small>
-					Array size: <span ng-show="tab === '5'">30 x </span>{{items.collection.length}}
+					Array size: <span ng-show="tab === 5">30 x </span>{{items.collection.length}}
 				</h3>
-				<ul class="nav nav-tabs" style="margin-bottom: 5px;" ng-init="tab = '1'">
-				  <li ng-class="{active: tab === '1'}"><a ng-click="tab = '1'">Simple</a></li>
-				  <li ng-class="{active: tab === '2'}"><a ng-click="tab = '2'">Nested</a></li>
-				  <li ng-class="{active: tab === '3'}"><a ng-click="tab = '3'">With offsets</a></li>
-				  <li ng-class="{active: tab === '4'}"><a ng-click="tab = '4'">Horizontal</a></li>
-				  <li ng-class="{active: tab === '5'}"><a ng-click="tab = '5'">Two dimensional</a></li>
+				<ul class="nav nav-tabs" style="margin-bottom: 5px;">
+				  <li ng-class="{active: tab == 1}"><a ng-click="tab = 1">Simple</a></li>
+				  <li ng-class="{active: tab == 2}"><a ng-click="tab = 2">Nested</a></li>
+				  <li ng-class="{active: tab == 3}"><a ng-click="tab = 3">Offsets</a></li>
+				  <li ng-class="{active: tab == 4}"><a ng-click="tab = 4">Horizontal</a></li>
+				  <li ng-class="{active: tab == 5}"><a ng-click="tab = 5">Two dimensional</a></li>
+				  <li class="imp" ng-class="{active: tab == 6}"><a ng-click="tab = 6">Performance</a></li>
 				</ul>
-				<div ng-if="tab === '1'">
+				<div ng-if="tab == 1">
 					<div class="repeater-container" vs-repeat>
 						<div class="item-element well" ng-repeat="item in items.collection">
 							<span>{{item.text}}</span>
 						</div>
 					</div>
 				</div>
-				<div ng-if="tab === '2'">
+				<div ng-if="tab == 2">
 					<div ng-repeat="foo in outerArray" class="enclosing-ng-repeat">
 						<div class="repeater-container" vs-repeat>
 							<div class="item-element well" ng-repeat="item in items.collection">
@@ -175,7 +242,7 @@
 						</div>
 					</div>
 				</div>
-				<div ng-if="tab === '3'" ng-init="beforeOffset = 50; afterOffset = 50;">
+				<div ng-if="tab == 3" ng-init="beforeOffset = 50; afterOffset = 50;">
 					<div>
 						<span>
 							Top offset:
@@ -196,14 +263,14 @@
 						</div>
 					</div>
 				</div>
-				<div ng-if="tab === '4'">
+				<div ng-if="tab == 4">
 					<div class="repeater-container horizontal" vs-repeat vs-horizontal>
 						<div class="item-element well" ng-repeat="item in items.collection">
 							<span>{{item.text}}</span>
 						</div>
 					</div>
 				</div>
-				<div ng-if="tab === '5'">
+				<div ng-if="tab == 5">
 					<div style="overflow: auto; height: 454px;" vs-repeat class="combined-vs" vs-offset-after="20">
 						<div ng-repeat="foo in thirdArray" class="third-array-ng-repeat">
 							<div>
@@ -216,8 +283,48 @@
 						</div>
 					</div>
 				</div>
+				<div ng-if="tab == 6">
+					<div class="row">
+						<div class="col-xs-12">
+							<p>
+								The following example shows the performance benefits of using <b>angular-vs-repeat</b>
+							</p>
+							<p>
+								If you don't look under the hood both lists look exactly the same. On the left size the <b>vs-repeat</b> directive
+								was used, whereas on the right side there is a plain regular ng-repeat. Above each of those lists the $digest cycle duration
+								gauge is placed (updates every second) so you can see how many milliseconds it takes to run a $digest with and without vs-repeat.
+							</p>
+							<p>
+								Try with a 10 000 elements array size (using the form below, and be careful, <b>note that the UI will stall for a significant amout of time</b>).
+								You can see that the $digest duration with vs-repeat stays on the same level (it actually depends on the container size), while the $digest duration on the right side (without vs-repeat) increases dramatically. Also note that each of those repeated elements consist of just two inputs and a binding, but if there were more complex elements inside, with other directives, watchers etc. the array size threshold for experiencing a 'laggy' UI would be much smaller.
+							</p>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-6" ng-controller="PerfController">
+							<div class="perf-summary">[with vs-repeat] $digest duration: <span class="success"><b>{{digestDuration}}</b> milliseconds</span></div>
+							<div class="perf-container" vs-repeat>
+								<div ng-repeat="foo in bar" class="perf-elem">
+									<input ng-model="foo.a" placeholder="a"/>
+									<input ng-model="foo.b" placeholder="b"/>
+									<span><small>a+b: </small>{{foo.a + ' ' + foo.b}}</span>
+								</div>
+							</div>
+						</div>
+						<div class="col-xs-6" ng-controller="PerfController">
+							<div class="perf-summary">[without vs-repeat] $digest duration: <span class="danger"><b>{{digestDuration}}</b> milliseconds</span></div>
+							<div class="perf-container">
+								<div ng-repeat="foo in bar" class="perf-elem">
+									<input ng-model="foo.a" placeholder="a"/>
+									<input ng-model="foo.b" placeholder="b"/>
+									<span><small>a+b: </small>{{foo.a + ' ' + foo.b}}</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
-			<div class="col-xs-5">
+			<div class="col-xs-5" ng-show="tab != 6">
 				<h3>
 					Actual elements in DOM ({{getDomElementsDesc().length}}):
 				</h3>
