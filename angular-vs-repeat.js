@@ -49,7 +49,7 @@
 	// vs-offset-before="value" - top/left offset in pixels (defaults to 0)
 	// vs-offset-after="value" - bottom/right offset in pixels (defaults to 0)
 	// vs-excess="value" - an integer number representing the number of elements to be rendered outside of the current container's viewport
-	// 						(defaults to 2)
+	//						(defaults to 2)
 
 	// EVENTS:
 	// - 'vsRepeatTrigger' - an event the directive listens for to manually trigger reinitialization
@@ -123,7 +123,7 @@
 						$scope.$scrollParent = $scrollParent;
 
 						//initial defaults
-						$scope.elementSize = $scrollParent[0][clientSize];
+						$scope.elementSize = $scrollParent[0][clientSize] || 50;
 						$scope.offsetBefore = 0;
 						$scope.offsetAfter = 0;
 						$scope.excess = 2;
