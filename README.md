@@ -1,4 +1,4 @@
-angular-vs-repeat
+angular-vs-repeat [![Build Status](https://travis-ci.org/kamilkp/angular-vs-repeat.svg?branch=master)](https://travis-ci.org/kamilkp/angular-vs-repeat)
 =================
 
 Virtual Scroll for AngularJS ngRepeat directive
