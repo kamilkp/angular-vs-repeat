@@ -1,3 +1,13 @@
+Version 1.0.0rc1 (2014/06/02)
+=================
+
+###FEATURES
+- added travis-ci integration
+- added unit tests
+- added minified version of the library
+- fixed some minor bugs
+- updated the [DEMO](http://kamilkp.github.io/angular-vs-repeat/) that now also address the performance benefits of using the library
+
 Version 0.3 (2014/05/30)
 =================
 
