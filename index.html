@@ -120,6 +120,17 @@
 			.success{
 				color: hsl(160, 100%, 35%);
 			}
+			.tab-1 label{
+				cursor: pointer;
+				font-size: 16px;
+				padding: 10px 0;
+			}
+			.tab-1 label span{
+				margin-left: 5px;
+			}
+			.tab-1 small{
+				color: hsl(0, 0%, 60%);
+			}
 		</style>
 		<script>
 			function getRegularArray(size){
@@ -226,10 +237,18 @@
 				  <li ng-class="{active: tab == 5}"><a ng-click="tab = 5">Two dimensional</a></li>
 				  <li class="imp" ng-class="{active: tab == 6}"><a ng-click="tab = 6">Performance</a></li>
 				</ul>
-				<div ng-if="tab == 1">
-					<div class="repeater-container" vs-repeat>
-						<div class="item-element well" ng-repeat="item in items.collection">
-							<span>{{item.text}}</span>
+				<div ng-if="tab == 1" ng-init="shown = false;" class="tab-1">
+					<label><input type="checkbox" ng-model="shown" /><span>is content visible</span></label>
+					<div ng-hide="shown">
+						<small>
+							To show the contents check the checkbox above. Mind how the "actual elements in DOM" changes when you toggle the checkbox. The visibility of the content is controlled via ngShow directive.
+						</small>
+					</div>
+					<div ng-show="shown">
+						<div class="repeater-container" vs-repeat>
+							<div class="item-element well" ng-repeat="item in items.collection">
+								<span>{{item.text}}</span>
+							</div>
 						</div>
 					</div>
 				</div>
