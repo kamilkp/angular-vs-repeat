@@ -148,25 +148,42 @@
 							}
 							else{
 								originalLength = originalCollection.length;
-								if(autoSize){
-									$scope.$$postDigest(function(){
+								setAutoSize();
+							}
+							reinitialize();
+						});
+
+						function setAutoSize(){
+							if(autoSize){
+								$scope.$$postDigest(function(){
+									if($element[0].offsetHeight || $element[0].offsetWidth){ // element is visible
 										var children = $element.children(),
 											i = 0;
 										while(i < children.length){
 											if(children[i].attributes['ng-repeat'] != null){
-												$scope.elementSize = children[i][offsetSize];
-												reinitialize();
-												autoSize = false;
-												if(!$scope.$root.$$phase) $scope.$apply();
+												if(children[i][offsetSize]){
+													$scope.elementSize = children[i][offsetSize];
+													reinitialize();
+													autoSize = false;
+													if($scope.$root && !$scope.$root.$$phase)
+														$scope.$apply();
+												}
 												break;
 											}
 											i++;
 										}
-									});
-								}
+									}
+									else{
+										var dereg = $scope.$watch(function(){
+											if($element[0].offsetHeight || $element[0].offsetWidth){
+												dereg();
+												setAutoSize();
+											}
+										});
+									}
+								});
 							}
-							reinitialize();
-						});
+						}
 
 						childClone.attr('ng-repeat', lhs + ' in ' + collectionName + (rhsSuffix ? ' ' + rhsSuffix : ''))
 								.attr('ng-style', '{' + positioningProperty + ': (($index + startIndex) * elementSize + offsetBefore) + "px"}')		
@@ -278,7 +295,7 @@
 							if(ch !== _prevClientSize){
 								reinitialize();
 								if($scope.$root && !$scope.$root.$$phase)
-									$scope.$digest();
+									$scope.$apply();
 							}
 							_prevClientSize = ch;
 						}
