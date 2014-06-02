@@ -23,6 +23,13 @@ module.exports = function(grunt){
 			unit: {
 				configFile: 'karma.conf.js',
 				singleRun: true,
+			},
+			travis: {
+				configFile: 'karma.conf.js',
+				singleRun: true,
+				browsers: [
+					'Firefox'
+				]
 			}
 		}
 	});
@@ -30,4 +37,5 @@ module.exports = function(grunt){
 	grunt.registerTask('min', 'Minify javascript source code', 'uglify');
 	grunt.registerTask('test', 'Run unit tests', ['jshint', 'min', 'karma:unit']);
 	grunt.registerTask('default', ['test']);
+	grunt.registerTask('travis', ['jshint', 'min', 'karma:travis']);
 };

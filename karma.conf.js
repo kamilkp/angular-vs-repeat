@@ -62,7 +62,8 @@ module.exports = function(config) {
 
 		plugins: [
 			'karma-mocha',
-			'karma-chrome-launcher'
+			'karma-chrome-launcher',
+			'karma-firefox-launcher'
 		]
 	});
 };

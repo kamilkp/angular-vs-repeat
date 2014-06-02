@@ -134,41 +134,6 @@
 					}, animationFrame);
 				}, animationFrame);
 			});
-			it('should render less elements when container is hidden', function(done){
-				$element = $compile([
-					'<div ng-show="showFlag">',
-					'	<div vs-repeat class="container">',
-					'		<div ng-repeat="foo in bar" class="item">',
-					'			<span class="value">{{foo.value}}</span>',
-					'		</div>',
-					'	</div>',
-					'</div>'
-				].join(''))($scope);
-				angular.element(document.body).append($element);
-				$scope.bar = getArray(100);
-				$scope.showFlag = true;
-				$scope.$digest();
-
-				setTimeout(function(){
-					var elems = getElements($element);
-					expect(elems.length).to.be.greaterThan(3);
-
-					$scope.showFlag = false;
-					$scope.$digest();
-					setTimeout(function(){
-						elems = getElements($element);				
-						expect(elems.length).to.be.lessThan(4);
-
-						$scope.showFlag = true;
-						$scope.$digest();
-						setTimeout(function(){
-							elems = getElements($element);
-							expect(elems.length).to.be.greaterThan(3);
-							done();
-						}, animationFrame);
-					}, animationFrame);
-				}, animationFrame);
-			});
 		});
 		it('should support horizontal stacking of elements', function(done){
 			$element = $compile([
