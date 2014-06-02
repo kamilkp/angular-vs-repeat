@@ -38,9 +38,9 @@ example:
 
 ```html
 <div vs-repeat="50"> <!-- the specified element height is 50px -->
-		<div ng-repeat="item in someArray">
-			<!-- content -->
-		</div>
+	<div ng-repeat="item in someArray">
+		<!-- content -->
+	</div>
 </div>
 ```
 

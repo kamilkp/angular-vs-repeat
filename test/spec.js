@@ -11,6 +11,18 @@
 		return res;
 	}
 
+	function getElements($element){
+		return $element[0].querySelectorAll('[ng-repeat] .value');
+	}
+
+	function getValues(elems){
+		return Array.prototype.map.call(elems, function(elem){
+			return +elem.innerHTML.trim();
+		});
+	}
+
+	var animationFrame = 1000/60;
+
 	describe('vs-repeat', function(){
 		// this.timeout(1000000);
 		var $compile,
@@ -28,6 +40,12 @@
 				'<style>',
 				'	.container{',
 				'		max-height: 200px;',
+				'		max-width: 200px;',
+				'		overflow: auto;',
+				'		background: hsla(60, 100%, 50%, 0.3);',
+				'	}',
+				'	.scroll{',
+				'		max-height: 100px;',
 				'		max-width: 200px;',
 				'		overflow: auto;',
 				'		background: hsla(60, 100%, 50%, 0.3);',
@@ -52,7 +70,7 @@
 			$scope.$destroy();
 		});
 		describe('automatic size', function(){
-			beforeEach(function(){
+			it('should render only a few elements', function(done) {
 				$element = $compile([
 					'<div vs-repeat class="container">',
 					'	<div ng-repeat="foo in bar" class="item">',
@@ -63,14 +81,11 @@
 				angular.element(document.body).append($element);
 				$scope.bar = getArray(100);
 				$scope.$digest();
-			});
-			it('should render only a few elements', function(done) {
+
 				var elems, values1, values2, count;
 
-				elems = $element[0].querySelectorAll('[ng-repeat] .value');
-				values1 = Array.prototype.map.call(elems, function(elem){
-					return +elem.innerHTML.trim();
-				});
+				elems = getElements($element);
+				values1 = getValues(elems);
 				count = elems.length;
 				expect(count).to.be.greaterThan(0);
 				expect(count).to.be.lessThan(20);
@@ -80,10 +95,8 @@
 
 				$element.triggerHandler('scroll');
 
-				elems = $element[0].querySelectorAll('[ng-repeat] .value');
-				values2 = Array.prototype.map.call(elems, function(elem){
-					return +elem.innerHTML.trim();
-				});
+				elems = getElements($element);
+				values2 = getValues(elems);
 				expect(Math.min.apply(Math, values1)).to.be.lessThan(Math.min.apply(Math, values2));
 				
 				count = elems.length;
@@ -91,6 +104,70 @@
 				expect(count).to.be.lessThan(20);
 
 				done();
+			});
+			it('should support rendering initially hidden element', function(done){
+				$element = $compile([
+					'<div ng-show="showFlag">',
+					'	<div vs-repeat class="container">',
+					'		<div ng-repeat="foo in bar" class="item">',
+					'			<span class="value">{{foo.value}}</span>',
+					'		</div>',
+					'	</div>',
+					'</div>'
+				].join(''))($scope);
+				angular.element(document.body).append($element);
+				$scope.bar = getArray(100);
+				$scope.showFlag = false;
+				$scope.$digest();
+
+				setTimeout(function(){
+					var elems = getElements($element);
+					expect(elems.length).to.be.greaterThan(0);
+					expect(elems.length).to.be.lessThan(4);
+
+					$scope.showFlag = true;
+					$scope.$digest();
+					setTimeout(function(){
+						elems = getElements($element);
+						expect(elems.length).to.be.greaterThan(3);
+						done();
+					}, animationFrame);
+				}, animationFrame);
+			});
+			it('should render less elements when container is hidden', function(done){
+				$element = $compile([
+					'<div ng-show="showFlag">',
+					'	<div vs-repeat class="container">',
+					'		<div ng-repeat="foo in bar" class="item">',
+					'			<span class="value">{{foo.value}}</span>',
+					'		</div>',
+					'	</div>',
+					'</div>'
+				].join(''))($scope);
+				angular.element(document.body).append($element);
+				$scope.bar = getArray(100);
+				$scope.showFlag = true;
+				$scope.$digest();
+
+				setTimeout(function(){
+					var elems = getElements($element);
+					expect(elems.length).to.be.greaterThan(3);
+
+					$scope.showFlag = false;
+					$scope.$digest();
+					setTimeout(function(){
+						elems = getElements($element);				
+						expect(elems.length).to.be.lessThan(4);
+
+						$scope.showFlag = true;
+						$scope.$digest();
+						setTimeout(function(){
+							elems = getElements($element);
+							expect(elems.length).to.be.greaterThan(3);
+							done();
+						}, animationFrame);
+					}, animationFrame);
+				}, animationFrame);
 			});
 		});
 		it('should support horizontal stacking of elements', function(done){
@@ -107,10 +184,8 @@
 
 			var elems, values1, values2, count;
 
-			elems = $element[0].querySelectorAll('[ng-repeat] .value');
-			values1 = Array.prototype.map.call(elems, function(elem){
-				return +elem.innerHTML.trim();
-			});
+			elems = getElements($element);
+			values1 = getValues(elems);
 			count = elems.length;
 			expect(count).to.be.greaterThan(0);
 			expect(count).to.be.lessThan(20);
@@ -120,10 +195,8 @@
 
 			$element.triggerHandler('scroll');
 
-			elems = $element[0].querySelectorAll('[ng-repeat] .value');
-			values2 = Array.prototype.map.call(elems, function(elem){
-				return +elem.innerHTML.trim();
-			});
+			elems = getElements($element);
+			values2 = getValues(elems);
 			expect(Math.min.apply(Math, values1)).to.be.lessThan(Math.min.apply(Math, values2));
 			
 			count = elems.length;
@@ -150,6 +223,62 @@
 				~~(rect.top + rect.height/2)
 			);
 			expect(fromPoint.className).not.to.contain('vs-repeat-fill-element');
+			done();
+		});
+		it('should support manually provided element size', function(done){
+			$element = $compile([
+				'<div vs-repeat="100" class="container">',
+				'	<div ng-repeat="foo in bar" class="item">',
+				'		<span class="value">{{foo.value}}</span>',
+				'	</div>',
+				'</div>'
+			].join(''))($scope);
+			angular.element(document.body).append($element);
+			$scope.bar = getArray(100);
+			$scope.$digest();
+
+			var elems = getElements($element);
+			expect(elems.length).to.be.greaterThan(1);
+			expect(+elems[1].parentNode.style.top.slice(0, -2)).to.be(100);
+			expect(elems.length).to.be.lessThan(5);
+			done();
+		});
+		it('should support non-default scrollable container', function(done){
+			$element = angular.element([
+				'<div class="scroll">',
+				'	<div vs-repeat vs-scroll-parent=".scroll">',
+				'		<div ng-repeat="foo in bar" class="item">',
+				'			<span class="value">{{foo.value}}</span>',
+				'		</div>',
+				'	</div>',
+				'</div>'
+			].join(''));
+			angular.element(document.body).append($element);
+			$compile($element)($scope);
+			$scope.bar = getArray(100);
+			$scope.$digest();
+
+			var elems, values1, values2, count;
+
+			elems = getElements($element);
+			values1 = getValues(elems);
+			count = elems.length;
+			expect(count).to.be.greaterThan(0);
+			expect(count).to.be.lessThan(20);
+
+			$element[0].scrollTop += 200;
+			$element[0].scrollLeft += 200;
+
+			$element.triggerHandler('scroll');
+
+			elems = getElements($element);
+			values2 = getValues(elems);
+			expect(Math.min.apply(Math, values1)).to.be.lessThan(Math.min.apply(Math, values2));
+			
+			count = elems.length;
+			expect(count).to.be.greaterThan(0);
+			expect(count).to.be.lessThan(20);
+
 			done();
 		});
 	});

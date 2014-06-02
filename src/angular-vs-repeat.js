@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v0.3 2014/05/30
+// Angular Virtual Scroll Repeat v1.0.0rc1 2014/06/02
 //
 
 (function(window, angular){
@@ -57,21 +57,23 @@
 
 	var isMacOS = navigator.appVersion.indexOf('Mac') != -1,
 		wheelEventName = typeof window.onwheel !== 'undefined' ? 'wheel' : typeof window.onmousewheel !== 'undefined' ? 'mousewheel' : 'DOMMouseScroll',
-		matchingFunction = document.documentElement.matches ? 'matches' :
-							document.documentElement.matchesSelector ? 'matchesSelector' :
-							document.documentElement.webkitMatches ? 'webkitMatches' :
-							document.documentElement.webkitMatchesSelector ? 'webkitMatchesSelector' :
-							document.documentElement.msMatches ? 'msMatches' :
-							document.documentElement.msMatchesSelector ? 'msMatchesSelector' :
-							document.documentElement.mozMatches ? 'mozMatches' :
-							document.documentElement.mozMatchesSelector ? 'mozMatchesSelector' : null;
+		dde = document.documentElement,
+		matchingFunction = dde.matches ? 'matches' :
+							dde.matchesSelector ? 'matchesSelector' :
+							dde.webkitMatches ? 'webkitMatches' :
+							dde.webkitMatchesSelector ? 'webkitMatchesSelector' :
+							dde.msMatches ? 'msMatches' :
+							dde.msMatchesSelector ? 'msMatchesSelector' :
+							dde.mozMatches ? 'mozMatches' :
+							dde.mozMatchesSelector ? 'mozMatchesSelector' : null;
 
 	var closestElement = angular.element.prototype.closest || function (selector){
 		var el = this[0].parentNode;
-		while(el !== document.documentElement && !el[matchingFunction](selector))
+		while(el !== document.documentElement && el != null && !el[matchingFunction](selector)){
 			el = el.parentNode;
+		}
 
-		if(el[matchingFunction](selector))
+		if(el && el[matchingFunction](selector))
 			return angular.element(el);
 		else
 			return angular.element();
@@ -120,6 +122,7 @@
 							offsetSize =  $$horizontal ? 'offsetWidth' : 'offsetHeight',
 							scrollPos =  $$horizontal ? 'scrollLeft' : 'scrollTop';
 
+						if($scrollParent.length === 0) throw 'Specified scroll parent selector did not match any element';
 						$scope.$scrollParent = $scrollParent;
 
 						//initial defaults
@@ -340,17 +343,17 @@
 	angular.element(document.head).append([
 		'<style>' +
 		'.vs-repeat-wheel-helper{' +
-		'	position: absolute;' +
-		'	top: 0;' +
-		'	bottom: 0;' +
-		'	left: 0;' +
-		'	right: 0;' +
-		'	z-index: 99999;' +
-		'	background: rgba(0, 0, 0, 0);' +
+			'position: absolute;' +
+			'top: 0;' +
+			'bottom: 0;' +
+			'left: 0;' +
+			'right: 0;' +
+			'z-index: 99999;' +
+			'background: rgba(0, 0, 0, 0);' +
 		'}' +
 		'.vs-repeat-repeated-element{' +
-		'	position: absolute;' +
-		'	z-index: 1;' +
+			'position: absolute;' +
+			'z-index: 1;' +
 		'}' +
 		'</style>'
 	].join(''));
