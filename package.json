@@ -23,5 +23,8 @@
     "expect.js": "~0.3.1",
     "grunt-karma": "~0.8.3"
   },
+  "scripts": {
+    "test": "grunt"
+  },
   "dependencies": {}
 }
