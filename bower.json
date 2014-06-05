@@ -21,7 +21,7 @@
     "package.json",
     "lib",
     "node_modules",
-    "tests",
+    "test",
     ".git"
   ],
   "authors": [
