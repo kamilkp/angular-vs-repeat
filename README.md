@@ -38,7 +38,7 @@ of the attribute 'vs-repeat'. This can be used if one wants to override the auto
 example:
 
 ```html
-<div vs-repeat="50"> <!-- the specified element height is 50px -->
+<div vs-repeat="50">	<!-- the specified element height is 50px -->
 	<div ng-repeat="item in someArray">
 		<!-- content -->
 	</div>
