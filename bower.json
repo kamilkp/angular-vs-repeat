@@ -3,15 +3,7 @@
   "version": "1.0.0rc1",
   "description": "Virtual Scroll for AngularJS ngRepeat directive",
   "homepage": "http://kamilkp.github.io/angular-vs-repeat",
-  "author": {
-    "name": "Kamil Pekala",
-    "email": "kamilkp@gmail.com",
-    "url": "http://github.com/kamilkp"
-  },
   "main": "src/angular-vs-repeat.js",
-  "moduleType": [
-    "globals"
-  ],
   "keywords": [
     "angularjs",
     "javascript",
@@ -24,11 +16,15 @@
     "Gruntfile.js",
     "karma.conf.js",
     "README.md",
-    "bootstrap",
+    "CHANGELOG.md",
     "bower.json",
     "package.json",
     "lib",
     "node_modules",
-    "tests"
+    "tests",
+    ".git"
+  ],
+  "authors": [
+    "Kamil Pękala <kamilkp@gmail.com>"
   ]
 }
