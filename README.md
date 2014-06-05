@@ -1,7 +1,6 @@
-angular-vs-repeat v1.0.0rc1 
-[![Build Status](https://travis-ci.org/kamilkp/angular-vs-repeat.svg?branch=master)](https://travis-ci.org/kamilkp/angular-vs-repeat) 
-[![NPM version](https://badge.fury.io/js/angular-vs-repeat.svg)](http://badge.fury.io/js/angular-vs-repeat)
+angular-vs-repeat v1.0.0rc1
 =================
+[![Build Status](https://travis-ci.org/kamilkp/angular-vs-repeat.svg?branch=master)](https://travis-ci.org/kamilkp/angular-vs-repeat) [![NPM version](https://badge.fury.io/js/angular-vs-repeat.svg)](http://badge.fury.io/js/angular-vs-repeat)
 
 Virtual Scroll for AngularJS ngRepeat directive
 
