@@ -1,3 +1,7 @@
+Version 1.0.0-rc2 (2014/06/09)
+=================
+Semver compatible version name
+
 Version 1.0.0rc1 (2014/06/02)
 =================
 
