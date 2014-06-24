@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.0.0-rc2 2014/06/02
+// Angular Virtual Scroll Repeat v1.0.0-rc3 2014/06/24
 //
 
 (function(window, angular){
@@ -117,7 +117,9 @@
 							$fillElement,
 							autoSize = !$attrs.vsRepeat,
 							$scrollParent = $attrs.vsScrollParent ? closestElement.call($element, $attrs.vsScrollParent) : $element,
+							positioningPropertyTransform = $$horizontal ? 'translateX' : 'translateY',
 							positioningProperty = $$horizontal ? 'left' : 'top',
+
 							clientSize =  $$horizontal ? 'clientWidth' : 'clientHeight',
 							offsetSize =  $$horizontal ? 'offsetWidth' : 'offsetHeight',
 							scrollPos =  $$horizontal ? 'scrollLeft' : 'scrollTop';
@@ -189,8 +191,18 @@
 						}
 
 						childClone.attr('ng-repeat', lhs + ' in ' + collectionName + (rhsSuffix ? ' ' + rhsSuffix : ''))
-								.attr('ng-style', '{' + positioningProperty + ': (($index + startIndex) * elementSize + offsetBefore) + "px"}')		
 								.addClass('vs-repeat-repeated-element');
+
+						if(typeof document.documentElement.style.transform !== "undefined"){ // browser supports transform css property
+							childClone.attr('ng-style', '{ "transform": "' + positioningPropertyTransform + '(" + (($index + startIndex) * elementSize + offsetBefore) + "px)"}');
+						}
+						else if(typeof document.documentElement.style.webkitTransform !== "undefined"){ // browser supports -webkit-transform css property
+							childClone.attr('ng-style', '{ "-webkit-transform": "' + positioningPropertyTransform + '(" + (($index + startIndex) * elementSize + offsetBefore) + "px)"}');
+						}
+						else{
+							childClone.attr('ng-style', '{' + positioningProperty + ': (($index + startIndex) * elementSize + offsetBefore) + "px"}');
+						}
+
 						$compile(childClone)($scope);
 						$element.append(childClone);
 

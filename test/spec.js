@@ -204,7 +204,17 @@
 
 			var elems = getElements($element);
 			expect(elems.length).to.be.greaterThan(1);
-			expect(+elems[1].parentNode.style.top.slice(0, -2)).to.be(100);
+
+			var eStyle = elems[1].parentNode.style;
+			if(eStyle.transform){
+				expect(+eStyle.transform.slice(11, -3)).to.be(100);
+			}
+			else if(eStyle.webkitTransform){
+				expect(+eStyle.webkitTransform.slice(11, -3)).to.be(100);
+			}
+			else{
+				expect(+eStyle.top.slice(0, -2)).to.be(100);
+			}
 			expect(elems.length).to.be.lessThan(5);
 			done();
 		});

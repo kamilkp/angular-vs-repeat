@@ -1,3 +1,7 @@
+Version 1.0.0-rc2 (2014/06/24)
+=================
+Fixed a bug on Safari and optimized layout recalculations
+
 Version 1.0.0-rc2 (2014/06/09)
 =================
 Semver compatible version name
