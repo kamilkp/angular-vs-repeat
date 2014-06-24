@@ -1,4 +1,4 @@
-Version 1.0.0-rc2 (2014/06/24)
+Version 1.0.0-rc3 (2014/06/24)
 =================
 Fixed a bug on Safari and optimized layout recalculations
 
