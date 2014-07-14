@@ -92,7 +92,7 @@
 				var ngRepeatChild = $element.children().eq(0),
 					ngRepeatExpression = ngRepeatChild.attr('ng-repeat'),
 					childCloneHtml = ngRepeatChild[0].outerHTML,
-					expressionMatches = /^\s*(\S+)\s+in\s+(\S+)\s*(track\s+by\s+\S+)?/.exec(ngRepeatExpression),
+					expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+\S+)?$/.exec(ngRepeatExpression),
 					lhs = expressionMatches[1],
 					rhs = expressionMatches[2],
 					rhsSuffix = expressionMatches[3],
