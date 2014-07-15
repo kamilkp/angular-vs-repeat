@@ -1,5 +1,12 @@
 Version 1.0.0-rc3 (2014/06/24)
 =================
+
+###FEATURES
+  * added support for filters in the `ngRepeat` expression
+  * added support for variable items sizes (if they are known up front)
+
+Version 1.0.0-rc3 (2014/06/24)
+=================
 Fixed a bug on Safari and optimized layout recalculations
 
 Version 1.0.0-rc2 (2014/06/09)

@@ -18,7 +18,7 @@ The directive renders only so many elements that can fit into current container'
 
 ###LIMITATIONS:
 - current version only supports an Array as a right-hand-side object for `ngRepeat`
-- all rendered elements must have the same height/width
+- all rendered elements must have the same height/width or the sizes of the elements must be known up front
 
 ###USAGE:
 First include `vs-repeat` as a module dependency in your app.
@@ -55,6 +55,7 @@ example:
 - `vs-offset-after="value"` - bottom/right offset in pixels (defaults to 0)
 - `vs-horizontal` - horizontal mode (the ngRepeat'ed elements should be horizontally stacked)
 - `vs-excess="value"` - an integer number representing the number of elements to be rendered outside of the current container's viewport (defaults to 2)
+- `vs-size-property="propertyName"` - a property name of the items in collection that is a number denoting the element size (in pixels)
 
 ###EVENTS:
 - `vsRepeatTrigger` - an event the directive listens for to manually trigger reinitialization

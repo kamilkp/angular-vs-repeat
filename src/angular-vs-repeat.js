@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.0.0-rc3 2014/06/24
+// Angular Virtual Scroll Repeat v1.0.0-rc4 2014/07/15
 //
 
 (function(window, angular){
@@ -16,7 +16,7 @@
 
 	// LIMITATIONS:
 	// - current version only supports an Array as a right-hand-side object for ngRepeat
-	// - all rendered elements must have the same height/width
+	// - all rendered elements must have the same height/width or the sizes of the elements must be known up front
 
 	// USAGE:
 	// In order to use the vsRepeat directive you need to place a vs-repeat attribute on a direct parent of an element with ng-repeat
@@ -50,6 +50,7 @@
 	// vs-offset-after="value" - bottom/right offset in pixels (defaults to 0)
 	// vs-excess="value" - an integer number representing the number of elements to be rendered outside of the current container's viewport
 	//						(defaults to 2)
+	// vs-size-property - a property name of the items in collection that is a number denoting the element size (in pixels)
 
 	// EVENTS:
 	// - 'vsRepeatTrigger' - an event the directive listens for to manually trigger reinitialization
@@ -116,6 +117,7 @@
 							$wheelHelper,
 							$fillElement,
 							autoSize = !$attrs.vsRepeat,
+							sizesPropertyExists = !!$attrs.vsSizeProperty,
 							$scrollParent = $attrs.vsScrollParent ? closestElement.call($element, $attrs.vsScrollParent) : $element,
 							positioningPropertyTransform = $$horizontal ? 'translateX' : 'translateY',
 							positioningProperty = $$horizontal ? 'left' : 'top',
@@ -126,6 +128,8 @@
 
 						if($scrollParent.length === 0) throw 'Specified scroll parent selector did not match any element';
 						$scope.$scrollParent = $scrollParent;
+
+						if(sizesPropertyExists) $scope.sizesCumulative = [];
 
 						//initial defaults
 						$scope.elementSize = $scrollParent[0][clientSize] || 50;
@@ -149,10 +153,23 @@
 								$scope[collectionName] = [];
 								originalLength = 0;
 								resizeFillElement(0);
+								$scope.sizesCumulative = [0];
 								return;
 							}
 							else{
 								originalLength = originalCollection.length;
+								if(sizesPropertyExists){
+									$scope.sizes = originalCollection.map(function(item){
+										return item[$attrs.vsSizeProperty];
+									});
+									var sum = 0;
+									$scope.sizesCumulative = $scope.sizes.map(function(size){
+										var res = sum;
+										sum += size;
+										return res;
+									});
+									$scope.sizesCumulative.push(sum);
+								}
 								setAutoSize();
 							}
 							reinitialize();
@@ -193,14 +210,18 @@
 						childClone.attr('ng-repeat', lhs + ' in ' + collectionName + (rhsSuffix ? ' ' + rhsSuffix : ''))
 								.addClass('vs-repeat-repeated-element');
 
+						var offsetCalculationString = sizesPropertyExists ?
+							'(sizesCumulative[$index + startIndex] + offsetBefore)' :
+							'(($index + startIndex) * elementSize + offsetBefore)';
+
 						if(typeof document.documentElement.style.transform !== "undefined"){ // browser supports transform css property
-							childClone.attr('ng-style', '{ "transform": "' + positioningPropertyTransform + '(" + (($index + startIndex) * elementSize + offsetBefore) + "px)"}');
+							childClone.attr('ng-style', '{ "transform": "' + positioningPropertyTransform + '(" + ' + offsetCalculationString + ' + "px)"}');
 						}
 						else if(typeof document.documentElement.style.webkitTransform !== "undefined"){ // browser supports -webkit-transform css property
-							childClone.attr('ng-style', '{ "-webkit-transform": "' + positioningPropertyTransform + '(" + (($index + startIndex) * elementSize + offsetBefore) + "px)"}');
+							childClone.attr('ng-style', '{ "-webkit-transform": "' + positioningPropertyTransform + '(" + ' + offsetCalculationString + ' + "px)"}');
 						}
 						else{
-							childClone.attr('ng-style', '{' + positioningProperty + ': (($index + startIndex) * elementSize + offsetBefore) + "px"}');
+							childClone.attr('ng-style', '{' + positioningProperty + ': ' + offsetCalculationString + ' + "px"}');
 						}
 
 						$compile(childClone)($scope);
@@ -271,7 +292,10 @@
 							_prevStartIndex = void 0;
 							_prevEndIndex = void 0;
 							updateInnerCollection();
-							resizeFillElement($scope.elementSize*originalLength);
+							resizeFillElement(sizesPropertyExists ?
+												$scope.sizesCumulative[originalLength] :
+												$scope.elementSize*originalLength
+											);
 							$scope.$emit('vsRepeatReinitialized');
 						}
 
@@ -323,18 +347,32 @@
 						});
 
 						function updateInnerCollection(){
-							$scope.startIndex = Math.max(
-								Math.floor(
-									($scrollParent[0][scrollPos]) / $scope.elementSize + $scope.excess/2
-								) - $scope.excess,
-								0
-							);
-							$scope.endIndex = Math.min(
-								$scope.startIndex + Math.ceil(
-									$scrollParent[0][clientSize] / $scope.elementSize
-								) + $scope.excess,
-								originalLength
-							);
+							if(sizesPropertyExists){
+								$scope.startIndex = 0;
+								while($scope.sizesCumulative[$scope.startIndex] < $scrollParent[0][scrollPos] - $scope.offsetBefore)
+									$scope.startIndex++;
+								if($scope.startIndex > 0) $scope.startIndex--;
+
+								$scope.endIndex = $scope.startIndex;
+								while($scope.sizesCumulative[$scope.endIndex] < $scrollParent[0][scrollPos] - $scope.offsetBefore + $scrollParent[0][clientSize])
+									$scope.endIndex++;
+							}
+							else{
+								$scope.startIndex = Math.max(
+									Math.floor(
+										($scrollParent[0][scrollPos] - $scope.offsetBefore) / $scope.elementSize + $scope.excess/2
+									) - $scope.excess,
+									0
+								);
+
+								$scope.endIndex = Math.min(
+									$scope.startIndex + Math.ceil(
+										$scrollParent[0][clientSize] / $scope.elementSize
+									) + $scope.excess,
+									originalLength
+								);
+							}
+							
 
 							var digestRequired = $scope.startIndex !== _prevStartIndex || $scope.endIndex !== _prevEndIndex;
 
