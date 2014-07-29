@@ -137,6 +137,16 @@
 						$scope.offsetAfter = 0;
 						$scope.excess = 2;
 
+						$scope.$watch($attrs.vsInitialElement, function(elementIndex){
+							$scope.goTo(elementIndex);
+						});
+						
+						$scope.goTo = function(index){
+							setTimeout(function() {
+								$($scrollParent[0]).scrollTop( $scope.elementSize * index + $scope.offsetBefore );
+							}, 0);
+						}
+
 						Object.keys(attributesDictionary).forEach(function(key){
 							if($attrs[key]){
 								$attrs.$observe(key, function(value){
