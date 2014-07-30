@@ -145,7 +145,7 @@
 							setTimeout(function() {
 								$scrollParent[0].scrollTop = $scope.elementSize * index + $scope.offsetBefore;
 							}, 0);
-						}
+						};
 
 						Object.keys(attributesDictionary).forEach(function(key){
 							if($attrs[key]){
