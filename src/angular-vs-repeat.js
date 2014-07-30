@@ -143,7 +143,7 @@
 						
 						$scope.goTo = function(index){
 							setTimeout(function() {
-								$($scrollParent[0]).scrollTop( $scope.elementSize * index + $scope.offsetBefore );
+								$scrollParent[0].scrollTop = $scope.elementSize * index + $scope.offsetBefore;
 							}, 0);
 						}
 
