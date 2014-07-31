@@ -142,9 +142,12 @@
 						});
 						
 						$scope.goTo = function(index){
-							setTimeout(function() {
-								$scrollParent[0].scrollTop = $scope.elementSize * index + $scope.offsetBefore;
-							}, 0);
+							$scope.$$postDigest(function(){
+								var scrollPosition = (sizesPropertyExists) ? 
+									($scope.sizesCumulative[index] + $scope.offsetBefore):
+									(index * $scope.elementSize + $scope.offsetBefore);
+								$scrollParent[0].scrollTop = scrollPosition;
+							});
 						};
 
 						Object.keys(attributesDictionary).forEach(function(key){
