@@ -1,3 +1,9 @@
+Version 1.0.0-rc5 (2014/08/01)
+=================
+
+###FEATURES
+  * added an optional `vs-autoresize` attribute. You can use it without `vs-size-property` and without specifying element's size. The automatically computed element style will readjust upon window resize if the size is dependable on the viewport size.
+
 Version 1.0.0-rc4 (2014/07/15)
 =================
 
