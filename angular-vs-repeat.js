@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.0.0-rc4 2014/07/15
+// Angular Virtual Scroll Repeat v1.0.0-rc5 2014/08/01
 //
 
 (function(window, angular){
@@ -51,6 +51,8 @@
 	// vs-excess="value" - an integer number representing the number of elements to be rendered outside of the current container's viewport
 	//						(defaults to 2)
 	// vs-size-property - a property name of the items in collection that is a number denoting the element size (in pixels)
+	// vs-autoresize - use this attribute without vs-size-property and without specifying element's size. The automatically computed element style will
+	//				readjust upon window resize if the size is dependable on the viewport size
 
 	// EVENTS:
 	// - 'vsRepeatTrigger' - an event the directive listens for to manually trigger reinitialization
@@ -275,6 +277,12 @@
 						}
 
 						function onWindowResize(){
+							if(typeof $attrs.vsAutoresize !== 'undefined'){
+								autoSize = true;
+								setAutoSize();
+								if($scope.$root && !$scope.$root.$$phase)
+									$scope.$apply();
+							}
 							if(updateInnerCollection())
 								$scope.$apply();
 						}
@@ -285,6 +293,10 @@
 						});
 
 						$scope.$on('vsRepeatTrigger', reinitialize);
+						$scope.$on('vsRepeatResize', function(){
+							autoSize = true;
+							setAutoSize();
+						});
 
 						var _prevStartIndex,
 							_prevEndIndex;

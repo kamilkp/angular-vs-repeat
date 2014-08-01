@@ -219,8 +219,8 @@
 			Angular-vs-repeat
 			<small>angular virtual scroll for ng-repeat</small>
 		</h1>
-		<div class="row" ng-init="tab = 7">
-			<div ng-class="{'col-xs-7': tab != 7, 'col-xs-12': tab == 7}">
+		<div class="row" ng-init="tab = 8">
+			<div ng-class="{'col-xs-7': tab != 8, 'col-xs-12': tab == 8}">
 				<h3>
 					<small class="pull-right" style="line-height: 34px;" ng-show="tab < 6">
 						<span ng-show="tab != 4 && tab != 5"><span class="glyphicon glyphicon-resize-vertical"></span>scroll it vertically</span>
@@ -239,7 +239,8 @@
 				  <li ng-class="{active: tab == 4}"><a ng-click="tab = 4">Horizontal</a></li>
 				  <li ng-class="{active: tab == 5}"><a ng-click="tab = 5">Two dimensional</a></li>
 				  <li ng-class="{active: tab == 6}"><a ng-click="tab = 6">Variable size</a></li>
-				  <li class="imp" ng-class="{active: tab == 7}"><a ng-click="tab = 7">Performance</a></li>
+				  <li ng-class="{active: tab == 7}"><a ng-click="tab = 7">Autoresizing</a></li>
+				  <li class="imp" ng-class="{active: tab == 8}"><a ng-click="tab = 8">Performance</a></li>
 				</ul>
 				<div ng-if="tab == 1" ng-init="shown = false;" class="tab-1">
 					<label><input type="checkbox" ng-model="shown" /><span>is content visible</span></label>
@@ -315,7 +316,16 @@
 						</div>
 					</div>
 				</div>
-				<div ng-if="tab == 7">
+				<div ng-if="tab == 7" class="tab-7">
+					<div>
+						<div class="repeater-container" vs-repeat vs-autoresize>
+							<div class="item-element well" ng-repeat="item in items.collection" style="height: 10vh">
+								<span>{{item.text}}</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div ng-if="tab == 8">
 					<div class="row">
 						<div class="col-xs-12">
 							<p>
@@ -356,7 +366,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-xs-5" ng-show="tab != 7">
+			<div class="col-xs-5" ng-show="tab != 8">
 				<h3>
 					Actual elements in DOM ({{getDomElementsDesc().length}}):
 				</h3>
