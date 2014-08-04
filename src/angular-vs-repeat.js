@@ -51,6 +51,7 @@
 	// vs-excess="value" - an integer number representing the number of elements to be rendered outside of the current container's viewport
 	//						(defaults to 2)
 	// vs-size-property - a property name of the items in collection that is a number denoting the element size (in pixels)
+	// vs-initial-element="" - an element index to set scrollTop
 
 	// EVENTS:
 	// - 'vsRepeatTrigger' - an event the directive listens for to manually trigger reinitialization
