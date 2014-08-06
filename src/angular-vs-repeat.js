@@ -51,7 +51,7 @@
 	// vs-excess="value" - an integer number representing the number of elements to be rendered outside of the current container's viewport
 	//						(defaults to 2)
 	// vs-size-property - a property name of the items in collection that is a number denoting the element size (in pixels)
-	// vs-initial-element="" - an element index to set scrollTop
+	// vs-initial-element="" - an integer for an element index to start scroll position to that element
 
 	// EVENTS:
 	// - 'vsRepeatTrigger' - an event the directive listens for to manually trigger reinitialization
@@ -147,7 +147,7 @@
 								var scrollPosition = (sizesPropertyExists) ? 
 									($scope.sizesCumulative[index] + $scope.offsetBefore):
 									(index * $scope.elementSize + $scope.offsetBefore);
-								$scrollParent[0].scrollTop = scrollPosition;
+								$scrollParent[0][scrollPos] = scrollPosition;
 							});
 						};
 
