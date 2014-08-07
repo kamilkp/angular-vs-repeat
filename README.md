@@ -1,4 +1,4 @@
-angular-vs-repeat v1.0.0-rc4
+angular-vs-repeat v1.0.0-rc5
 =================
 [![Build Status](https://travis-ci.org/kamilkp/angular-vs-repeat.svg?branch=master)](https://travis-ci.org/kamilkp/angular-vs-repeat) [![NPM version](https://badge.fury.io/js/angular-vs-repeat.svg)](http://badge.fury.io/js/angular-vs-repeat) [![Bower version](https://badge.fury.io/bo/angular-vs-repeat.svg)](http://badge.fury.io/bo/angular-vs-repeat)
 
@@ -56,6 +56,7 @@ example:
 - `vs-horizontal` - horizontal mode (the ngRepeat'ed elements should be horizontally stacked)
 - `vs-excess="value"` - an integer number representing the number of elements to be rendered outside of the current container's viewport (defaults to 2)
 - `vs-size-property="propertyName"` - a property name of the items in collection that is a number denoting the element size (in pixels)
+- `vs-autoresize` - use this attribute without `vs-size-property` and without specifying element's size. The automatically computed element style will readjust upon window resize if the size is dependable on the viewport size
 
 ###EVENTS:
 - `vsRepeatTrigger` - an event the directive listens for to manually trigger reinitialization
