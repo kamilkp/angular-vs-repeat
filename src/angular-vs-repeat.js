@@ -82,7 +82,7 @@
 			return angular.element();
 	};
 
-	angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', function($compile){
+	angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', function($compile, $parse){
 		return {
 			restrict: 'A',
 			scope: true,
@@ -357,6 +357,12 @@
 							else
 								reinitOnClientHeightChange();
 						});
+
+						if ($attrs.vsOnIndexChange) {
+							$scope.$watch('startIndex + "" + endIndex', function() {
+								$parse($attrs.vsOnIndexChange)($scope);
+							});
+						}
 
 						function updateInnerCollection(){
 							if(sizesPropertyExists){

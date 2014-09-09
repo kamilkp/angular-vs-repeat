@@ -256,5 +256,34 @@
 
 			done();
 		});
+		it('should call vs-on-index-change when the indexes change', function() {
+			$element = $compile([
+				'<div vs-repeat class="container" vs-on-index-change="loadMoreItems(startIndex, endIndex)">',
+				'	<div ng-repeat="foo in bar" class="item">',
+				'		<span class="value">{{foo.value}}</span>',
+				'	</div>',
+				'</div>'
+			].join(''))($scope);
+			angular.element(document.body).append($element);
+			var elScope = $element.scope();
+			$scope.bar = getArray(100);
+			var calledCount = 0;
+			$scope.loadMoreItems = function loadMoreItems(startIndex, endIndex) {
+				expect(startIndex).to.not.be(undefined);
+				expect(endIndex).to.not.be(undefined);
+				calledCount++;
+			};
+
+			$scope.$digest();
+			expect(calledCount).to.be(2); // the endIndex gets updated twice in the previous digest.
+
+			elScope.endIndex += 10;
+			$scope.$digest();
+			expect(calledCount).to.be(3);
+
+			elScope.endIndex += 10;
+			$scope.$digest();
+			expect(calledCount).to.be(4);
+		});
 	});
 })();
