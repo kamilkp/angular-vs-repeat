@@ -5,7 +5,8 @@
 		var res = [];
 		for(var i=0;i<size;i++){
 			res.push({
-				value: i
+				value: i,
+				size: 110
 			});
 		}
 		return res;
@@ -19,6 +20,19 @@
 		return Array.prototype.map.call(elems, function(elem){
 			return +elem.innerHTML.trim();
 		});
+	}
+
+	function expectTranslation(elem, expectedTranslation){
+		var eStyle = elem.parentNode.style;
+		if(eStyle.transform){
+			expect(+eStyle.transform.slice(11, -3)).to.be(expectedTranslation);
+		}
+		else if(eStyle.webkitTransform){
+			expect(+eStyle.webkitTransform.slice(11, -3)).to.be(expectedTranslation);
+		}
+		else{
+			expect(+eStyle.top.slice(0, -2)).to.be(expectedTranslation);
+		}
 	}
 
 	var animationFrame = 1000/60;
@@ -98,13 +112,14 @@
 				elems = getElements($element);
 				values2 = getValues(elems);
 				expect(Math.min.apply(Math, values1)).to.be.lessThan(Math.min.apply(Math, values2));
-				
+
 				count = elems.length;
 				expect(count).to.be.greaterThan(0);
 				expect(count).to.be.lessThan(20);
 
 				done();
 			});
+
 			it('should support rendering initially hidden element', function(done){
 				$element = $compile([
 					'<div ng-show="showFlag">',
@@ -135,6 +150,7 @@
 				}, animationFrame);
 			});
 		});
+
 		it('should support horizontal stacking of elements', function(done){
 			$element = $compile([
 				'<div vs-repeat class="container horizontal" vs-horizontal>',
@@ -163,13 +179,14 @@
 			elems = getElements($element);
 			values2 = getValues(elems);
 			expect(Math.min.apply(Math, values1)).to.be.lessThan(Math.min.apply(Math, values2));
-			
+
 			count = elems.length;
 			expect(count).to.be.greaterThan(0);
 			expect(count).to.be.lessThan(20);
 
 			done();
 		});
+
 		it('fill element should not obscure repeated elements', function(done){
 			$element = $compile([
 				'<div vs-repeat class="container">',
@@ -190,9 +207,10 @@
 			expect(fromPoint.className).not.to.contain('vs-repeat-fill-element');
 			done();
 		});
-		it('should support manually provided element size', function(done){
+
+		it('should support manually provided unique element size', function(done){
 			$element = $compile([
-				'<div vs-repeat="100" class="container">',
+				'<div vs-repeat="150" class="container">',
 				'	<div ng-repeat="foo in bar" class="item">',
 				'		<span class="value">{{foo.value}}</span>',
 				'	</div>',
@@ -204,20 +222,67 @@
 
 			var elems = getElements($element);
 			expect(elems.length).to.be.greaterThan(1);
-
-			var eStyle = elems[1].parentNode.style;
-			if(eStyle.transform){
-				expect(+eStyle.transform.slice(11, -3)).to.be(100);
-			}
-			else if(eStyle.webkitTransform){
-				expect(+eStyle.webkitTransform.slice(11, -3)).to.be(100);
-			}
-			else{
-				expect(+eStyle.top.slice(0, -2)).to.be(100);
-			}
 			expect(elems.length).to.be.lessThan(5);
+			expectTranslation(elems[1], 150);
 			done();
 		});
+
+		it('should support manually provided size per element', function(done){
+			$element = $compile([
+				'<div vs-repeat vs-size-property="size" class="container">',
+				'	<div ng-repeat="foo in bar" class="item">',
+				'		<span class="value">{{foo.value}}</span>',
+				'	</div>',
+				'</div>'
+			].join(''))($scope);
+			angular.element(document.body).append($element);
+			$scope.bar = getArray(100);
+			$scope.$digest();
+			$scope.$broadcast('vsRepeatTrigger');
+			$scope.$digest();
+
+			var elems = getElements($element);
+			expect(elems.length).to.be.greaterThan(1);
+			expect(elems.length).to.be.lessThan(5);
+			expectTranslation(elems[1], 110);
+			done();
+		});
+
+		it('should support changing manually provided size per element', function(done){
+
+			$element = $compile([
+				'<div vs-repeat vs-size-property="size" class="container">',
+				'	<div ng-repeat="foo in bar" class="item">',
+				'		<span class="value">{{foo.value}}</span>',
+				'	</div>',
+				'</div>'
+			].join(''))($scope);
+			angular.element(document.body).append($element);
+			$scope.bar = getArray(100);
+			$scope.$digest();
+			$scope.$broadcast('vsRepeatTrigger');
+			$scope.$digest();
+
+			var elems = getElements($element);
+			expect(elems.length).to.be.greaterThan(1);
+			expect(elems.length).to.be.lessThan(5);
+			expectTranslation(elems[1], 110);
+
+			// Change first item size and trigger refresh
+			var newSize = 123;
+			$scope.bar[0].size = newSize;
+			$scope.$digest();
+			$scope.$broadcast('vsRepeatTrigger');
+			$scope.$digest();
+
+			// Second item should have shifted
+			elems = getElements($element);
+			expect(elems.length).to.be.greaterThan(1);
+			expect(elems.length).to.be.lessThan(5);
+			expectTranslation(elems[1], newSize);
+			done();
+		});
+
 		it('should support non-default scrollable container', function(done){
 			$element = angular.element([
 				'<div class="scroll">',
@@ -249,7 +314,7 @@
 			elems = getElements($element);
 			values2 = getValues(elems);
 			expect(Math.min.apply(Math, values1)).to.be.lessThan(Math.min.apply(Math, values2));
-			
+
 			count = elems.length;
 			expect(count).to.be.greaterThan(0);
 			expect(count).to.be.lessThan(20);
