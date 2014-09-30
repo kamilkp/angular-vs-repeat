@@ -1,3 +1,9 @@
+Version 1.0.0-rc6 (2014/09/29)
+=================
+
+###FEATURES
+  * added support for resizing items by changing the item size property and then `$broadcasting()`ing the ``vsRepeatTrigger`` event.
+
 Version 1.0.0-rc5 (2014/08/01)
 =================
 

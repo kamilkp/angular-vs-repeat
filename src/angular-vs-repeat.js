@@ -26,7 +26,7 @@
 	//			<!-- content -->
 	//		</div>
 	// </div>
-	// 
+	//
 	// You can also measure the single element's height/width (including all paddings and margins), and then speficy it as a value
 	// of the attribute 'vs-repeat'. This can be used if one wants to override the automatically computed element size.
 	// example:
@@ -35,13 +35,13 @@
 	//			<!-- content -->
 	//		</div>
 	// </div>
-	// 
-	// IMPORTANT! 
-	// 
+	//
+	// IMPORTANT!
+	//
 	// - the vsRepeat directive must be applied to a direct parent of an element with ngRepeat
 	// - the value of vsRepeat attribute is the single element's height/width measured in pixels. If none provided, the directive
 	//		will compute it automatically
-	
+
 	// OPTIONAL PARAMETERS (attributes):
 	// vs-scroll-parent="selector" - selector to the scrollable container. The directive will look for a closest parent matching
 	//								he given selector (defaults to the current element)
@@ -151,6 +151,10 @@
 
 						$scope.$watchCollection(rhs, function(coll){
 							originalCollection = coll || [];
+							refresh();
+						});
+
+						function refresh(){
 							if(!originalCollection || originalCollection.length < 1){
 								$scope[collectionName] = [];
 								originalLength = 0;
@@ -174,8 +178,9 @@
 								}
 								setAutoSize();
 							}
+
 							reinitialize();
-						});
+						}
 
 						function setAutoSize(){
 							if(autoSize){
@@ -292,7 +297,7 @@
 							angular.element(window).off('resize', onWindowResize);
 						});
 
-						$scope.$on('vsRepeatTrigger', reinitialize);
+						$scope.$on('vsRepeatTrigger', refresh);
 						$scope.$on('vsRepeatResize', function(){
 							autoSize = true;
 							setAutoSize();
@@ -384,7 +389,7 @@
 									originalLength
 								);
 							}
-							
+
 
 							var digestRequired = $scope.startIndex !== _prevStartIndex || $scope.endIndex !== _prevEndIndex;
 
