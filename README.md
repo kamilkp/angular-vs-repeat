@@ -47,7 +47,7 @@ example:
 
 - the vsRepeat directive must be applied to a direct parent of an element with `ngRepeat`
 - the value of vsRepeat attribute is the single element's height/width measured in pixels. If none provided, the directive will compute it automatically
-	
+
 
 ###OPTIONAL PARAMETERS (attributes):
 - `vs-scroll-parent="selector"` - selector to the scrollable container. The directive will look for a closest parent matching the given selector (defaults to the current element)
@@ -57,7 +57,8 @@ example:
 - `vs-excess="value"` - an integer number representing the number of elements to be rendered outside of the current container's viewport (defaults to 2)
 - `vs-size-property="propertyName"` - a property name of the items in collection that is a number denoting the element size (in pixels)
 - `vs-autoresize` - use this attribute without `vs-size-property` and without specifying element's size. The automatically computed element style will readjust upon window resize if the size is dependable on the viewport size
+- `vs-scroll-settings` - an object with 2 possible properties: `scrollIndex: "value"` - index of the item that should be scrolled to; the exact position of this item in the viewport may be further defined by `scrollIndexPosition: "value"` - a position where the element at `scrollIndex` index will be scrolled to; either a number of pixels or one of the following strings: 'top', 'middle', 'bottom', 'inview' is the same as 'inview#top', 'inview#middle', 'inview#bottom', 'inview#auto'; the 'inview#\<position\>' settings means that if the item is already in the view, nothing is scrolled, but if it is not, then the item will be scrolled accordingly (to be in the \<position\>); position 'auto' means that it will be either 'top' or 'bottom' depending on what is closer to the current item position
 
 ###EVENTS:
-- `vsRepeatTrigger` - an event the directive listens for to manually trigger reinitialization
-- `vsRepeatReinitialized` - an event the directive emits upon reinitialization done
+- `vsRepeatTrigger` - an event the directive listens for to manually trigger reinitialization; it may receive additional argument - an object with two properties: `scrollIndex` and `scrollIndexPosition` - their meaning is the same as in the optional attribute `vs-scroll-settings`
+- `vsRepeatReinitialized` - an event the directive emits upon reinitialization done; the listener may accepts three arguments: `event`, `startIndex` and `endIndex`
