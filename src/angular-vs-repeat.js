@@ -58,7 +58,7 @@
 	// - 'vsRepeatTrigger' - an event the directive listens for to manually trigger reinitialization
 	// - 'vsRepeatReinitialized' - an event the directive emits upon reinitialization done
 
-	var isMacOS = navigator.appVersion.indexOf('Mac') !== -1,
+	var isMacOS = navigator.appVersion.indexOf('Mac') != -1,
 		wheelEventName = typeof window.onwheel !== 'undefined' ? 'wheel' : typeof window.onmousewheel !== 'undefined' ? 'mousewheel' : 'DOMMouseScroll',
 		dde = document.documentElement,
 		matchingFunction = dde.matches ? 'matches' :
@@ -76,12 +76,10 @@
 			el = el.parentNode;
 		}
 
-		if(el && el[matchingFunction](selector)) {
+		if(el && el[matchingFunction](selector))
 			return angular.element(el);
-		}
-		else {
+		else
 			return angular.element();
-		}
 	};
 
 	angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', function($compile){
@@ -110,15 +108,14 @@
 					};
 
 				$element.empty();
-				if(!window.getComputedStyle || window.getComputedStyle($element[0]).position !== 'absolute') {
+				if(!window.getComputedStyle || window.getComputedStyle($element[0]).position !== 'absolute')
 					$element.css('position', 'relative');
-				}
 				return {
 					pre: function($scope, $element, $attrs, $ctrl){
 						var childClone = angular.element(childCloneHtml),
 							originalCollection = [],
 							originalLength,
-							$$horizontal = typeof $attrs.vsHorizontal !== 'undefined',
+							$$horizontal = typeof $attrs.vsHorizontal !== "undefined",
 							$wheelHelper,
 							$fillElement,
 							autoSize = !$attrs.vsRepeat,
@@ -133,10 +130,10 @@
 							offsetSize =  $$horizontal ? 'offsetWidth' : 'offsetHeight',
 							scrollPos =  $$horizontal ? 'scrollLeft' : 'scrollTop';
 
-						if($scrollParent.length === 0) { throw 'Specified scroll parent selector did not match any element'; }
+						if($scrollParent.length === 0) throw 'Specified scroll parent selector did not match any element';
 						$scope.$scrollParent = $scrollParent;
 
-						if(sizesPropertyExists) { $scope.sizesCumulative = []; }
+						if(sizesPropertyExists) $scope.sizesCumulative = [];
 
 						//initial defaults
 						$scope.elementSize = $scrollParent[0][clientSize] || 50;
@@ -212,9 +209,8 @@
 													$scope.elementSize = children[i][offsetSize];
 													reinitialize();
 													autoSize = false;
-													if($scope.$root && !$scope.$root.$$phase) {
+													if($scope.$root && !$scope.$root.$$phase)
 														$scope.$apply();
-													}
 												}
 												break;
 											}
@@ -240,10 +236,10 @@
 							'(sizesCumulative[$index + startIndex] + offsetBefore)' :
 							'(($index + startIndex) * elementSize + offsetBefore)';
 
-						if(typeof document.documentElement.style.transform !== 'undefined'){ // browser supports transform css property
+						if(typeof document.documentElement.style.transform !== "undefined"){ // browser supports transform css property
 							childClone.attr('ng-style', '{ "transform": "' + positioningPropertyTransform + '(" + ' + offsetCalculationString + ' + "px)"}');
 						}
-						else if(typeof document.documentElement.style.webkitTransform !== 'undefined'){ // browser supports -webkit-transform css property
+						else if(typeof document.documentElement.style.webkitTransform !== "undefined"){ // browser supports -webkit-transform css property
 							childClone.attr('ng-style', '{ "-webkit-transform": "' + positioningPropertyTransform + '(" + ' + offsetCalculationString + ' + "px)"}');
 						}
 						else{
@@ -264,18 +260,17 @@
 						$scope.$fillElement = $fillElement;
 
 						var _prevMouse = {};
-						if(isMacOS) {
+						if(isMacOS){
 							$wheelHelper = angular.element('<div class="vs-repeat-wheel-helper"></div>')
 								.on(wheelEventName, function(e){
 									e.preventDefault();
 									e.stopPropagation();
-									if(e.originalEvent) { e = e.originalEvent; }
+									if(e.originalEvent) e = e.originalEvent;
 									$scrollParent[0].scrollLeft += (e.deltaX || -e.wheelDeltaX);
 									$scrollParent[0].scrollTop += (e.deltaY || -e.wheelDeltaY);
 								}).on('mousemove', function(e){
-									if(_prevMouse.x !== e.clientX || _prevMouse.y !== e.clientY) {
+									if(_prevMouse.x !== e.clientX || _prevMouse.y !== e.clientY)
 										angular.element(this).css('display', 'none');
-									}
 									_prevMouse = {
 										x: e.clientX,
 										y: e.clientY
@@ -300,27 +295,24 @@
 							}
 						});
 
-						function wheelHandler(e) {
-							var elem = e.currentTarget;
-							if(elem.scrollWidth > elem.clientWidth || elem.scrollHeight > elem.clientHeight) {
-								$wheelHelper.css('display', 'block');
-							}
-						}
 						if(isMacOS){
 							$scrollParent.on(wheelEventName, wheelHandler);
+						}
+						function wheelHandler(e){
+							var elem = e.currentTarget;
+							if(elem.scrollWidth > elem.clientWidth || elem.scrollHeight > elem.clientHeight)
+								$wheelHelper.css('display', 'block');
 						}
 
 						function onWindowResize(){
 							if(typeof $attrs.vsAutoresize !== 'undefined'){
 								autoSize = true;
 								setAutoSize();
-								if($scope.$root && !$scope.$root.$$phase) {
+								if($scope.$root && !$scope.$root.$$phase)
 									$scope.$apply();
-								}
 							}
-							if(updateInnerCollection()) {
+							if(updateInnerCollection())
 								$scope.$apply();
-							}
 						}
 
 						angular.element(window).on('resize', onWindowResize);
@@ -355,11 +347,10 @@
 								});
 								if($ctrl && $ctrl.$fillElement){
 									var referenceElement = $ctrl.$fillElement[0].parentNode.querySelector('[ng-repeat]');
-									if(referenceElement) {
+									if(referenceElement)
 										$ctrl.$fillElement.css({
 											'width': referenceElement.scrollWidth + 'px'
 										});
-									}
 								}
 							}
 							else{
@@ -369,11 +360,10 @@
 								});
 								if($ctrl && $ctrl.$fillElement){
 									referenceElement = $ctrl.$fillElement[0].parentNode.querySelector('[ng-repeat]');
-									if(referenceElement) {
+									if(referenceElement)
 										$ctrl.$fillElement.css({
 											'height': referenceElement.scrollHeight + 'px'
 										});
-									}
 								}
 							}
 						}
@@ -383,20 +373,17 @@
 							var ch = $scrollParent[0][clientSize];
 							if(ch !== _prevClientSize){
 								reinitialize();
-								if($scope.$root && !$scope.$root.$$phase) {
+								if($scope.$root && !$scope.$root.$$phase)
 									$scope.$apply();
-								}
 							}
 							_prevClientSize = ch;
 						}
 
 						$scope.$watch(function(){
-							if(typeof window.requestAnimationFrame === 'function') {
+							if(typeof window.requestAnimationFrame === "function")
 								window.requestAnimationFrame(reinitOnClientHeightChange);
-							}
-							else {
+							else
 								reinitOnClientHeightChange();
-							}
 						});
 
 						// Scroll to required position
