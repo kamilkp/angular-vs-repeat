@@ -414,6 +414,8 @@
 							var scrollChange = true,
 								position,
 								visibleStartIndex;
+								
+							if (data && data.elementSize !== undefined) $scope.elementSize = data.elementSize;
 
 							if (data && data.scrollIndex !== undefined) {
 								if (typeof $scope.scrollSettings !== 'undefined') {

@@ -60,5 +60,7 @@ example:
 - `vs-scroll-settings` - an object with 2 possible properties: `scrollIndex: "value"` - index of the item that should be scrolled to; the exact position of this item in the viewport may be further defined by `scrollIndexPosition: "value"` - a position where the element at `scrollIndex` index will be scrolled to; either a number of pixels or one of the following strings: 'top', 'middle', 'bottom', 'inview' is the same as 'inview#top', 'inview#middle', 'inview#bottom', 'inview#auto'; the 'inview#\<position\>' settings means that if the item is already in the view, nothing is scrolled, but if it is not, then the item will be scrolled accordingly (to be in the \<position\>); position 'auto' means that it will be either 'top' or 'bottom' depending on what is closer to the current item position
 
 ###EVENTS:
-- `vsRepeatTrigger` - an event the directive listens for to manually trigger reinitialization; it may receive additional argument - an object with two properties: `scrollIndex` and `scrollIndexPosition` - their meaning is the same as in the optional attribute `vs-scroll-settings`
+- `vsRepeatTrigger` - an event the directive listens for to manually trigger reinitialization; it may receive additional argument - an object with following properties:
+1. `scrollIndex` and `scrollIndexPosition` - their meaning is the same as in the optional attribute `vs-scroll-settings`
+2. `elementSize` - set the size in pixels of each element in the reinitialized list
 - `vsRepeatReinitialized` - an event the directive emits upon reinitialization done; the listener may accepts three arguments: `event`, `startIndex` and `endIndex`
