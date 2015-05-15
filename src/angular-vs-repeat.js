@@ -413,13 +413,24 @@
 
 							var scrollChange = true,
 								position,
-								visibleStartIndex;
-								
+								visibleStartIndex,
+								scrollIndexCumulativeSize,
+								scrollIndexSize;
+
 							if (data && data.elementSize !== undefined) $scope.elementSize = data.elementSize;
 
 							if (data && data.scrollIndex !== undefined) {
 								if (typeof $scope.scrollSettings !== 'undefined') {
 									$scope.scrollSettings.scrollIndex = data.scrollIndex;
+								}
+
+								if (sizesPropertyExists) {
+									scrollIndexSize = $scope.sizes[data.scrollIndex];
+									scrollIndexCumulativeSize = $scope.sizesCumulative[data.scrollIndex];
+								}
+								else {
+									scrollIndexSize = $scope.elementSize;
+									scrollIndexCumulativeSize = data.scrollIndex * $scope.elementSize;
 								}
 
 								// Item scroll position relative to the view, i.e. position === 0 means the top of the view,
@@ -439,10 +450,10 @@
 													position = $scope.offsetBefore;
 													break;
 												case 'middle':
-													position = ($scrollParent[0][clientSize] - $scope.sizes[data.scrollIndex]) / 2;
+													position = ($scrollParent[0][clientSize] - scrollIndexSize) / 2;
 													break;
 												case 'bottom':
-													position = $scrollParent[0][clientSize] - $scope.sizes[data.scrollIndex] - $scope.offsetAfter;
+													position = $scrollParent[0][clientSize] - scrollIndexSize - $scope.offsetAfter;
 													break;
 												case 'inview':
 												case 'inview#top':
@@ -451,11 +462,11 @@
 												case 'inview#auto':
 													// The item is in the viewport, do nothing
 													if (
-															($scrollParent[0][scrollPos] <= ($scope.sizesCumulative[data.scrollIndex])) &&
-															($scrollParent[0][scrollPos] + $scrollParent[0][clientSize] - $scope.sizes[data.scrollIndex] >= $scope.sizesCumulative[data.scrollIndex])) {
+															($scrollParent[0][scrollPos] <= (scrollIndexCumulativeSize)) &&
+															($scrollParent[0][scrollPos] + $scrollParent[0][clientSize] - scrollIndexSize >= scrollIndexCumulativeSize)) {
 														scrollChange = false;
 														// The current item scroll position
-														position = $scope.sizesCumulative[data.scrollIndex] - $scrollParent[0][scrollPos];
+														position = scrollIndexCumulativeSize - $scrollParent[0][scrollPos];
 													}
 													// The item is out of the viewport
 													else {
@@ -465,16 +476,16 @@
 														}
 														if (data.scrollIndexPosition === 'inview#bottom') {
 															// Get it at the bottom
-															position = $scrollParent[0][clientSize] - $scope.sizes[data.scrollIndex] + $scope.offsetAfter;
+															position = $scrollParent[0][clientSize] - scrollIndexSize + $scope.offsetAfter;
 														}
 														if (data.scrollIndexPosition === 'inview#middle') {
 															// Get it at the middle
-															position = ($scrollParent[0][clientSize] - $scope.sizes[data.scrollIndex]) / 2;
+															position = ($scrollParent[0][clientSize] - scrollIndexSize) / 2;
 														}
 														if (data.scrollIndexPosition === 'inview#auto') {
 															// Get it at the bottom or at the top, depending on what is closer
-															if ($scrollParent[0][scrollPos] <= $scope.sizesCumulative[data.scrollIndex]) {
-																position = $scrollParent[0][clientSize] - $scope.sizes[data.scrollIndex] + $scope.offsetAfter;
+															if ($scrollParent[0][scrollPos] <= scrollIndexCumulativeSize) {
+																position = $scrollParent[0][clientSize] - scrollIndexSize + $scope.offsetAfter;
 															}
 															else {
 																position = $scope.offsetBefore;
@@ -496,7 +507,12 @@
 									// The item is not required to be in the viewport, do nothing
 									scrollChange = false;
 									// The current item scroll position
-									position = $scope.sizesCumulative[data.scrollIndex] - $scrollParent[0][scrollPos];
+									if (sizesPropertyExists) {
+										position = $scope.sizesCumulative[data.scrollIndex] - $scrollParent[0][scrollPos];
+									}
+									else {
+										position = (data.scrollIndex * $scope.elementSize) - $scrollParent[0][scrollPos];
+									}
 								}
 
 								$scope.startIndex = data.scrollIndex;
@@ -590,7 +606,7 @@
 							var scrolled = false;
 							if (data !== undefined && data.scrollIndex !== undefined && position !== undefined && scrollChange) {
 								// Scroll to the requested position
-								scrolled = scrollToPosition($scope.sizesCumulative[data.scrollIndex] - position);
+								scrolled = scrollToPosition(scrollIndexCumulativeSize - position);
 							}
 
 							var digestRequired = $scope.startIndex !== _prevStartIndex || $scope.endIndex !== _prevEndIndex;
