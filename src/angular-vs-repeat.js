@@ -105,7 +105,8 @@
 						'vsRepeat': 'elementSize',
 						'vsOffsetBefore': 'offsetBefore',
 						'vsOffsetAfter': 'offsetAfter',
-						'vsExcess': 'excess'
+                        'vsScrolledBottomOffset': 'scrolledBottomOffset',
+                        'vsExcess': 'excess'
 					};
 
 				repeatContainer.empty();
@@ -130,7 +131,9 @@
 
 							clientSize =  $$horizontal ? 'clientWidth' : 'clientHeight',
 							offsetSize =  $$horizontal ? 'offsetWidth' : 'offsetHeight',
-							scrollPos =  $$horizontal ? 'scrollLeft' : 'scrollTop';
+							scrollPos =  $$horizontal ? 'scrollLeft' : 'scrollTop',
+
+                            scrolledBottomEnabled = angular.isDefined($attrs.vsScrolledBottom);
 
 						if($scrollParent.length === 0) throw 'Specified scroll parent selector did not match any element';
 						$scope.$scrollParent = $scrollParent;
@@ -618,6 +621,13 @@
 
 								// Emit the event
 								$scope.$emit('vsRepeatInnerCollectionUpdated', $scope.startIndex, $scope.endIndex, _prevStartIndex, _prevEndIndex);
+							}
+
+							if (scrolledBottomEnabled) {
+								var triggerIndex = originalCollection.length - ($scope.scrolledBottomOffset || 0);
+								if($scope.endIndex >= triggerIndex && _prevEndIndex < triggerIndex) {
+									$scope.$evalAsync($attrs.vsScrolledBottom);
+								}
 							}
 
 							_prevStartIndex = $scope.startIndex;
