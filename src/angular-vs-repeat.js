@@ -524,7 +524,8 @@
 										$scope.startIndex--;
 									}
 									// The real first item in the view
-									visibleStartIndex = $scope.startIndex;
+									visibleStartIndex = Math.max($scope.startIndex, 0);
+
 									// Adjust the start index according to the excess
 									$scope.startIndex = Math.max(
 										Math.floor($scope.startIndex - ($scope.excess / 2)),
@@ -549,7 +550,7 @@
 										$scope.startIndex--;
 									}
 									// The real first item in the view
-									visibleStartIndex = $scope.startIndex;
+									visibleStartIndex = Math.max($scope.startIndex, 0);
 									$scope.startIndex = Math.max(
 										Math.floor($scope.startIndex - ($scope.excess / 2)),
 										0
