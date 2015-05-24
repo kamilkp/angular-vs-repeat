@@ -82,7 +82,7 @@
 			return angular.element();
 	};
 
-	angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', function($compile){
+	angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', function($compile, $parse){
 		return {
 			restrict: 'A',
 			scope: true,
@@ -236,14 +236,30 @@
 							'(sizesCumulative[$index + startIndex] + offsetBefore)' :
 							'(($index + startIndex) * elementSize + offsetBefore)';
 
+						var originalNgStyle = childClone.attr('ng-style'),
+							ngStyle;
+
 						if(typeof document.documentElement.style.transform !== "undefined"){ // browser supports transform css property
-							childClone.attr('ng-style', '{ "transform": "' + positioningPropertyTransform + '(" + ' + offsetCalculationString + ' + "px)"}');
+							ngStyle = '{ "transform": "' + positioningPropertyTransform + '(" + ' + offsetCalculationString + ' + "px)"}';
 						}
 						else if(typeof document.documentElement.style.webkitTransform !== "undefined"){ // browser supports -webkit-transform css property
-							childClone.attr('ng-style', '{ "-webkit-transform": "' + positioningPropertyTransform + '(" + ' + offsetCalculationString + ' + "px)"}');
+							ngStyle = '{ "-webkit-transform": "' + positioningPropertyTransform + '(" + ' + offsetCalculationString + ' + "px)"}';
 						}
 						else{
-							childClone.attr('ng-style', '{' + positioningProperty + ': ' + offsetCalculationString + ' + "px"}');
+							ngStyle = '{' + positioningProperty + ': ' + offsetCalculationString + ' + "px"}';
+						}
+
+						// merge custom ng-style and vs-repeat ng-style directives
+						if (originalNgStyle) {
+							originalNgStyle = $parse(originalNgStyle);
+							ngStyle = $parse(ngStyle);
+							$scope._vsRepeatNgStyleCallback = function(currentScope) {
+								return angular.extend(originalNgStyle(currentScope), ngStyle(currentScope));
+							};
+							childClone.attr('ng-style', '_vsRepeatNgStyleCallback(this)');
+						}
+						else {
+							childClone.attr('ng-style', ngStyle);
 						}
 
 						$compile(childClone)($scope);
