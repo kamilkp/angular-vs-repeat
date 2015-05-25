@@ -61,6 +61,7 @@ example:
 
 ###EVENTS:
 - `vsRepeatTrigger` - an event the directive listens for to manually trigger reinitialization; it may receive additional argument - an object with following properties:
-1. `scrollIndex` and `scrollIndexPosition` - their meaning is the same as in the optional attribute `vs-scroll-settings`
-2. `elementSize` - set the size in pixels of each element in the reinitialized list
+    1. `scrollIndex` and `scrollIndexPosition` - their meaning is the same as in the optional attribute `vs-scroll-settings`
+    2. `elementSize` - set the size in pixels of each element in the reinitialized list
+- `vsRepeatResize` - an event the directive listens for to manually trigger the autosizing algorithm
 - `vsRepeatReinitialized` - an event the directive emits upon reinitialization done; the listener may accepts three arguments: `event`, `startIndex` and `endIndex`
