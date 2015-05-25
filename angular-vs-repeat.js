@@ -191,7 +191,8 @@
 									});
 									$scope.sizesCumulative.push(sum);
 								}
-								setAutoSize();
+								else
+									setAutoSize();
 							}
 
 							reinitialize(data);
@@ -236,14 +237,15 @@
 							'(sizesCumulative[$index + startIndex] + offsetBefore)' :
 							'(($index + startIndex) * elementSize + offsetBefore)';
 
+						var prevStyle = childClone.attr('style') || '';
 						if(typeof document.documentElement.style.transform !== "undefined"){ // browser supports transform css property
-							childClone.attr('ng-style', '{ "transform": "' + positioningPropertyTransform + '(" + ' + offsetCalculationString + ' + "px)"}');
+							childClone.attr('style', prevStyle + '; transform: ' + positioningPropertyTransform + '({{' + offsetCalculationString + '}}px)');
 						}
 						else if(typeof document.documentElement.style.webkitTransform !== "undefined"){ // browser supports -webkit-transform css property
-							childClone.attr('ng-style', '{ "-webkit-transform": "' + positioningPropertyTransform + '(" + ' + offsetCalculationString + ' + "px)"}');
+							childClone.attr('style', prevStyle + '; -webkit-transform: ' + positioningPropertyTransform + '({{' + offsetCalculationString + '}}px)');
 						}
 						else{
-							childClone.attr('ng-style', '{' + positioningProperty + ': ' + offsetCalculationString + ' + "px"}');
+							childClone.attr('style', prevStyle + '; ' + positioningProperty + ': {{' + offsetCalculationString + '}}px');
 						}
 
 						$compile(childClone)($scope);
