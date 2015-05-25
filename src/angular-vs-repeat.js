@@ -93,7 +93,7 @@
 			}],
 			compile: function($element, $attrs){
 				var ngRepeatChild = $element.children().eq(0),
-					ngRepeatExpression = ngRepeatChild.attr('ng-repeat'),
+					ngRepeatExpression = ngRepeatChild.attr('ng-repeat') || ngRepeatChild.attr('data-ng-repeat'),
 					childCloneHtml = ngRepeatChild[0].outerHTML,
 					expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+\S+)?$/.exec(ngRepeatExpression),
 					lhs = expressionMatches[1],
@@ -136,7 +136,7 @@
 						if(sizesPropertyExists) $scope.sizesCumulative = [];
 
 						//initial defaults
-						$scope.elementSize = $scrollParent[0][clientSize] || 50;
+						$scope.elementSize = (+$attrs.vsRepeat) || $scrollParent[0][clientSize] || 50;
 						$scope.offsetBefore = 0;
 						$scope.offsetAfter = 0;
 						$scope.excess = 2;
@@ -181,7 +181,7 @@
 								originalLength = originalCollection.length;
 								if(sizesPropertyExists){
 									$scope.sizes = originalCollection.map(function(item){
-										return item[$attrs.vsSizeProperty];
+										return item[$attrs.vsSizeProperty] || $scope.elementSize;
 									});
 									var sum = 0;
 									$scope.sizesCumulative = $scope.sizes.map(function(size){
@@ -204,7 +204,7 @@
 										var children = $element.children(),
 											i = 0;
 										while(i < children.length){
-											if(children[i].attributes['ng-repeat'] != null){
+											if(children[i].attributes['ng-repeat'] != null || children[i].attributes['data-ng-repeat'] != null){
 												if(children[i][offsetSize]){
 													$scope.elementSize = children[i][offsetSize];
 													reinitialize();
