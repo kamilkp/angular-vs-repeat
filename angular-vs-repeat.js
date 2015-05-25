@@ -93,7 +93,7 @@
 			}],
 			compile: function($element, $attrs){
 				var ngRepeatChild = $element.children().eq(0),
-					ngRepeatExpression = ngRepeatChild.attr('ng-repeat'),
+					ngRepeatExpression = ngRepeatChild.attr('ng-repeat') || ngRepeatChild.attr('data-ng-repeat'),
 					childCloneHtml = ngRepeatChild[0].outerHTML,
 					expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+\S+)?$/.exec(ngRepeatExpression),
 					lhs = expressionMatches[1],
@@ -204,7 +204,7 @@
 										var children = $element.children(),
 											i = 0;
 										while(i < children.length){
-											if(children[i].attributes['ng-repeat'] != null){
+											if(children[i].attributes['ng-repeat'] != null || children[i].attributes['data-ng-repeat'] != null){
 												if(children[i][offsetSize]){
 													$scope.elementSize = children[i][offsetSize];
 													reinitialize();
