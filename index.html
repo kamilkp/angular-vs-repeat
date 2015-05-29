@@ -237,7 +237,7 @@
 				  <li ng-class="{active: tab == 2}"><a ng-click="tab = 2">Nested</a></li>
 				  <li ng-class="{active: tab == 3}"><a ng-click="tab = 3">Offsets</a></li>
 				  <li ng-class="{active: tab == 4}"><a ng-click="tab = 4">Horizontal</a></li>
-				  <li ng-class="{active: tab == 5}"><a ng-click="tab = 5">Two dimensional</a></li>
+				  <!-- <li ng-class="{active: tab == 5}"><a ng-click="tab = 5">Two dimensional</a></li> -->
 				  <li ng-class="{active: tab == 6}"><a ng-click="tab = 6">Variable size</a></li>
 				  <li ng-class="{active: tab == 7}"><a ng-click="tab = 7">Autoresizing</a></li>
 				  <li class="imp" ng-class="{active: tab == 8}"><a ng-click="tab = 8">Performance</a></li>
@@ -294,7 +294,7 @@
 						</div>
 					</div>
 				</div>
-				<div ng-if="tab == 5">
+				<!--<div ng-if="tab == 5">
 					<div style="overflow: auto; height: 454px;" vs-repeat class="combined-vs" vs-offset-after="20">
 						<div ng-repeat="foo in thirdArray" class="third-array-ng-repeat">
 							<div>
@@ -306,11 +306,11 @@
 							</div>
 						</div>
 					</div>
-				</div>
+				</div> -->
 				<div ng-if="tab == 6" class="tab-6">
 					<div>
 						<div class="repeater-container" data-vs-repeat="100" vs-size-property="size">
-							<div class="item-element well" ng-repeat="item in items.collection" style="height: {{item.size}}px"
+							<div class="item-element well" ng-repeat="item in items.collection" ng-style="{height: item.size + 'px'}"
 								ng-click="item.size = item.size + 30; $emit('vsRepeatTrigger')">
 								<span>{{item.text}}</span>
 							</div>
