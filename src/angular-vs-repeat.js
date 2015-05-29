@@ -344,6 +344,7 @@
                             else {
                                 if(updateInnerCollection()) {
                                     $scope.$apply();
+                                    $scope.$broadcast('vsSetSize-refresh');
                                     // $scope.$digest();
                                 }
                             }
