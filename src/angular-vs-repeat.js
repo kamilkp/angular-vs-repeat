@@ -498,7 +498,7 @@
                                 }
 
                                 // Item scroll position relative to the view, i.e. position === 0 means the top of the view,
-                                // position === $scrollParent[0][clientSize] means the bottom
+                                // position === getClientSize($scrollParent[0], clientSize) means the bottom
                                 if (data.scrollIndexPosition !== undefined) {
                                     if (typeof $scope.scrollSettings !== 'undefined') {
                                         $scope.scrollSettings.scrollIndexPosition = data.scrollIndexPosition;
@@ -514,10 +514,10 @@
                                                     position = $scope.offsetBefore;
                                                     break;
                                                 case 'middle':
-                                                    position = ($scrollParent[0][clientSize] - scrollIndexSize) / 2;
+                                                    position = (getClientSize($scrollParent[0], clientSize) - scrollIndexSize) / 2;
                                                     break;
                                                 case 'bottom':
-                                                    position = $scrollParent[0][clientSize] - scrollIndexSize - $scope.offsetAfter;
+                                                    position = getClientSize($scrollParent[0], clientSize) - scrollIndexSize - $scope.offsetAfter;
                                                     break;
                                                 case 'inview':
                                                 case 'inview#top':
@@ -527,7 +527,7 @@
                                                     // The item is in the viewport, do nothing
                                                     if (
                                                             ($scrollParent[0][scrollPos] <= (scrollIndexCumulativeSize)) &&
-                                                            ($scrollParent[0][scrollPos] + $scrollParent[0][clientSize] - scrollIndexSize >= scrollIndexCumulativeSize)) {
+                                                            ($scrollParent[0][scrollPos] + getClientSize($scrollParent[0], clientSize) - scrollIndexSize >= scrollIndexCumulativeSize)) {
                                                         scrollChange = false;
                                                         // The current item scroll position
                                                         position = scrollIndexCumulativeSize - $scrollParent[0][scrollPos];
@@ -540,16 +540,16 @@
                                                         }
                                                         if (data.scrollIndexPosition === 'inview#bottom') {
                                                             // Get it at the bottom
-                                                            position = $scrollParent[0][clientSize] - scrollIndexSize + $scope.offsetAfter;
+                                                            position = getClientSize($scrollParent[0], clientSize) - scrollIndexSize + $scope.offsetAfter;
                                                         }
                                                         if (data.scrollIndexPosition === 'inview#middle') {
                                                             // Get it at the middle
-                                                            position = ($scrollParent[0][clientSize] - scrollIndexSize) / 2;
+                                                            position = (getClientSize($scrollParent[0], clientSize) - scrollIndexSize) / 2;
                                                         }
                                                         if (data.scrollIndexPosition === 'inview#auto') {
                                                             // Get it at the bottom or at the top, depending on what is closer
                                                             if ($scrollParent[0][scrollPos] <= scrollIndexCumulativeSize) {
-                                                                position = $scrollParent[0][clientSize] - scrollIndexSize + $scope.offsetAfter;
+                                                                position = getClientSize($scrollParent[0], clientSize) - scrollIndexSize + $scope.offsetAfter;
                                                             }
                                                             else {
                                                                 position = $scope.offsetBefore;
@@ -597,7 +597,7 @@
                                     );
 
                                     $scope.endIndex = $scope.startIndex;
-                                    while($scope.sizesCumulative[$scope.endIndex] < $scope.sizesCumulative[visibleStartIndex] - $scope.offsetBefore + $scrollParent[0][clientSize]) {
+                                    while($scope.sizesCumulative[$scope.endIndex] < $scope.sizesCumulative[visibleStartIndex] - $scope.offsetBefore + getClientSize($scrollParent[0], clientSize)) {
                                         $scope.endIndex++;
                                     }
                                     // Adjust the end index according to the excess
@@ -621,7 +621,7 @@
                                     );
 
                                     $scope.endIndex = Math.min(
-                                        $scope.startIndex + Math.ceil($scrollParent[0][clientSize] / $scope.elementSize) + $scope.excess / 2,
+                                        $scope.startIndex + Math.ceil(getClientSize($scrollParent[0], clientSize) / $scope.elementSize) + $scope.excess / 2,
                                         originalLength
                                     );
 
@@ -667,7 +667,7 @@
                                     // console.log(renderViewPortSize);
                                     $scope.endIndex = Math.min(
                                         $scope.startIndex + Math.ceil(
-                                            $scrollParent[0][clientSize] / $scope.elementSize
+                                            getClientSize($scrollParent[0], clientSize) / $scope.elementSize
                                         ) + $scope.excess,
                                         originalLength
                                     );
