@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.0.0-rc8 2015/05/25
+// Angular Virtual Scroll Repeat v1.0.0-rc8 2015/05/29
 //
 
 (function(window, angular){
@@ -44,7 +44,7 @@
 
     // OPTIONAL PARAMETERS (attributes):
     // vs-scroll-parent="selector" - selector to the scrollable container. The directive will look for a closest parent matching
-    //                              he given selector (defaults to the current element)
+    //                              the given selector (defaults to the current element)
     // vs-horizontal - stack repeated elements horizontally instead of vertically
     // vs-offset-before="value" - top/left offset in pixels (defaults to 0)
     // vs-offset-after="value" - bottom/right offset in pixels (defaults to 0)
@@ -81,6 +81,54 @@
         else
             return angular.element();
     };
+
+    function getWindowScroll(){
+        if('pageYOffset' in window){
+            return {
+                scrollTop: pageYOffset,
+                scrollLeft: pageXOffset
+            };
+        }
+        else{
+            var sx, sy, d = document, r = d.documentElement, b = d.body;
+            sx = r.scrollLeft || b.scrollLeft || 0;
+            sy = r.scrollTop || b.scrollTop || 0;
+            return {
+                scrollTop: sy,
+                scrollLeft: sx
+            };
+        }
+    }
+
+    function getClientSize(element, sizeProp){
+        if(element === window)
+            return sizeProp === 'clientWidth' ? window.innerWidth : window.innerHeight;
+        else
+            return element[sizeProp];
+    }
+
+    function getScrollPos(element, scrollProp){
+        return element === window ? getWindowScroll()[scrollProp] : element[scrollProp];
+    }
+
+    function getScrollOffset(vsElement, scrollElement, isHorizontal){
+        var vsPos = vsElement.getBoundingClientRect()[isHorizontal ? 'left' : 'top'];
+        var scrollPos = scrollElement === window ? 0 : scrollElement.getBoundingClientRect()[isHorizontal ? 'left' : 'top'];
+        var correction = vsPos - scrollPos + getWindowScroll()[isHorizontal ? 'scrollLeft' : 'scrollTop'];
+
+        return correction;
+    }
+
+    function getRenderViewPortSize(vsElement, scrollElement, isHorizontal){
+        var vsPos = vsElement.getBoundingClientRect()[isHorizontal ? 'left' : 'top'];
+        var containerBound = scrollElement === window ? window.innerHeight : scrollElement.getBoundingClientRect()[isHorizontal ? 'right' : 'bottom'];
+        return Math.max(
+                Math.min(
+                    getClientSize(scrollElement, isHorizontal ? 'clientWidth' : 'clientHeight'),
+                    containerBound - vsPos
+                ),
+            0);
+    }
 
     angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', function($compile){
         return {
@@ -119,8 +167,10 @@
                             $wheelHelper,
                             $fillElement,
                             autoSize = !$attrs.vsRepeat,
-                            sizesPropertyExists = !!$attrs.vsSizeProperty,
-                            $scrollParent = $attrs.vsScrollParent ? closestElement.call($element, $attrs.vsScrollParent) : $element,
+                            sizesPropertyExists = !!$attrs.vsSize || !!$attrs.vsSizeProperty,
+                            $scrollParent = $attrs.vsScrollParent ?
+                                $attrs.vsScrollParent === 'window' ? angular.element(window) :
+                                closestElement.call($element, $attrs.vsScrollParent) : $element,
                             positioningPropertyTransform = $$horizontal ? 'translateX' : 'translateY',
                             positioningProperty = $$horizontal ? 'left' : 'top',
 
@@ -130,13 +180,16 @@
                             offsetSize =  $$horizontal ? 'offsetWidth' : 'offsetHeight',
                             scrollPos =  $$horizontal ? 'scrollLeft' : 'scrollTop';
 
+                        if(!('vsSize' in $attrs) && 'vsSizeProperty' in $attrs)
+                            console.warn('vs-size-property attribute is deprecated. Please use vs-size attrubute which also accepts angular expressions.');
+
                         if($scrollParent.length === 0) throw 'Specified scroll parent selector did not match any element';
                         $scope.$scrollParent = $scrollParent;
 
                         if(sizesPropertyExists) $scope.sizesCumulative = [];
 
                         //initial defaults
-                        $scope.elementSize = (+$attrs.vsRepeat) || $scrollParent[0][clientSize] || 50;
+                        $scope.elementSize = (+$attrs.vsRepeat) || getClientSize($scrollParent[0], clientSize) || 50;
                         $scope.offsetBefore = 0;
                         $scope.offsetAfter = 0;
                         $scope.excess = 2;
@@ -181,7 +234,11 @@
                                 originalLength = originalCollection.length;
                                 if(sizesPropertyExists){
                                     $scope.sizes = originalCollection.map(function(item){
-                                        return item[$attrs.vsSizeProperty] || $scope.elementSize;
+                                        var s = $scope.$new(true);
+                                        angular.extend(s, item);
+                                        var size = s.$eval($attrs.vsSize || $attrs.vsSizeProperty) || $scope.elementSize;
+                                        s.$destroy();
+                                        return size;
                                     });
                                     var sum = 0;
                                     $scope.sizesCumulative = $scope.sizes.map(function(size){
@@ -237,16 +294,10 @@
                             '(sizesCumulative[$index + startIndex] + offsetBefore)' :
                             '(($index + startIndex) * elementSize + offsetBefore)';
 
-                        var prevStyle = childClone.attr('style') || '';
-                        if(typeof document.documentElement.style.transform !== "undefined"){ // browser supports transform css property
-                            childClone.attr('style', prevStyle + '; transform: ' + positioningPropertyTransform + '({{' + offsetCalculationString + '}}px)');
-                        }
-                        else if(typeof document.documentElement.style.webkitTransform !== "undefined"){ // browser supports -webkit-transform css property
-                            childClone.attr('style', prevStyle + '; -webkit-transform: ' + positioningPropertyTransform + '({{' + offsetCalculationString + '}}px)');
-                        }
-                        else{
-                            childClone.attr('style', prevStyle + '; ' + positioningProperty + ': {{' + offsetCalculationString + '}}px');
-                        }
+
+                        childClone.attr('vs-set-size', offsetCalculationString);
+                        childClone.attr('vs-set-size-transform-property', positioningPropertyTransform);
+                        childClone.attr('vs-set-size-positioning-property', positioningProperty);
 
                         $compile(childClone)($scope);
                         $element.append(childClone);
@@ -293,6 +344,7 @@
                             else {
                                 if(updateInnerCollection()) {
                                     $scope.$apply();
+                                    // $scope.$digest();
                                 }
                             }
                         });
@@ -322,7 +374,11 @@
                             angular.element(window).off('resize', onWindowResize);
                         });
 
-                        $scope.$on('vsRepeatTrigger', refresh);
+                        $scope.$on('vsRepeatTrigger', function(){
+                            refresh();
+                            $scope.$broadcast('vsSetSize-refresh');
+                        });
+
                         $scope.$on('vsRepeatResize', function(){
                             autoSize = true;
                             setAutoSize();
@@ -372,7 +428,7 @@
 
                         var _prevClientSize;
                         function reinitOnClientHeightChange(){
-                            var ch = $scrollParent[0][clientSize];
+                            var ch = getClientSize($scrollParent[0], clientSize);
                             if(ch !== _prevClientSize){
                                 reinitialize();
                                 if($scope.$root && !$scope.$root.$$phase)
@@ -412,6 +468,14 @@
                         }
 
                         function updateInnerCollection(data){
+                            var $scrollPosition = getScrollPos($scrollParent[0], scrollPos);
+                            var $clientSize = getClientSize($scrollParent[0], clientSize);
+
+                            var scrollOffset = getScrollOffset(
+                                                    $element[0],
+                                                    $scrollParent[0],
+                                                    $$horizontal
+                                                );
 
                             var scrollChange = true,
                                 position,
@@ -569,7 +633,7 @@
 
                                 if(sizesPropertyExists){
                                     $scope.startIndex = 0;
-                                    while($scope.sizesCumulative[$scope.startIndex] < $scrollParent[0][scrollPos] - $scope.offsetBefore) {
+                                    while($scope.sizesCumulative[$scope.startIndex] < $scrollPosition - $scope.offsetBefore - scrollOffset) {
                                         $scope.startIndex++;
                                     }
                                     if($scope.startIndex > 0) { $scope.startIndex--; }
@@ -580,7 +644,7 @@
                                     );
 
                                     $scope.endIndex = $scope.startIndex;
-                                    while($scope.sizesCumulative[$scope.endIndex] < $scrollParent[0][scrollPos] - $scope.offsetBefore + $scrollParent[0][clientSize]) {
+                                    while($scope.sizesCumulative[$scope.endIndex] < $scrollPosition - $scope.offsetBefore - scrollOffset + $clientSize) {
                                         $scope.endIndex++;
                                     }
                                     // Adjust the end index according to the excess
@@ -592,11 +656,17 @@
                                 else{
                                     $scope.startIndex = Math.max(
                                         Math.floor(
-                                            ($scrollParent[0][scrollPos] - $scope.offsetBefore) / $scope.elementSize + $scope.excess / 2
+                                            ($scrollPosition - $scope.offsetBefore - scrollOffset) / $scope.elementSize + $scope.excess / 2
                                         ) - $scope.excess,
                                         0
                                     );
 
+                                    // var renderViewPortSize = getRenderViewPortSize(
+                                    //                             $element[0],
+                                    //                             $scrollParent[0],
+                                    //                             $$horizontal
+                                    //                         );
+                                    // console.log(renderViewPortSize);
                                     $scope.endIndex = Math.min(
                                         $scope.startIndex + Math.ceil(
                                             $scrollParent[0][clientSize] / $scope.elementSize
@@ -628,6 +698,27 @@
                         }
                     }
                 };
+            }
+        };
+    }]).directive('vsSetSize', [function(){
+        return function($scope, $element, $attrs){
+            var positioningPropertyTransform = $attrs.vsSetSizeTransformProperty;
+            var positioningProperty = $attrs.vsSetSizePositioningProperty;
+
+            setOffset();
+            $scope.$on('vsSetSize-refresh', setOffset);
+
+            function setOffset(){
+                var offset = $scope.$eval($attrs.vsSetSize);
+                if(typeof document.documentElement.style.transform !== "undefined"){ // browser supports transform css property
+                    $element.css('transform', positioningPropertyTransform + '(' + offset + 'px)');
+                }
+                else if(typeof document.documentElement.style.webkitTransform !== "undefined"){ // browser supports -webkit-transform css property
+                    $element.css('-webkit-transform', positioningPropertyTransform + '(' + offset + 'px)');
+                }
+                else{
+                    $element.css(positioningProperty, offset + 'px');
+                }
             }
         };
     }]);
