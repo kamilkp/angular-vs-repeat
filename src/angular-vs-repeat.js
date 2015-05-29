@@ -195,7 +195,7 @@
                         $scope.excess = 2;
                         $scope.scrollSettings = {
                             scrollIndex: 0,
-                            scrollIndexPosition: 'top',
+                            scrollIndexPosition: 'top'
                         };
 
                         $scope.$watch($attrs.vsScrollSettings, function(newValue, oldValue) {
@@ -374,10 +374,7 @@
                             angular.element(window).off('resize', onWindowResize);
                         });
 
-                        $scope.$on('vsRepeatTrigger', function(){
-                            refresh();
-                            $scope.$broadcast('vsSetSize-refresh');
-                        });
+                        $scope.$on('vsRepeatTrigger', refresh);
 
                         $scope.$on('vsRepeatResize', function(){
                             autoSize = true;
@@ -394,6 +391,7 @@
                                                 $scope.sizesCumulative[originalLength] :
                                                 $scope.elementSize*originalLength
                                             );
+                            $scope.$broadcast('vsSetSize-refresh');
                             $scope.$emit('vsRepeatReinitialized', $scope.startIndex, $scope.endIndex);
                         }
 
