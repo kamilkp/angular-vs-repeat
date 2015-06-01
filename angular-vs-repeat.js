@@ -686,8 +686,8 @@
                                 else {
                                     __startIndex = Math.max(
                                         Math.floor(
-                                            ($scrollPosition - $scope.offsetBefore - scrollOffset) / $scope.elementSize + $scope.excess / 2
-                                        ) - $scope.excess,
+                                            ($scrollPosition - $scope.offsetBefore - scrollOffset) / $scope.elementSize
+                                        ) - $scope.excess / 2,
                                         0
                                     );
 
@@ -711,7 +711,30 @@
                                 scrolled = scrollToPosition(scrollIndexCumulativeSize - position);
                             }
 
-                            var digestRequired = $scope.startIndex !== _prevStartIndex || $scope.endIndex !== _prevEndIndex;
+                            var digestRequired = false;
+                            if (_prevStartIndex == null) {
+                                digestRequired = true;
+                            }
+                            else if (_prevEndIndex == null) {
+                                digestRequired = true;
+                            }
+
+                            if (!digestRequired) {
+                                if ($$options.hunked) {
+                                    if (Math.abs($scope.startIndex - _prevStartIndex) >= $scope.excess / 2 || __startIndex === 0) {
+                                        digestRequired = true;
+                                    }
+                                    else if (Math.abs($scope.endIndex - _prevEndIndex) >= $scope.excess / 2 || __endIndex === originalLength) {
+                                        digestRequired = true;
+                                    }
+                                }
+                                else {
+                                    digestRequired = $scope.startIndex !== _prevStartIndex ||
+                                                        $scope.endIndex !== _prevEndIndex;
+                                }
+                            }
+                            // var digestRequired = $scope.startIndex !== _prevStartIndex ||
+                            //                     $scope.endIndex !== _prevEndIndex;
 
                             // $$options
                             if (digestRequired) {
@@ -720,10 +743,9 @@
 
                                 // Emit the event
                                 $scope.$emit('vsRepeatInnerCollectionUpdated', $scope.startIndex, $scope.endIndex, _prevStartIndex, _prevEndIndex);
+                                _prevStartIndex = $scope.startIndex;
+                                _prevEndIndex = $scope.endIndex;
                             }
-
-                            _prevStartIndex = $scope.startIndex;
-                            _prevEndIndex = $scope.endIndex;
 
                             return digestRequired;
                         }
