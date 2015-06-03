@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.0.0-rc10 2015/06/01
+// Angular Virtual Scroll Repeat v1.0.0-rc10 2015/06/03
 //
 
 (function(window, angular) {
@@ -118,21 +118,11 @@
     function getScrollOffset(vsElement, scrollElement, isHorizontal) {
         var vsPos = vsElement.getBoundingClientRect()[isHorizontal ? 'left' : 'top'];
         var scrollPos = scrollElement === window ? 0 : scrollElement.getBoundingClientRect()[isHorizontal ? 'left' : 'top'];
-        var correction = vsPos - scrollPos + getWindowScroll()[isHorizontal ? 'scrollLeft' : 'scrollTop'];
+        var correction = vsPos - scrollPos +
+            (scrollElement === window ? getWindowScroll() : scrollElement)[isHorizontal ? 'scrollLeft' : 'scrollTop'];
 
         return correction;
     }
-
-    // function getRenderViewPortSize(vsElement, scrollElement, isHorizontal){
-    //     var vsPos = vsElement.getBoundingClientRect()[isHorizontal ? 'left' : 'top'];
-    //     var containerBound = scrollElement === window ? window.innerHeight : scrollElement.getBoundingClientRect()[isHorizontal ? 'right' : 'bottom'];
-    //     return Math.max(
-    //             Math.min(
-    //                 getClientSize(scrollElement, isHorizontal ? 'clientWidth' : 'clientHeight'),
-    //                 containerBound - vsPos
-    //             ),
-    //         0);
-    // }
 
     angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', function($compile) {
         return {
@@ -353,6 +343,7 @@
                         $scrollParent.on('scroll', function scrollHandler() {
                             // Check if the scrolling was triggerred by a local action to avoid
                             // unnecessary inner collection updating
+
                             if (localScrollTrigger) {
                                 localScrollTrigger = false;
                             }
@@ -360,7 +351,6 @@
                                 if (updateInnerCollection()) {
                                     $scope.$apply();
                                     $scope.$broadcast('vsSetOffset-refresh');
-                                    // $scope.$digest();
                                 }
                             }
                         });
@@ -499,7 +489,7 @@
                             var $scrollPosition = getScrollPos($scrollParent[0], scrollPos);
                             var $clientSize = getClientSize($scrollParent[0], clientSize);
 
-                            var scrollOffset = getScrollOffset(
+                            var scrollOffset = $element[0] === $scrollParent[0] ? 0 : getScrollOffset(
                                                     $element[0],
                                                     $scrollParent[0],
                                                     $$horizontal
@@ -708,7 +698,7 @@
 
                             if (data !== undefined && data.scrollIndex !== undefined && position !== undefined && scrollChange) {
                                 // Scroll to the requested position
-                                scrolled = scrollToPosition(scrollIndexCumulativeSize - position);
+                                scrollToPosition(scrollIndexCumulativeSize - position);
                             }
 
                             var digestRequired = false;
@@ -721,10 +711,12 @@
 
                             if (!digestRequired) {
                                 if ($$options.hunked) {
-                                    if (Math.abs($scope.startIndex - _prevStartIndex) >= $scope.excess / 2 || __startIndex === 0) {
+                                    if (Math.abs($scope.startIndex - _prevStartIndex) >= $scope.excess / 2 ||
+                                        ($scope.startIndex === 0 && _prevStartIndex !== 0)) {
                                         digestRequired = true;
                                     }
-                                    else if (Math.abs($scope.endIndex - _prevEndIndex) >= $scope.excess / 2 || __endIndex === originalLength) {
+                                    else if (Math.abs($scope.endIndex - _prevEndIndex) >= $scope.excess / 2 ||
+                                        ($scope.endIndex === originalLength && _prevEndIndex !== originalLength)) {
                                         digestRequired = true;
                                     }
                                 }
@@ -733,12 +725,8 @@
                                                         $scope.endIndex !== _prevEndIndex;
                                 }
                             }
-                            // var digestRequired = $scope.startIndex !== _prevStartIndex ||
-                            //                     $scope.endIndex !== _prevEndIndex;
 
-                            // $$options
                             if (digestRequired) {
-                                console.count('digestRequired');
                                 $scope[collectionName] = originalCollection.slice($scope.startIndex, $scope.endIndex);
 
                                 // Emit the event
