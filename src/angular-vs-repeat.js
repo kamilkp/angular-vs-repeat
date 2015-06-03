@@ -1,9 +1,9 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.0.0-rc8 2015/05/29
+// Angular Virtual Scroll Repeat v1.0.0-rc10 2015/06/03
 //
 
-(function(window, angular){
+(function(window, angular) {
     'use strict';
     /* jshint eqnull:true */
     /* jshint -W038 */
@@ -70,26 +70,28 @@
                             dde.mozMatches ? 'mozMatches' :
                             dde.mozMatchesSelector ? 'mozMatchesSelector' : null;
 
-    var closestElement = angular.element.prototype.closest || function (selector){
+    var closestElement = angular.element.prototype.closest || function (selector) {
         var el = this[0].parentNode;
-        while(el !== document.documentElement && el != null && !el[matchingFunction](selector)){
+        while (el !== document.documentElement && el != null && !el[matchingFunction](selector)) {
             el = el.parentNode;
         }
 
-        if(el && el[matchingFunction](selector))
+        if (el && el[matchingFunction](selector)) {
             return angular.element(el);
-        else
+        }
+        else {
             return angular.element();
+        }
     };
 
-    function getWindowScroll(){
-        if('pageYOffset' in window){
+    function getWindowScroll() {
+        if ('pageYOffset' in window) {
             return {
                 scrollTop: pageYOffset,
                 scrollLeft: pageXOffset
             };
         }
-        else{
+        else {
             var sx, sy, d = document, r = d.documentElement, b = d.body;
             sx = r.scrollLeft || b.scrollLeft || 0;
             sy = r.scrollTop || b.scrollTop || 0;
@@ -100,46 +102,38 @@
         }
     }
 
-    function getClientSize(element, sizeProp){
-        if(element === window)
+    function getClientSize(element, sizeProp) {
+        if (element === window) {
             return sizeProp === 'clientWidth' ? window.innerWidth : window.innerHeight;
-        else
+        }
+        else {
             return element[sizeProp];
+        }
     }
 
-    function getScrollPos(element, scrollProp){
+    function getScrollPos(element, scrollProp) {
         return element === window ? getWindowScroll()[scrollProp] : element[scrollProp];
     }
 
-    function getScrollOffset(vsElement, scrollElement, isHorizontal){
+    function getScrollOffset(vsElement, scrollElement, isHorizontal) {
         var vsPos = vsElement.getBoundingClientRect()[isHorizontal ? 'left' : 'top'];
         var scrollPos = scrollElement === window ? 0 : scrollElement.getBoundingClientRect()[isHorizontal ? 'left' : 'top'];
-        var correction = vsPos - scrollPos + getWindowScroll()[isHorizontal ? 'scrollLeft' : 'scrollTop'];
+        var correction = vsPos - scrollPos +
+            (scrollElement === window ? getWindowScroll() : scrollElement)[isHorizontal ? 'scrollLeft' : 'scrollTop'];
 
         return correction;
     }
 
-    function getRenderViewPortSize(vsElement, scrollElement, isHorizontal){
-        var vsPos = vsElement.getBoundingClientRect()[isHorizontal ? 'left' : 'top'];
-        var containerBound = scrollElement === window ? window.innerHeight : scrollElement.getBoundingClientRect()[isHorizontal ? 'right' : 'bottom'];
-        return Math.max(
-                Math.min(
-                    getClientSize(scrollElement, isHorizontal ? 'clientWidth' : 'clientHeight'),
-                    containerBound - vsPos
-                ),
-            0);
-    }
-
-    angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', function($compile){
+    angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', function($compile) {
         return {
             restrict: 'A',
             scope: true,
             require: '?^vsRepeat',
-            controller: ['$scope', function($scope){
+            controller: ['$scope', function($scope) {
                 this.$scrollParent = $scope.$scrollParent;
                 this.$fillElement = $scope.$fillElement;
             }],
-            compile: function($element, $attrs){
+            compile: function($element) {
                 var ngRepeatChild = $element.children().eq(0),
                     ngRepeatExpression = ngRepeatChild.attr('ng-repeat') || ngRepeatChild.attr('data-ng-repeat'),
                     childCloneHtml = ngRepeatChild[0].outerHTML,
@@ -156,14 +150,15 @@
                     };
 
                 $element.empty();
-                if(!window.getComputedStyle || window.getComputedStyle($element[0]).position !== 'absolute')
+                if (!window.getComputedStyle || window.getComputedStyle($element[0]).position !== 'absolute') {
                     $element.css('position', 'relative');
+                }
                 return {
-                    pre: function($scope, $element, $attrs, $ctrl){
+                    pre: function($scope, $element, $attrs, $ctrl) {
                         var childClone = angular.element(childCloneHtml),
                             originalCollection = [],
                             originalLength,
-                            $$horizontal = typeof $attrs.vsHorizontal !== "undefined",
+                            $$horizontal = typeof $attrs.vsHorizontal !== 'undefined',
                             $wheelHelper,
                             $fillElement,
                             autoSize = !$attrs.vsRepeat,
@@ -171,22 +166,25 @@
                             $scrollParent = $attrs.vsScrollParent ?
                                 $attrs.vsScrollParent === 'window' ? angular.element(window) :
                                 closestElement.call($element, $attrs.vsScrollParent) : $element,
-                            positioningPropertyTransform = $$horizontal ? 'translateX' : 'translateY',
                             positioningProperty = $$horizontal ? 'left' : 'top',
-
                             localScrollTrigger = false,
+                            $$options = 'vsOptions' in $attrs ? $scope.$eval($attrs.vsOptions) : {},
+                            clientSize = $$horizontal ? 'clientWidth' : 'clientHeight',
+                            offsetSize = $$horizontal ? 'offsetWidth' : 'offsetHeight',
+                            scrollPos = $$horizontal ? 'scrollLeft' : 'scrollTop';
 
-                            clientSize =  $$horizontal ? 'clientWidth' : 'clientHeight',
-                            offsetSize =  $$horizontal ? 'offsetWidth' : 'offsetHeight',
-                            scrollPos =  $$horizontal ? 'scrollLeft' : 'scrollTop';
-
-                        if(!('vsSize' in $attrs) && 'vsSizeProperty' in $attrs)
+                        if (!('vsSize' in $attrs) && 'vsSizeProperty' in $attrs) {
                             console.warn('vs-size-property attribute is deprecated. Please use vs-size attrubute which also accepts angular expressions.');
+                        }
 
-                        if($scrollParent.length === 0) throw 'Specified scroll parent selector did not match any element';
+                        if ($scrollParent.length === 0) {
+                            throw 'Specified scroll parent selector did not match any element';
+                        }
                         $scope.$scrollParent = $scrollParent;
 
-                        if(sizesPropertyExists) $scope.sizesCumulative = [];
+                        if (sizesPropertyExists) {
+                            $scope.sizesCumulative = [];
+                        }
 
                         //initial defaults
                         $scope.elementSize = (+$attrs.vsRepeat) || getClientSize($scrollParent[0], clientSize) || 50;
@@ -198,7 +196,7 @@
                             scrollIndexPosition: 'top'
                         };
 
-                        $scope.$watch($attrs.vsScrollSettings, function(newValue, oldValue) {
+                        $scope.$watch($attrs.vsScrollSettings, function(newValue) {
                             if (typeof newValue === 'undefined') {
                                 return;
                             }
@@ -206,9 +204,9 @@
                             reinitialize($scope.scrollSettings);
                         }, true);
 
-                        Object.keys(attributesDictionary).forEach(function(key){
-                            if($attrs[key]){
-                                $attrs.$observe(key, function(value){
+                        Object.keys(attributesDictionary).forEach(function(key) {
+                            if ($attrs[key]) {
+                                $attrs.$observe(key, function(value) {
                                     // '+' serves for getting a number from the string as the attributes are always strings
                                     $scope[attributesDictionary[key]] = +value;
                                     reinitialize();
@@ -217,67 +215,72 @@
                         });
 
 
-                        $scope.$watchCollection(rhs, function(coll){
+                        $scope.$watchCollection(rhs, function(coll) {
                             originalCollection = coll || [];
                             refresh();
                         });
 
-                        function refresh(event, data){
-                            if(!originalCollection || originalCollection.length < 1){
+                        function refresh(event, data) {
+                            if (!originalCollection || originalCollection.length < 1) {
                                 $scope[collectionName] = [];
                                 originalLength = 0;
                                 resizeFillElement(0);
                                 $scope.sizesCumulative = [0];
                                 return;
                             }
-                            else{
+                            else {
                                 originalLength = originalCollection.length;
-                                if(sizesPropertyExists){
-                                    $scope.sizes = originalCollection.map(function(item){
-                                        var s = $scope.$new(true);
+                                if (sizesPropertyExists) {
+                                    $scope.sizes = originalCollection.map(function(item) {
+                                        var s = $scope.$new(false);
                                         angular.extend(s, item);
-                                        var size = s.$eval($attrs.vsSize || $attrs.vsSizeProperty) || $scope.elementSize;
+                                        s[lhs] = item;
+                                        var size = ($attrs.vsSize || $attrs.vsSizeProperty) ?
+                                                        s.$eval($attrs.vsSize || $attrs.vsSizeProperty) :
+                                                        $scope.elementSize;
                                         s.$destroy();
                                         return size;
                                     });
                                     var sum = 0;
-                                    $scope.sizesCumulative = $scope.sizes.map(function(size){
+                                    $scope.sizesCumulative = $scope.sizes.map(function(size) {
                                         var res = sum;
                                         sum += size;
                                         return res;
                                     });
                                     $scope.sizesCumulative.push(sum);
                                 }
-                                else
+                                else {
                                     setAutoSize();
+                                }
                             }
 
                             reinitialize(data);
                         }
 
-                        function setAutoSize(){
-                            if(autoSize){
-                                $scope.$$postDigest(function(){
-                                    if($element[0].offsetHeight || $element[0].offsetWidth){ // element is visible
+                        function setAutoSize() {
+                            if (autoSize) {
+                                $scope.$$postDigest(function() {
+                                    if ($element[0].offsetHeight || $element[0].offsetWidth) { // element is visible
                                         var children = $element.children(),
                                             i = 0;
-                                        while(i < children.length){
-                                            if(children[i].attributes['ng-repeat'] != null || children[i].attributes['data-ng-repeat'] != null){
-                                                if(children[i][offsetSize]){
+                                        while (i < children.length) {
+                                            if (children[i].attributes['ng-repeat'] != null || children[i].attributes['data-ng-repeat'] != null) {
+                                                if (children[i][offsetSize]) {
                                                     $scope.elementSize = children[i][offsetSize];
                                                     reinitialize();
                                                     autoSize = false;
-                                                    if($scope.$root && !$scope.$root.$$phase)
+                                                    if ($scope.$root && !$scope.$root.$$phase) {
                                                         $scope.$apply();
+                                                    }
                                                 }
                                                 break;
                                             }
                                             i++;
                                         }
                                     }
-                                    else{
-                                        var dereg = $scope.$watch(function(){
-                                            if($element[0].offsetHeight || $element[0].offsetWidth){
+                                    else {
+                                        var dereg = $scope.$watch(function() {
+                                            if ($element[0].offsetHeight || $element[0].offsetWidth) {
                                                 dereg();
                                                 setAutoSize();
                                             }
@@ -295,16 +298,15 @@
                             '(($index + startIndex) * elementSize + offsetBefore)';
 
 
-                        childClone.attr('vs-set-size', offsetCalculationString);
-                        childClone.attr('vs-set-size-transform-property', positioningPropertyTransform);
-                        childClone.attr('vs-set-size-positioning-property', positioningProperty);
+                        childClone.attr('vs-set-offset', offsetCalculationString);
+                        childClone.attr('vs-set-offset-positioning-property', positioningProperty);
 
                         $compile(childClone)($scope);
                         $element.append(childClone);
 
                         $fillElement = angular.element('<div class="vs-repeat-fill-element"></div>')
                             .css({
-                                'position':'relative',
+                                'position': 'relative',
                                 'min-height': '100%',
                                 'min-width': '100%'
                             });
@@ -313,17 +315,20 @@
                         $scope.$fillElement = $fillElement;
 
                         var _prevMouse = {};
-                        if(isMacOS){
+                        if (isMacOS && $attrs.vsScrollParent !== 'window') {
                             $wheelHelper = angular.element('<div class="vs-repeat-wheel-helper"></div>')
-                                .on(wheelEventName, function(e){
+                                .on(wheelEventName, function(e) {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    if(e.originalEvent) e = e.originalEvent;
+                                    if (e.originalEvent) {
+                                        e = e.originalEvent;
+                                    }
                                     $scrollParent[0].scrollLeft += (e.deltaX || -e.wheelDeltaX);
                                     $scrollParent[0].scrollTop += (e.deltaY || -e.wheelDeltaY);
-                                }).on('mousemove', function(e){
-                                    if(_prevMouse.x !== e.clientX || _prevMouse.y !== e.clientY)
+                                }).on('mousemove', function(e) {
+                                    if (_prevMouse.x !== e.clientX || _prevMouse.y !== e.clientY) {
                                         angular.element(this).css('display', 'none');
+                                    }
                                     _prevMouse = {
                                         x: e.clientX,
                                         y: e.clientY
@@ -335,112 +340,126 @@
                         $scope.startIndex = 0;
                         $scope.endIndex = 0;
 
-                        $scrollParent.on('scroll', function scrollHandler(e){
+                        $scrollParent.on('scroll', function scrollHandler() {
                             // Check if the scrolling was triggerred by a local action to avoid
                             // unnecessary inner collection updating
+
                             if (localScrollTrigger) {
                                 localScrollTrigger = false;
                             }
                             else {
-                                if(updateInnerCollection()) {
+                                if (updateInnerCollection()) {
                                     $scope.$apply();
-                                    $scope.$broadcast('vsSetSize-refresh');
-                                    // $scope.$digest();
+                                    $scope.$broadcast('vsSetOffset-refresh');
                                 }
                             }
                         });
 
-                        if(isMacOS){
+                        if (isMacOS) {
                             $scrollParent.on(wheelEventName, wheelHandler);
                         }
-                        function wheelHandler(e){
+                        function wheelHandler(e) {
                             var elem = e.currentTarget;
-                            if(elem.scrollWidth > elem.clientWidth || elem.scrollHeight > elem.clientHeight)
+                            if (elem.scrollWidth > elem.clientWidth || elem.scrollHeight > elem.clientHeight) {
                                 $wheelHelper.css('display', 'block');
+                            }
                         }
 
-                        function onWindowResize(){
-                            if(typeof $attrs.vsAutoresize !== 'undefined'){
+                        function onWindowResize() {
+                            if (typeof $attrs.vsAutoresize !== 'undefined') {
                                 autoSize = true;
                                 setAutoSize();
-                                if($scope.$root && !$scope.$root.$$phase)
+                                if ($scope.$root && !$scope.$root.$$phase) {
                                     $scope.$apply();
+                                }
                             }
-                            if(updateInnerCollection())
+                            if (updateInnerCollection()) {
                                 $scope.$apply();
+                                $scope.$broadcast('vsSetOffset-refresh');
+                            }
                         }
 
                         angular.element(window).on('resize', onWindowResize);
-                        $scope.$on('$destroy', function(){
+                        $scope.$on('$destroy', function() {
                             angular.element(window).off('resize', onWindowResize);
                         });
 
                         $scope.$on('vsRepeatTrigger', refresh);
 
-                        $scope.$on('vsRepeatResize', function(){
+                        $scope.$on('vsRepeatResize', function() {
                             autoSize = true;
                             setAutoSize();
                         });
 
                         var _prevStartIndex,
-                            _prevEndIndex;
-                        function reinitialize(data){
+                            _prevEndIndex,
+                            _minStartIndex,
+                            _maxEndIndex;
+                        function reinitialize(data) {
                             _prevStartIndex = void 0;
                             _prevEndIndex = void 0;
+                            _minStartIndex = originalLength;
+                            _maxEndIndex = 0;
                             updateInnerCollection(data);
                             resizeFillElement(sizesPropertyExists ?
                                                 $scope.sizesCumulative[originalLength] :
-                                                $scope.elementSize*originalLength
+                                                $scope.elementSize * originalLength
                                             );
-                            $scope.$broadcast('vsSetSize-refresh');
+                            $scope.$broadcast('vsSetOffset-refresh');
                             $scope.$emit('vsRepeatReinitialized', $scope.startIndex, $scope.endIndex);
                         }
 
-                        function resizeFillElement(size){
-                            if($$horizontal){
+                        function resizeFillElement(size) {
+                            if ($$horizontal) {
                                 $fillElement.css({
                                     'width': $scope.offsetBefore + size + $scope.offsetAfter + 'px',
                                     'height': '100%'
                                 });
-                                if($ctrl && $ctrl.$fillElement){
+                                if ($ctrl && $ctrl.$fillElement) {
                                     var referenceElement = $ctrl.$fillElement[0].parentNode.querySelector('[ng-repeat]');
-                                    if(referenceElement)
+                                    if (referenceElement) {
                                         $ctrl.$fillElement.css({
                                             'width': referenceElement.scrollWidth + 'px'
                                         });
+                                    }
                                 }
                             }
-                            else{
+                            else {
                                 $fillElement.css({
                                     'height': $scope.offsetBefore + size + $scope.offsetAfter + 'px',
                                     'width': '100%'
                                 });
-                                if($ctrl && $ctrl.$fillElement){
+                                if ($ctrl && $ctrl.$fillElement) {
                                     referenceElement = $ctrl.$fillElement[0].parentNode.querySelector('[ng-repeat]');
-                                    if(referenceElement)
+                                    if (referenceElement) {
                                         $ctrl.$fillElement.css({
                                             'height': referenceElement.scrollHeight + 'px'
                                         });
+                                    }
                                 }
                             }
                         }
 
                         var _prevClientSize;
-                        function reinitOnClientHeightChange(){
+                        function reinitOnClientHeightChange() {
                             var ch = getClientSize($scrollParent[0], clientSize);
-                            if(ch !== _prevClientSize){
+                            if (ch !== _prevClientSize) {
                                 reinitialize();
-                                if($scope.$root && !$scope.$root.$$phase)
+                                if ($scope.$root && !$scope.$root.$$phase) {
                                     $scope.$apply();
+                                    $scope.$broadcast('vsSetOffset-refresh');
+                                }
                             }
                             _prevClientSize = ch;
                         }
 
-                        $scope.$watch(function(){
-                            if(typeof window.requestAnimationFrame === "function")
+                        $scope.$watch(function() {
+                            if (typeof window.requestAnimationFrame === 'function') {
                                 window.requestAnimationFrame(reinitOnClientHeightChange);
-                            else
+                            }
+                            else {
                                 reinitOnClientHeightChange();
+                            }
                         });
 
                         // Scroll to required position
@@ -466,11 +485,11 @@
                             return scrolled;
                         }
 
-                        function updateInnerCollection(data){
+                        function updateInnerCollection(data) {
                             var $scrollPosition = getScrollPos($scrollParent[0], scrollPos);
                             var $clientSize = getClientSize($scrollParent[0], clientSize);
 
-                            var scrollOffset = getScrollOffset(
+                            var scrollOffset = $element[0] === $scrollParent[0] ? 0 : getScrollOffset(
                                                     $element[0],
                                                     $scrollParent[0],
                                                     $$horizontal
@@ -482,7 +501,12 @@
                                 scrollIndexCumulativeSize,
                                 scrollIndexSize;
 
-                            if (data && data.elementSize !== undefined) $scope.elementSize = data.elementSize;
+                            var __startIndex = $scope.startIndex;
+                            var __endIndex = $scope.endIndex;
+
+                            if (data && data.elementSize !== undefined) {
+                                $scope.elementSize = data.elementSize;
+                            }
 
                             if (data && data.scrollIndex !== undefined) {
                                 if (typeof $scope.scrollSettings !== 'undefined') {
@@ -499,7 +523,7 @@
                                 }
 
                                 // Item scroll position relative to the view, i.e. position === 0 means the top of the view,
-                                // position === getClientSize($scrollParent[0], clientSize) means the bottom
+                                // position === $clientSize means the bottom
                                 if (data.scrollIndexPosition !== undefined) {
                                     if (typeof $scope.scrollSettings !== 'undefined') {
                                         $scope.scrollSettings.scrollIndexPosition = data.scrollIndexPosition;
@@ -515,42 +539,42 @@
                                                     position = $scope.offsetBefore;
                                                     break;
                                                 case 'middle':
-                                                    position = (getClientSize($scrollParent[0], clientSize) - scrollIndexSize) / 2;
+                                                    position = ($clientSize - scrollIndexSize) / 2;
                                                     break;
                                                 case 'bottom':
-                                                    position = getClientSize($scrollParent[0], clientSize) - scrollIndexSize - $scope.offsetAfter;
+                                                    position = $clientSize - scrollIndexSize - $scope.offsetAfter;
                                                     break;
                                                 case 'inview':
                                                 case 'inview#top':
                                                 case 'inview#middle':
                                                 case 'inview#bottom':
                                                 case 'inview#auto':
-                                                    // The item is in the viewport, do nothing
+                                                        // The item is in the viewport, do nothing
                                                     if (
                                                             ($scrollParent[0][scrollPos] <= (scrollIndexCumulativeSize)) &&
-                                                            ($scrollParent[0][scrollPos] + getClientSize($scrollParent[0], clientSize) - scrollIndexSize >= scrollIndexCumulativeSize)) {
+                                                            ($scrollParent[0][scrollPos] + $clientSize - scrollIndexSize >= scrollIndexCumulativeSize)) {
                                                         scrollChange = false;
                                                         // The current item scroll position
                                                         position = scrollIndexCumulativeSize - $scrollParent[0][scrollPos];
-                                                    }
-                                                    // The item is out of the viewport
+                                                        }
+                                                        // The item is out of the viewport
                                                     else {
-                                                        if (data.scrollIndexPosition === 'inview#top' ||  data.scrollIndexPosition === 'inview') {
+                                                        if (data.scrollIndexPosition === 'inview#top' || data.scrollIndexPosition === 'inview') {
                                                             // Get it at the top
                                                             position = $scope.offsetBefore;
                                                         }
                                                         if (data.scrollIndexPosition === 'inview#bottom') {
                                                             // Get it at the bottom
-                                                            position = getClientSize($scrollParent[0], clientSize) - scrollIndexSize + $scope.offsetAfter;
+                                                            position = $clientSize - scrollIndexSize + $scope.offsetAfter;
                                                         }
                                                         if (data.scrollIndexPosition === 'inview#middle') {
                                                             // Get it at the middle
-                                                            position = (getClientSize($scrollParent[0], clientSize) - scrollIndexSize) / 2;
+                                                            position = ($clientSize - scrollIndexSize) / 2;
                                                         }
                                                         if (data.scrollIndexPosition === 'inview#auto') {
                                                             // Get it at the bottom or at the top, depending on what is closer
                                                             if ($scrollParent[0][scrollPos] <= scrollIndexCumulativeSize) {
-                                                                position = getClientSize($scrollParent[0], clientSize) - scrollIndexSize + $scope.offsetAfter;
+                                                                position = $clientSize - scrollIndexSize + $scope.offsetAfter;
                                                             }
                                                             else {
                                                                 position = $scope.offsetBefore;
@@ -580,118 +604,136 @@
                                     }
                                 }
 
-                                $scope.startIndex = data.scrollIndex;
+                                __startIndex = data.scrollIndex;
 
-                                if(sizesPropertyExists){
+                                if (sizesPropertyExists) {
 
-                                    while($scope.sizesCumulative[$scope.startIndex] > $scope.sizesCumulative[data.scrollIndex] - position)
-                                    {
-                                        $scope.startIndex--;
+                                    while ($scope.sizesCumulative[__startIndex] > $scope.sizesCumulative[data.scrollIndex] - position) {
+                                        __startIndex--;
                                     }
                                     // The real first item in the view
-                                    visibleStartIndex = Math.max($scope.startIndex, 0);
+                                    visibleStartIndex = Math.max(__startIndex, 0);
 
                                     // Adjust the start index according to the excess
-                                    $scope.startIndex = Math.max(
-                                        Math.floor($scope.startIndex - ($scope.excess / 2)),
+                                    __startIndex = Math.max(
+                                        Math.floor(__startIndex - ($scope.excess / 2)),
                                         0
                                     );
 
-                                    $scope.endIndex = $scope.startIndex;
-                                    while($scope.sizesCumulative[$scope.endIndex] < $scope.sizesCumulative[visibleStartIndex] - $scope.offsetBefore + getClientSize($scrollParent[0], clientSize)) {
-                                        $scope.endIndex++;
+                                    __endIndex = __startIndex;
+                                    while ($scope.sizesCumulative[__endIndex] < $scope.sizesCumulative[visibleStartIndex] - $scope.offsetBefore + $clientSize) {
+                                        __endIndex++;
                                     }
                                     // Adjust the end index according to the excess
-                                    $scope.endIndex = Math.min(
-                                        Math.ceil($scope.endIndex + ($scope.excess / 2)),
+                                    __endIndex = Math.min(
+                                        Math.ceil(__endIndex + ($scope.excess / 2)),
                                         originalLength
                                     );
 
                                 }
                                 else {
 
-                                    while(($scope.startIndex * $scope.elementSize) > (data.scrollIndex * $scope.elementSize) - position)
-                                    {
-                                        $scope.startIndex--;
+                                    while ((__startIndex * $scope.elementSize) > (data.scrollIndex * $scope.elementSize) - position) {
+                                        __startIndex--;
                                     }
                                     // The real first item in the view
-                                    visibleStartIndex = Math.max($scope.startIndex, 0);
-                                    $scope.startIndex = Math.max(
-                                        Math.floor($scope.startIndex - ($scope.excess / 2)),
+                                    visibleStartIndex = Math.max(__startIndex, 0);
+                                    __startIndex = Math.max(
+                                        Math.floor(__startIndex - ($scope.excess / 2)),
                                         0
                                     );
 
-                                    $scope.endIndex = Math.min(
-                                        $scope.startIndex + Math.ceil(getClientSize($scrollParent[0], clientSize) / $scope.elementSize) + $scope.excess / 2,
+                                    __endIndex = Math.min(
+                                        __startIndex + Math.ceil($clientSize / $scope.elementSize) + $scope.excess / 2,
                                         originalLength
                                     );
 
                                 }
                             }
                             else {
-
-                                if(sizesPropertyExists){
-                                    $scope.startIndex = 0;
-                                    while($scope.sizesCumulative[$scope.startIndex] < $scrollPosition - $scope.offsetBefore - scrollOffset) {
-                                        $scope.startIndex++;
+                                if (sizesPropertyExists) {
+                                    __startIndex = 0;
+                                    while ($scope.sizesCumulative[__startIndex] < $scrollPosition - $scope.offsetBefore - scrollOffset) {
+                                        __startIndex++;
                                     }
-                                    if($scope.startIndex > 0) { $scope.startIndex--; }
+                                    if (__startIndex > 0) { __startIndex--; }
                                     // Adjust the start index according to the excess
-                                    $scope.startIndex = Math.max(
-                                        Math.floor($scope.startIndex - $scope.excess / 2),
+                                    __startIndex = Math.max(
+                                        Math.floor(__startIndex - $scope.excess / 2),
                                         0
                                     );
 
-                                    $scope.endIndex = $scope.startIndex;
-                                    while($scope.sizesCumulative[$scope.endIndex] < $scrollPosition - $scope.offsetBefore - scrollOffset + $clientSize) {
-                                        $scope.endIndex++;
+                                    __endIndex = __startIndex;
+                                    while ($scope.sizesCumulative[__endIndex] < $scrollPosition - $scope.offsetBefore - scrollOffset + $clientSize) {
+                                        __endIndex++;
                                     }
                                     // Adjust the end index according to the excess
-                                    $scope.endIndex = Math.min(
-                                        Math.ceil($scope.endIndex + $scope.excess / 2),
+                                    __endIndex = Math.min(
+                                        Math.ceil(__endIndex + $scope.excess / 2),
                                         originalLength
                                     );
                                 }
-                                else{
-                                    $scope.startIndex = Math.max(
+                                else {
+                                    __startIndex = Math.max(
                                         Math.floor(
-                                            ($scrollPosition - $scope.offsetBefore - scrollOffset) / $scope.elementSize + $scope.excess / 2
-                                        ) - $scope.excess,
+                                            ($scrollPosition - $scope.offsetBefore - scrollOffset) / $scope.elementSize
+                                        ) - $scope.excess / 2,
                                         0
                                     );
 
-                                    // var renderViewPortSize = getRenderViewPortSize(
-                                    //                             $element[0],
-                                    //                             $scrollParent[0],
-                                    //                             $$horizontal
-                                    //                         );
-                                    // console.log(renderViewPortSize);
-                                    $scope.endIndex = Math.min(
-                                        $scope.startIndex + Math.ceil(
-                                            getClientSize($scrollParent[0], clientSize) / $scope.elementSize
+                                    __endIndex = Math.min(
+                                        __startIndex + Math.ceil(
+                                            $clientSize / $scope.elementSize
                                         ) + $scope.excess,
                                         originalLength
                                     );
                                 }
                             }
 
-                            var scrolled = false;
+                            _minStartIndex = Math.min(__startIndex, _minStartIndex);
+                            _maxEndIndex = Math.max(__endIndex, _maxEndIndex);
+
+                            $scope.startIndex = $$options.latch ? _minStartIndex : __startIndex;
+                            $scope.endIndex = $$options.latch ? _maxEndIndex : __endIndex;
+
                             if (data !== undefined && data.scrollIndex !== undefined && position !== undefined && scrollChange) {
                                 // Scroll to the requested position
-                                scrolled = scrollToPosition(scrollIndexCumulativeSize - position);
+                                scrollToPosition(scrollIndexCumulativeSize - position);
                             }
 
-                            var digestRequired = $scope.startIndex !== _prevStartIndex || $scope.endIndex !== _prevEndIndex;
+                            var digestRequired = false;
+                            if (_prevStartIndex == null) {
+                                digestRequired = true;
+                            }
+                            else if (_prevEndIndex == null) {
+                                digestRequired = true;
+                            }
 
-                            if(digestRequired) {
+                            if (!digestRequired) {
+                                if ($$options.hunked) {
+                                    if (Math.abs($scope.startIndex - _prevStartIndex) >= $scope.excess / 2 ||
+                                        ($scope.startIndex === 0 && _prevStartIndex !== 0)) {
+                                        digestRequired = true;
+                                    }
+                                    else if (Math.abs($scope.endIndex - _prevEndIndex) >= $scope.excess / 2 ||
+                                        ($scope.endIndex === originalLength && _prevEndIndex !== originalLength)) {
+                                        digestRequired = true;
+                                    }
+                                }
+                                else {
+                                    digestRequired = $scope.startIndex !== _prevStartIndex ||
+                                                        $scope.endIndex !== _prevEndIndex;
+                                }
+                            }
+
+                            if (digestRequired) {
                                 $scope[collectionName] = originalCollection.slice($scope.startIndex, $scope.endIndex);
 
                                 // Emit the event
                                 $scope.$emit('vsRepeatInnerCollectionUpdated', $scope.startIndex, $scope.endIndex, _prevStartIndex, _prevEndIndex);
+                                _prevStartIndex = $scope.startIndex;
+                                _prevEndIndex = $scope.endIndex;
                             }
-
-                            _prevStartIndex = $scope.startIndex;
-                            _prevEndIndex = $scope.endIndex;
 
                             return digestRequired;
                         }
@@ -699,25 +741,15 @@
                 };
             }
         };
-    }]).directive('vsSetSize', [function(){
-        return function($scope, $element, $attrs){
-            var positioningPropertyTransform = $attrs.vsSetSizeTransformProperty;
-            var positioningProperty = $attrs.vsSetSizePositioningProperty;
+    }]).directive('vsSetOffset', [function() {
+        return function($scope, $element, $attrs) {
+            var positioningProperty = $attrs.vsSetOffsetPositioningProperty;
 
             setOffset();
-            $scope.$on('vsSetSize-refresh', setOffset);
+            $scope.$on('vsSetOffset-refresh', setOffset);
 
-            function setOffset(){
-                var offset = $scope.$eval($attrs.vsSetSize);
-                if(typeof document.documentElement.style.transform !== "undefined"){ // browser supports transform css property
-                    $element.css('transform', positioningPropertyTransform + '(' + offset + 'px)');
-                }
-                else if(typeof document.documentElement.style.webkitTransform !== "undefined"){ // browser supports -webkit-transform css property
-                    $element.css('-webkit-transform', positioningPropertyTransform + '(' + offset + 'px)');
-                }
-                else{
-                    $element.css(positioningProperty, offset + 'px');
-                }
+            function setOffset() {
+                $element.css(positioningProperty, $scope.$eval($attrs.vsSetOffset) + 'px');
             }
         };
     }]);

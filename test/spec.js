@@ -229,7 +229,7 @@
 
 		it('should support manually provided size per element', function(done){
 			$element = $compile([
-				'<div vs-repeat vs-size-property="size" class="container">',
+				'<div vs-repeat vs-size="size" class="container">',
 				'	<div ng-repeat="foo in bar" class="item">',
 				'		<span class="value">{{foo.value}}</span>',
 				'	</div>',
@@ -248,10 +248,55 @@
 			done();
 		});
 
+		it('should support angular expression as vs-size attribute value', function(done){
+			$element = $compile([
+				'<div vs-repeat vs-size="2*size - 10" class="container">',
+				'	<div ng-repeat="foo in bar" class="item">',
+				'		<span class="value">{{foo.value}}</span>',
+				'	</div>',
+				'</div>'
+			].join(''))($scope);
+			angular.element(document.body).append($element);
+			$scope.bar = getArray(100);
+			$scope.$digest();
+			$scope.$broadcast('vsRepeatTrigger');
+			$scope.$digest();
+
+			var elems = getElements($element);
+			expect(elems.length).to.be.greaterThan(1);
+			expect(elems.length).to.be.lessThan(3);
+			expectTranslation(elems[1], 210);
+			done();
+		});
+
+		it('should support latching mode', function(done){
+			$element = $compile([
+				'<div vs-repeat vs-size="size" vs-options="{latch: true}" class="container">',
+				'	<div ng-repeat="foo in bar" class="item">',
+				'		<span class="value">{{foo.value}}</span>',
+				'	</div>',
+				'</div>'
+			].join(''))($scope);
+			angular.element(document.body).append($element);
+			$scope.bar = getArray(100);
+			$scope.$digest();
+			$scope.$broadcast('vsRepeatTrigger');
+			$scope.$digest();
+
+			var elems = getElements($element);
+			expect(elems.length).to.be.greaterThan(1);
+			expect(elems.length).to.be.lessThan(5);
+
+			$element[0].scrollTop = 3000;
+			$element.triggerHandler('scroll');
+			expect(getElements($element).length).to.be.greaterThan(20);
+			done();
+		});
+
 		it('should support changing manually provided size per element', function(done){
 
 			$element = $compile([
-				'<div vs-repeat vs-size-property="size" class="container">',
+				'<div vs-repeat vs-size="size" class="container">',
 				'	<div ng-repeat="foo in bar" class="item">',
 				'		<span class="value">{{foo.value}}</span>',
 				'	</div>',

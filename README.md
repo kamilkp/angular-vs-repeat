@@ -1,4 +1,4 @@
-angular-vs-repeat v1.0.0-rc9
+angular-vs-repeat v1.0.0-rc10
 =================
 [![Build Status](https://travis-ci.org/kamilkp/angular-vs-repeat.svg?branch=master)](https://travis-ci.org/kamilkp/angular-vs-repeat) [![NPM version](https://badge.fury.io/js/angular-vs-repeat.svg)](http://badge.fury.io/js/angular-vs-repeat) [![Bower version](https://badge.fury.io/bo/angular-vs-repeat.svg)](http://badge.fury.io/bo/angular-vs-repeat)
 
@@ -58,6 +58,7 @@ example:
 - `vs-size-property="propertyName"` - a property name of the items in collection that is a number denoting the element size (in pixels)
 - `vs-autoresize` - use this attribute without `vs-size-property` and without specifying element's size. The automatically computed element style will readjust upon window resize if the size is dependable on the viewport size
 - `vs-scroll-settings` - an object with 2 possible properties: `scrollIndex: "value"` - index of the item that should be scrolled to; the exact position of this item in the viewport may be further defined by `scrollIndexPosition: "value"` - a position where the element at `scrollIndex` index will be scrolled to; either a number of pixels or one of the following strings: 'top', 'middle', 'bottom', 'inview' is the same as 'inview#top', 'inview#middle', 'inview#bottom', 'inview#auto'; the 'inview#\<position\>' settings means that if the item is already in the view, nothing is scrolled, but if it is not, then the item will be scrolled accordingly (to be in the \<position\>); position 'auto' means that it will be either 'top' or 'bottom' depending on what is closer to the current item position
+- `vs-options="{latch: true}"` enables latching mode - elements once rendered are not being removed when scrolled away (improves scrolling performance when the rendering of each element is time consuming)
 
 ###EVENTS:
 - `vsRepeatTrigger` - an event the directive listens for to manually trigger reinitialization; it may receive additional argument - an object with following properties:

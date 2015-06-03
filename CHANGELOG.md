@@ -1,3 +1,9 @@
+Version 1.0.0-rc10 (2015/06/03)
+=================
+
+  * You can now specify an attribute `vs-options="{latch: true}"` to enable latching mode - elements once rendered are not being removed when scrolled away (improves scrolling performance when the rendering of each element is time consuming)
+  * bugfixes
+
 Version 1.0.0-rc9 (2015/05/25)
 =================
 
