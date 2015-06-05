@@ -405,7 +405,11 @@
                                                 $scope.sizesCumulative[originalLength] :
                                                 $scope.elementSize * originalLength
                                             );
-                            $scope.$broadcast('vsSetOffset-refresh');
+
+                            // Allow Angular to update ng-repeat $index values before syncing offsets:
+                            $scope.$evalAsync(function(){
+                                $scope.$broadcast('vsSetOffset-refresh');
+                            });
                             $scope.$emit('vsRepeatReinitialized', $scope.startIndex, $scope.endIndex);
                         }
 
