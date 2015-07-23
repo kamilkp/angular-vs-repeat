@@ -54,6 +54,8 @@
     // vs-size-property - a property name of the items in collection that is a number denoting the element size (in pixels)
     // vs-autoresize - use this attribute without vs-size-property and without specifying element's size. The automatically computed element style will
     //              readjust upon window resize if the size is dependable on the viewport size
+    // vs-scrolled-to-end="callback" - callback will be called when the last item of the list is rendered
+    // vs-scrolled-to-end-offset="integer" - set this number to trigger the scrolledToEnd callback n items before the last gets rendered
 
     // EVENTS:
     // - 'vsRepeatTrigger' - an event the directive listens for to manually trigger reinitialization
@@ -148,6 +150,7 @@
                         'vsRepeat': 'elementSize',
                         'vsOffsetBefore': 'offsetBefore',
                         'vsOffsetAfter': 'offsetAfter',
+                        'vsScrolledToEndOffset': 'scrolledToEndOffset',
                         'vsExcess': 'excess'
                     };
 
@@ -737,6 +740,14 @@
 
                                 // Emit the event
                                 $scope.$emit('vsRepeatInnerCollectionUpdated', $scope.startIndex, $scope.endIndex, _prevStartIndex, _prevEndIndex);
+
+                                if ($attrs.vsScrolledToEnd) {
+                                    var triggerIndex = originalCollection.length - ($scope.scrolledToEndOffset || 0);
+                                    if($scope.endIndex >= triggerIndex && _prevEndIndex < triggerIndex) {
+                                        $scope.$eval($attrs.vsScrolledToEnd);
+                                    }
+                                }
+
                                 _prevStartIndex = $scope.startIndex;
                                 _prevEndIndex = $scope.endIndex;
                             }
