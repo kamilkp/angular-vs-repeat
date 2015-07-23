@@ -366,5 +366,31 @@
 
 			done();
 		});
-	});
+
+        it ('should support ngRepeater container selector', function (done) {
+            $element = angular.element([
+                '	<div vs-repeat vs-repeat-container=".container">',
+                '	    <div class="container">',
+                '		    <div ng-repeat="foo in bar" class="item">',
+                '			    <span class="value">{{foo.value}}</span>',
+                '		    </div>',
+                '	    </div>',
+                '	</div>'
+            ].join(''));
+
+            angular.element(document.body).append($element);
+            $compile($element)($scope);
+            $scope.bar = getArray(100);
+            $scope.$digest();
+
+            var elems, count;
+
+            elems = getElements($element);
+            count = elems.length;
+            expect(count).to.be.greaterThan(0);
+            expect(count).to.be.lessThan(20);
+
+            done();
+        });
+    });
 })();

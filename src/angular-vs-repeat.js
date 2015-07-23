@@ -43,6 +43,7 @@
     //      will compute it automatically
 
     // OPTIONAL PARAMETERS (attributes):
+    // vs-repeat-container="selector" - selector for element containing ng-repeat. (defaults to the current element)
     // vs-scroll-parent="selector" - selector to the scrollable container. The directive will look for a closest parent matching
     //                              the given selector (defaults to the current element)
     // vs-horizontal - stack repeated elements horizontally instead of vertically
@@ -133,8 +134,9 @@
                 this.$scrollParent = $scope.$scrollParent;
                 this.$fillElement = $scope.$fillElement;
             }],
-            compile: function($element) {
-                var ngRepeatChild = $element.children().eq(0),
+            compile: function($element, $attrs) {
+                var repeatContainer = angular.isDefined($attrs.vsRepeatContainer) ? angular.element($element[0].querySelector($attrs.vsRepeatContainer)) : $element,
+                    ngRepeatChild = repeatContainer.children().eq(0),
                     ngRepeatExpression = ngRepeatChild.attr('ng-repeat') || ngRepeatChild.attr('data-ng-repeat'),
                     childCloneHtml = ngRepeatChild[0].outerHTML,
                     expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+\S+)?$/.exec(ngRepeatExpression),
@@ -149,9 +151,9 @@
                         'vsExcess': 'excess'
                     };
 
-                $element.empty();
-                if (!window.getComputedStyle || window.getComputedStyle($element[0]).position !== 'absolute') {
-                    $element.css('position', 'relative');
+                repeatContainer.empty();
+                if (!window.getComputedStyle || window.getComputedStyle(repeatContainer[0]).position !== 'absolute') {
+                    repeatContainer.css('position', 'relative');
                 }
                 return {
                     pre: function($scope, $element, $attrs, $ctrl) {
@@ -165,7 +167,7 @@
                             sizesPropertyExists = !!$attrs.vsSize || !!$attrs.vsSizeProperty,
                             $scrollParent = $attrs.vsScrollParent ?
                                 $attrs.vsScrollParent === 'window' ? angular.element(window) :
-                                closestElement.call($element, $attrs.vsScrollParent) : $element,
+                                closestElement.call(repeatContainer, $attrs.vsScrollParent) : repeatContainer,
                             positioningProperty = $$horizontal ? 'left' : 'top',
                             localScrollTrigger = false,
                             $$options = 'vsOptions' in $attrs ? $scope.$eval($attrs.vsOptions) : {},
@@ -260,8 +262,8 @@
                         function setAutoSize() {
                             if (autoSize) {
                                 $scope.$$postDigest(function() {
-                                    if ($element[0].offsetHeight || $element[0].offsetWidth) { // element is visible
-                                        var children = $element.children(),
+                                    if (repeatContainer[0].offsetHeight || $element[0].offsetWidth) { // element is visible
+                                        var children = repeatContainer.children(),
                                             i = 0;
                                         while (i < children.length) {
                                             if (children[i].attributes['ng-repeat'] != null || children[i].attributes['data-ng-repeat'] != null) {
@@ -280,7 +282,7 @@
                                     }
                                     else {
                                         var dereg = $scope.$watch(function() {
-                                            if ($element[0].offsetHeight || $element[0].offsetWidth) {
+                                            if (repeatContainer[0].offsetHeight || repeatContainer[0].offsetWidth) {
                                                 dereg();
                                                 setAutoSize();
                                             }
@@ -302,7 +304,7 @@
                         childClone.attr('vs-set-offset-positioning-property', positioningProperty);
 
                         $compile(childClone)($scope);
-                        $element.append(childClone);
+                        repeatContainer.append(childClone);
 
                         $fillElement = angular.element('<div class="vs-repeat-fill-element"></div>')
                             .css({
@@ -310,7 +312,7 @@
                                 'min-height': '100%',
                                 'min-width': '100%'
                             });
-                        $element.append($fillElement);
+                        repeatContainer.append($fillElement);
                         $compile($fillElement)($scope);
                         $scope.$fillElement = $fillElement;
 
@@ -493,8 +495,8 @@
                             var $scrollPosition = getScrollPos($scrollParent[0], scrollPos);
                             var $clientSize = getClientSize($scrollParent[0], clientSize);
 
-                            var scrollOffset = $element[0] === $scrollParent[0] ? 0 : getScrollOffset(
-                                                    $element[0],
+                            var scrollOffset = repeatContainer[0] === $scrollParent[0] ? 0 : getScrollOffset(
+                                                    repeatContainer[0],
                                                     $scrollParent[0],
                                                     $$horizontal
                                                 );
