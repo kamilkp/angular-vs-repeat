@@ -138,6 +138,7 @@
             }],
             compile: function($element, $attrs) {
                 var repeatContainer = angular.isDefined($attrs.vsRepeatContainer) ? angular.element($element[0].querySelector($attrs.vsRepeatContainer)) : $element,
+                    repeatHeader = $element[0].querySelector('[vs-repeat-header]') || false,
                     ngRepeatChild = repeatContainer.children().eq(0),
                     ngRepeatExpression = ngRepeatChild.attr('ng-repeat') || ngRepeatChild.attr('data-ng-repeat'),
                     childCloneHtml = ngRepeatChild[0].outerHTML,
@@ -302,6 +303,9 @@
                             '(sizesCumulative[$index + startIndex] + offsetBefore)' :
                             '(($index + startIndex) * elementSize + offsetBefore)';
 
+                        if(repeatHeader){
+                            repeatContainer.prepend(repeatHeader);
+                        }
 
                         childClone.attr('vs-set-offset', offsetCalculationString);
                         childClone.attr('vs-set-offset-positioning-property', positioningProperty);
@@ -418,7 +422,18 @@
                             $scope.$emit('vsRepeatReinitialized', $scope.startIndex, $scope.endIndex);
                         }
 
+                        function updateTopOffset() {
+                            var offset = $attrs.vsOffsetBefore || 0;
+                            offset += repeatHeader[$$horizontal ? 'offsetWidth' : 'offsetHeight'];
+                            $scope.offsetBefore = offset;
+                        }
+
                         function resizeFillElement(size) {
+
+                            if (repeatHeader) {
+                                updateTopOffset();
+                            }
+
                             if ($$horizontal) {
                                 $fillElement.css({
                                     'width': $scope.offsetBefore + size + $scope.offsetAfter + 'px',
