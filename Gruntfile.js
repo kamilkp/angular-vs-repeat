@@ -8,6 +8,15 @@ module.exports = function(grunt){
 			target: {
 				files: {
 					'src/angular-vs-repeat.min.js': ['src/angular-vs-repeat.js']
+				},
+				options: {
+					banner: [
+						'//',
+						'// Copyright Kamil Pękala http://github.com/kamilkp',
+						'// Angular Virtual Scroll Repeat v1.0.0-rc12 2015/08/03',
+						'//',
+						''
+					].join('\n')
 				}
 			}
 		},

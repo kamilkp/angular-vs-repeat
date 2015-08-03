@@ -1,6 +1,6 @@
 {
   "name": "angular-vs-repeat",
-  "version": "1.0.0-rc11",
+  "version": "1.0.0-rc12",
   "description": "Virtual Scroll for AngularJS ngRepeat directive",
   "homepage": "http://kamilkp.github.io/angular-vs-repeat",
   "author": {
@@ -8,6 +8,7 @@
     "email": "kamilkp@gmail.com",
     "url": "http://github.com/kamilkp"
   },
+  "main": "src/angular-vs-repeat.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/kamilkp/angular-vs-repeat.git"
