@@ -231,14 +231,17 @@
                             else {
                                 originalLength = originalCollection.length;
                                 if (sizesPropertyExists) {
+                                    var s = $scope.$new(false);
+                                    var counter = originalCollection.length;
                                     $scope.sizes = originalCollection.map(function(item) {
-                                        var s = $scope.$new(false);
                                         angular.extend(s, item);
                                         s[lhs] = item;
                                         var size = ($attrs.vsSize || $attrs.vsSizeProperty) ?
                                                         s.$eval($attrs.vsSize || $attrs.vsSizeProperty) :
                                                         $scope.elementSize;
-                                        s.$destroy();
+                                        for(var p in item) p && s[p] && delete s[p];
+                                        if(--counter == 0)
+                                            s.$destroy();
                                         return size;
                                     });
                                     var sum = 0;
