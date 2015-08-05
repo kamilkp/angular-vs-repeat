@@ -239,8 +239,10 @@
                                         var size = ($attrs.vsSize || $attrs.vsSizeProperty) ?
                                                         s.$eval($attrs.vsSize || $attrs.vsSizeProperty) :
                                                         $scope.elementSize;
-                                        for(var p in item) p && s[p] && delete s[p];
-                                        if(--counter == 0)
+                                        for(var p in item) {
+                                            if(p && s[p]) delete s[p];
+                                        }
+                                        if(--counter === 0)
                                             s.$destroy();
                                         return size;
                                     });
