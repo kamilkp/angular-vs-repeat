@@ -174,7 +174,7 @@
                             scrollPos = $$horizontal ? 'scrollLeft' : 'scrollTop';
 
                         if (!('vsSize' in $attrs) && 'vsSizeProperty' in $attrs) {
-                            console.warn('vs-size-property attribute is deprecated. Please use vs-size attrubute which also accepts angular expressions.');
+                            console.warn('vs-size-property attribute is deprecated. Please use vs-size attribute which also accepts angular expressions.');
                         }
 
                         if ($scrollParent.length === 0) {
