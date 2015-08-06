@@ -232,13 +232,19 @@
                                 originalLength = originalCollection.length;
                                 if (sizesPropertyExists) {
                                     $scope.sizes = originalCollection.map(function(item) {
-                                        var s = $scope.$new(false);
-                                        angular.extend(s, item);
-                                        s[lhs] = item;
-                                        var size = ($attrs.vsSize || $attrs.vsSizeProperty) ?
-                                                        s.$eval($attrs.vsSize || $attrs.vsSizeProperty) :
-                                                        $scope.elementSize;
-                                        s.$destroy();
+                                        if($attrs.vsSizeProperty && item[$attrs.vsSizeProperty] && !(item[$attrs.vsSizeProperty].constructor && item[$attrs.vsSizeProperty].call && item[$attrs.vsSizeProperty].apply))
+                                        {
+                                            size = item[$attrs.vsSizeProperty];
+                                        } else
+                                        {  
+                                            var s = $scope.$new(false);
+                                            angular.extend(s, item);
+                                            s[lhs] = item;
+                                            var size = ($attrs.vsSize || $attrs.vsSizeProperty) ?
+                                                            s.$eval($attrs.vsSize || $attrs.vsSizeProperty) :
+                                                            $scope.elementSize;
+                                            s.$destroy();
+                                        }
                                         return size;
                                     });
                                     var sum = 0;
