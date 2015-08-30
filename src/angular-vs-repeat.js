@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.0.0-rc12 2015/08/03
+// Angular Virtual Scroll Repeat v1.0.0-rc13 2015/08/30
 //
 
 (function(window, angular) {
@@ -407,8 +407,6 @@
                                     _prevEndIndex = $scope.endIndex;
 
                                     $scope.$apply(function() {
-                                        $element.addClass('vs-repeat-rendered-all');
-                                        $fillElement.remove();
                                         $scope.$emit('vsRenderAllDone');
                                     });
                                 });
@@ -792,15 +790,6 @@
         '.vs-repeat-repeated-element{' +
             'position: absolute;' +
             'z-index: 1;' +
-        '}' +
-        '.vs-repeat-rendered-all .vs-repeat-repeated-element{' +
-            'position: static;' +
-        '}' +
-        '.vs-repeat-rendered-all .vs-repeat-wheel-helper{' +
-            'display: none;' +
-        '}' +
-        '.vs-repeat-rendered-all .vs-repeat-fill-element{' +
-            'display: none;' +
         '}' +
         '</style>'
     ].join(''));
