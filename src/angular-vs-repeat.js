@@ -768,7 +768,9 @@
             var positioningProperty = $attrs.vsSetOffsetPositioningProperty;
 
             setOffset();
-            $scope.$on('vsSetOffset-refresh', setOffset);
+            $scope.$on('vsSetSize-refresh', function() {
+                $scope.$evalAsync(setOffset);
+            });
 
             function setOffset() {
                 $element.css(positioningProperty, $scope.$eval($attrs.vsSetOffset) + 'px');
