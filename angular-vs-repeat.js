@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.0.0-beta.0 2015/12/04
+// Angular Virtual Scroll Repeat v1.0.0-beta.1 2015/12/04
 //
 
 (function(window, angular) {
@@ -50,8 +50,8 @@
     // vs-offset-after="value" - bottom/right offset in pixels (defaults to 0)
     // vs-excess="value" - an integer number representing the number of elements to be rendered outside of the current container's viewport
     //                      (defaults to 2)
-    // vs-size-property - a property name of the items in collection that is a number denoting the element size (in pixels)
-    // vs-autoresize - use this attribute without vs-size-property and without specifying element's size. The automatically computed element style will
+    // vs-size - a property name of the items in collection that is a number denoting the element size (in pixels)
+    // vs-autoresize - use this attribute without vs-size and without specifying element's size. The automatically computed element style will
     //              readjust upon window resize if the size is dependable on the viewport size
 
     // EVENTS:
@@ -143,16 +143,15 @@
                     };
 
                 $element.empty();
-                if (!window.getComputedStyle || window.getComputedStyle($element[0]).position !== 'absolute') {
-                    $element.css('position', 'relative');
-                }
                 return {
                     pre: function($scope, $element, $attrs) {
                         var childClone = angular.element(childCloneHtml),
+                            childTagName = childClone[0].tagName.toLowerCase(),
                             originalCollection = [],
                             originalLength,
                             $$horizontal = typeof $attrs.vsHorizontal !== 'undefined',
-                            $paddingElement,
+                            $beforeContent = angular.element('<' + childTagName + ' class="vs-repeat-before-content"></' + childTagName + '>'),
+                            $afterContent = angular.element('<' + childTagName + ' class="vs-repeat-after-content"></' + childTagName + '>'),
                             autoSize = !$attrs.vsRepeat,
                             sizesPropertyExists = !!$attrs.vsSize || !!$attrs.vsSizeProperty,
                             $scrollParent = $attrs.vsScrollParent ?
@@ -188,6 +187,15 @@
                             scrollIndex: 0,
                             scrollIndexPosition: 'top'
                         };
+
+                        if ($$horizontal) {
+                            $beforeContent.css('height', '100%');
+                            $afterContent.css('height', '100%');
+                        }
+                        else {
+                            $beforeContent.css('width', '100%');
+                            $afterContent.css('width', '100%');
+                        }
 
                         $scope.$watch($attrs.vsScrollSettings, function(newValue) {
                             if (typeof newValue === 'undefined') {
@@ -253,8 +261,8 @@
                         function setAutoSize() {
                             if (autoSize) {
                                 $scope.$$postDigest(function() {
-                                    if ($paddingElement[0].offsetHeight || $paddingElement[0].offsetWidth) { // element is visible
-                                        var children = $paddingElement.children(),
+                                    if ($element[0].offsetHeight || $element[0].offsetWidth) { // element is visible
+                                        var children = $element.children(),
                                             i = 0;
                                         while (i < children.length) {
                                             if (children[i].attributes['ng-repeat'] != null || children[i].attributes['data-ng-repeat'] != null) {
@@ -286,11 +294,10 @@
                         childClone.attr('ng-repeat', lhs + ' in ' + collectionName + (rhsSuffix ? ' ' + rhsSuffix : ''))
                                 .addClass('vs-repeat-repeated-element');
 
-                        $paddingElement = angular.element('<div class="vs-repeat-padding-element"></div>');
-                        $element.append($paddingElement);
-
+                        $element.append($beforeContent);
+                        $element.append(childClone);
                         $compile(childClone)($scope);
-                        $paddingElement.append(childClone);
+                        $element.append($afterContent);
 
                         $scope.startIndex = 0;
                         $scope.endIndex = 0;
@@ -305,7 +312,6 @@
                             else {
                                 if (updateInnerCollection()) {
                                     $scope.$apply();
-                                    $scope.$broadcast('vsSetOffset-refresh');
                                 }
                             }
                         });
@@ -320,7 +326,6 @@
                             }
                             if (updateInnerCollection()) {
                                 $scope.$apply();
-                                $scope.$broadcast('vsSetOffset-refresh');
                             }
                         }
 
@@ -351,6 +356,12 @@
                                     $scope[collectionName] = originalCollection.slice($scope.startIndex, $scope.endIndex);
                                     _prevEndIndex = $scope.endIndex;
 
+                                    $scope.$$postDigest(function() {
+                                        var layoutProp = $$horizontal ? 'width' : 'height';
+                                        $beforeContent.css(layoutProp, 0);
+                                        $afterContent.css(layoutProp, 0);
+                                    });
+
                                     $scope.$apply(function() {
                                         $scope.$emit('vsRenderAllDone');
                                     });
@@ -369,10 +380,6 @@
                                                 $scope.elementSize * originalLength
                                             );
 
-                            // Allow Angular to update ng-repeat $index values before syncing offsets:
-                            $scope.$evalAsync(function(){
-                                $scope.$broadcast('vsSetOffset-refresh');
-                            });
                             $scope.$emit('vsRepeatReinitialized', $scope.startIndex, $scope.endIndex);
                         }
 
@@ -387,7 +394,6 @@
                                 reinitialize();
                                 if ($scope.$root && !$scope.$root.$$phase) {
                                     $scope.$apply();
-                                    $scope.$broadcast('vsSetOffset-refresh');
                                 }
                             }
                             _prevClientSize = ch;
@@ -683,18 +689,10 @@
                                     var o1 = parsed($scope, {$index: 0});
                                     var o2 = parsed($scope, {$index: $scope[collectionName].length});
                                     var total = $scope.totalSize;
-                                    if ($$horizontal) {
-                                        $paddingElement.css({
-                                            'padding-left': o1 + 'px',
-                                            'padding-right': (total - o2) + 'px'
-                                        });
-                                    }
-                                    else {
-                                        $paddingElement.css({
-                                            'padding-top': o1 + 'px',
-                                            'padding-bottom': (total - o2) + 'px'
-                                        });
-                                    }
+                                    var layoutProp = $$horizontal ? 'width' : 'height';
+
+                                    $beforeContent.css(layoutProp, o1 + 'px');
+                                    $afterContent.css(layoutProp, (total - o2) + 'px');
                                     // console.log(o1, o2, total);
                                 });
                             }

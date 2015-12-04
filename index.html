@@ -31,14 +31,18 @@
 				margin-top: 20px;
 				background: hsl(60, 100%, 90%);
 			}
-			.repeater-container.horizontal .vs-repeat-padding-element {
-				height: 100%;
+			.repeater-container.horizontal {
 				white-space: nowrap;
+			}
+			.repeater-container.horizontal > * {
+				display: inline-block;
+		    position: relative;
+		    top: -100%;
+		    margin-top: 35px;
 			}
 			.repeater-container.horizontal .item-element{
 				width: 50px;
 				height: 100%;
-				display: inline-block;
 			}
 			.repeater-container.horizontal.combined{
 				height: 145px;
@@ -59,6 +63,12 @@
 			}
 			.item-element:hover{
 				background-color: hsla(180, 100%, 50%, 0.3);
+			}
+			tr.item-element {
+				height: 30px;
+			}
+			tr.item-element td {
+				padding: 0 20px;
 			}
 			#dom-preview-container pre{
 				max-height: 500px;
@@ -98,6 +108,20 @@
 			}
 			li.imp.active a:hover{
 				color: hsl(0, 100%, 35%);
+			}
+			li.imp2 a{
+				color: magenta;
+				font-weight: bold;
+			}
+			li.imp2.active a{
+				color: magenta;
+				font-weight: bold;
+			}
+			li.imp2 a:hover{
+				color: magenta;
+			}
+			li.imp2.active a:hover{
+				color: magenta;
 			}
 			.perf-container{
 				overflow: auto;
@@ -246,6 +270,7 @@
 				  <li ng-class="{active: tab == 6}"><a ng-click="tab = 6">Variable size</a></li>
 				  <li ng-class="{active: tab == 7}"><a ng-click="tab = 7">Autoresizing</a></li>
 				  <li class="imp" ng-class="{active: tab == 8}"><a ng-click="tab = 8">Performance</a></li>
+				  <li class="imp2" ng-class="{active: tab == 9}"><a ng-click="tab = 9">Tables!</a></li>
 				</ul>
 				<div ng-if="tab == 1" ng-init="shown = false;" class="tab-1">
 					<label><input type="checkbox" ng-model="shown" /><span>is content visible</span></label>
@@ -369,6 +394,18 @@
 								</div>
 							</div>
 						</div>
+					</div>
+				</div>
+				<div ng-if="tab == 9">
+					<div class="repeater-container">
+						<table style="width: 100%;">
+							<tbody vs-repeat vs-scroll-parent=".repeater-container">
+								<tr class="item-element well" ng-repeat="item in items.collection">
+									<td><span>{{item.text}} (cell 1)</span></td>
+									<td><span>{{item.text}} (cell 2)</span></td>
+								</tr>
+							</tbody>
+						</table>
 					</div>
 				</div>
 			</div>
