@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.0.0-rc13 2015/08/30
+// Angular Virtual Scroll Repeat v1.0.0-beta.0 2015/12/04
 //
 
 (function(window, angular) {
@@ -58,9 +58,7 @@
     // - 'vsRepeatTrigger' - an event the directive listens for to manually trigger reinitialization
     // - 'vsRepeatReinitialized' - an event the directive emits upon reinitialization done
 
-    var isMacOS = navigator.appVersion.indexOf('Mac') != -1,
-        wheelEventName = typeof window.onwheel !== 'undefined' ? 'wheel' : typeof window.onmousewheel !== 'undefined' ? 'mousewheel' : 'DOMMouseScroll',
-        dde = document.documentElement,
+    var dde = document.documentElement,
         matchingFunction = dde.matches ? 'matches' :
                             dde.matchesSelector ? 'matchesSelector' :
                             dde.webkitMatches ? 'webkitMatches' :
@@ -124,15 +122,10 @@
         return correction;
     }
 
-    var vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', function($compile) {
+    var vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', function($compile, $parse) {
         return {
             restrict: 'A',
             scope: true,
-            require: '?^vsRepeat',
-            controller: ['$scope', function($scope) {
-                this.$scrollParent = $scope.$scrollParent;
-                this.$fillElement = $scope.$fillElement;
-            }],
             compile: function($element) {
                 var ngRepeatChild = $element.children().eq(0),
                     ngRepeatExpression = ngRepeatChild.attr('ng-repeat') || ngRepeatChild.attr('data-ng-repeat'),
@@ -154,13 +147,12 @@
                     $element.css('position', 'relative');
                 }
                 return {
-                    pre: function($scope, $element, $attrs, $ctrl) {
+                    pre: function($scope, $element, $attrs) {
                         var childClone = angular.element(childCloneHtml),
                             originalCollection = [],
                             originalLength,
                             $$horizontal = typeof $attrs.vsHorizontal !== 'undefined',
-                            $wheelHelper,
-                            $fillElement,
+                            $paddingElement,
                             autoSize = !$attrs.vsRepeat,
                             sizesPropertyExists = !!$attrs.vsSize || !!$attrs.vsSizeProperty,
                             $scrollParent = $attrs.vsScrollParent ?
@@ -173,6 +165,7 @@
                             offsetSize = $$horizontal ? 'offsetWidth' : 'offsetHeight',
                             scrollPos = $$horizontal ? 'scrollLeft' : 'scrollTop';
 
+                        $scope.totalSize = 0;
                         if (!('vsSize' in $attrs) && 'vsSizeProperty' in $attrs) {
                             console.warn('vs-size-property attribute is deprecated. Please use vs-size attrubute which also accepts angular expressions.');
                         }
@@ -224,7 +217,7 @@
                             if (!originalCollection || originalCollection.length < 1) {
                                 $scope[collectionName] = [];
                                 originalLength = 0;
-                                resizeFillElement(0);
+                                updateTotalSize(0);
                                 $scope.sizesCumulative = [0];
                                 return;
                             }
@@ -260,8 +253,8 @@
                         function setAutoSize() {
                             if (autoSize) {
                                 $scope.$$postDigest(function() {
-                                    if ($element[0].offsetHeight || $element[0].offsetWidth) { // element is visible
-                                        var children = $element.children(),
+                                    if ($paddingElement[0].offsetHeight || $paddingElement[0].offsetWidth) { // element is visible
+                                        var children = $paddingElement.children(),
                                             i = 0;
                                         while (i < children.length) {
                                             if (children[i].attributes['ng-repeat'] != null || children[i].attributes['data-ng-repeat'] != null) {
@@ -293,49 +286,11 @@
                         childClone.attr('ng-repeat', lhs + ' in ' + collectionName + (rhsSuffix ? ' ' + rhsSuffix : ''))
                                 .addClass('vs-repeat-repeated-element');
 
-                        var offsetCalculationString = sizesPropertyExists ?
-                            '(sizesCumulative[$index + startIndex] + offsetBefore)' :
-                            '(($index + startIndex) * elementSize + offsetBefore)';
-
-
-                        childClone.attr('vs-set-offset', offsetCalculationString);
-                        childClone.attr('vs-set-offset-positioning-property', positioningProperty);
+                        $paddingElement = angular.element('<div class="vs-repeat-padding-element"></div>');
+                        $element.append($paddingElement);
 
                         $compile(childClone)($scope);
-                        $element.append(childClone);
-
-                        $fillElement = angular.element('<div class="vs-repeat-fill-element"></div>')
-                            .css({
-                                'position': 'relative',
-                                'min-height': '100%',
-                                'min-width': '100%'
-                            });
-                        $element.append($fillElement);
-                        $compile($fillElement)($scope);
-                        $scope.$fillElement = $fillElement;
-
-                        var _prevMouse = {};
-                        if (isMacOS && $attrs.vsScrollParent !== 'window') {
-                            $wheelHelper = angular.element('<div class="vs-repeat-wheel-helper"></div>')
-                                .on(wheelEventName, function(e) {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    if (e.originalEvent) {
-                                        e = e.originalEvent;
-                                    }
-                                    $scrollParent[0].scrollLeft += (e.deltaX || -e.wheelDeltaX);
-                                    $scrollParent[0].scrollTop += (e.deltaY || -e.wheelDeltaY);
-                                }).on('mousemove', function(e) {
-                                    if (_prevMouse.x !== e.clientX || _prevMouse.y !== e.clientY) {
-                                        angular.element(this).css('display', 'none');
-                                    }
-                                    _prevMouse = {
-                                        x: e.clientX,
-                                        y: e.clientY
-                                    };
-                                }).css('display', 'none');
-                            $fillElement.append($wheelHelper);
-                        }
+                        $paddingElement.append(childClone);
 
                         $scope.startIndex = 0;
                         $scope.endIndex = 0;
@@ -354,16 +309,6 @@
                                 }
                             }
                         });
-
-                        if (isMacOS) {
-                            $scrollParent.on(wheelEventName, wheelHandler);
-                        }
-                        function wheelHandler(e) {
-                            var elem = e.currentTarget;
-                            if (elem.scrollWidth > elem.clientWidth || elem.scrollHeight > elem.clientHeight) {
-                                $wheelHelper.css('display', 'block');
-                            }
-                        }
 
                         function onWindowResize() {
                             if (typeof $attrs.vsAutoresize !== 'undefined') {
@@ -419,7 +364,7 @@
                             _minStartIndex = originalLength;
                             _maxEndIndex = 0;
                             updateInnerCollection(data);
-                            resizeFillElement(sizesPropertyExists ?
+                            updateTotalSize(sizesPropertyExists ?
                                                 $scope.sizesCumulative[originalLength] :
                                                 $scope.elementSize * originalLength
                                             );
@@ -431,35 +376,8 @@
                             $scope.$emit('vsRepeatReinitialized', $scope.startIndex, $scope.endIndex);
                         }
 
-                        function resizeFillElement(size) {
-                            if ($$horizontal) {
-                                $fillElement.css({
-                                    'width': $scope.offsetBefore + size + $scope.offsetAfter + 'px',
-                                    'height': '100%'
-                                });
-                                if ($ctrl && $ctrl.$fillElement) {
-                                    var referenceElement = $ctrl.$fillElement[0].parentNode.querySelector('[ng-repeat]');
-                                    if (referenceElement) {
-                                        $ctrl.$fillElement.css({
-                                            'width': referenceElement.scrollWidth + 'px'
-                                        });
-                                    }
-                                }
-                            }
-                            else {
-                                $fillElement.css({
-                                    'height': $scope.offsetBefore + size + $scope.offsetAfter + 'px',
-                                    'width': '100%'
-                                });
-                                if ($ctrl && $ctrl.$fillElement) {
-                                    referenceElement = $ctrl.$fillElement[0].parentNode.querySelector('[ng-repeat]');
-                                    if (referenceElement) {
-                                        $ctrl.$fillElement.css({
-                                            'height': referenceElement.scrollHeight + 'px'
-                                        });
-                                    }
-                                }
-                            }
+                        function updateTotalSize(size) {
+                            $scope.totalSize = $scope.offsetBefore + size + $scope.offsetAfter;
                         }
 
                         var _prevClientSize;
@@ -755,6 +673,30 @@
                                 $scope.$emit('vsRepeatInnerCollectionUpdated', $scope.startIndex, $scope.endIndex, _prevStartIndex, _prevEndIndex);
                                 _prevStartIndex = $scope.startIndex;
                                 _prevEndIndex = $scope.endIndex;
+
+                                $scope.$$postDigest(function() {
+                                    var offsetCalculationString = sizesPropertyExists ?
+                                        '(sizesCumulative[$index + startIndex] + offsetBefore)' :
+                                        '(($index + startIndex) * elementSize + offsetBefore)';
+
+                                    var parsed = $parse(offsetCalculationString);
+                                    var o1 = parsed($scope, {$index: 0});
+                                    var o2 = parsed($scope, {$index: $scope[collectionName].length});
+                                    var total = $scope.totalSize;
+                                    if ($$horizontal) {
+                                        $paddingElement.css({
+                                            'padding-left': o1 + 'px',
+                                            'padding-right': (total - o2) + 'px'
+                                        });
+                                    }
+                                    else {
+                                        $paddingElement.css({
+                                            'padding-top': o1 + 'px',
+                                            'padding-bottom': (total - o2) + 'px'
+                                        });
+                                    }
+                                    // console.log(o1, o2, total);
+                                });
                             }
 
                             return digestRequired;
@@ -763,36 +705,7 @@
                 };
             }
         };
-    }]).directive('vsSetOffset', [function() {
-        return function($scope, $element, $attrs) {
-            var positioningProperty = $attrs.vsSetOffsetPositioningProperty;
-
-            setOffset();
-            $scope.$on('vsSetOffset-refresh', setOffset);
-
-            function setOffset() {
-                $element.css(positioningProperty, $scope.$eval($attrs.vsSetOffset) + 'px');
-            }
-        };
     }]);
-
-    angular.element(document.head).append([
-        '<style>' +
-        '.vs-repeat-wheel-helper{' +
-            'position: absolute;' +
-            'top: 0;' +
-            'bottom: 0;' +
-            'left: 0;' +
-            'right: 0;' +
-            'z-index: 99999;' +
-            'background: rgba(0, 0, 0, 0);' +
-        '}' +
-        '.vs-repeat-repeated-element{' +
-            'position: absolute;' +
-            'z-index: 1;' +
-        '}' +
-        '</style>'
-    ].join(''));
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = vsRepeatModule.name;

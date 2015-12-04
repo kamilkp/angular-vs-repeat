@@ -22,19 +22,6 @@
 		});
 	}
 
-	function expectTranslation(elem, expectedTranslation){
-		var eStyle = elem.parentNode.style;
-		if(eStyle.transform){
-			expect(+eStyle.transform.slice(11, -3)).to.be(expectedTranslation);
-		}
-		else if(eStyle.webkitTransform){
-			expect(+eStyle.webkitTransform.slice(11, -3)).to.be(expectedTranslation);
-		}
-		else{
-			expect(+eStyle.top.slice(0, -2)).to.be(expectedTranslation);
-		}
-	}
-
 	var animationFrame = 1000/60;
 
 	describe('vs-repeat', function(){
@@ -187,27 +174,6 @@
 			done();
 		});
 
-		it('fill element should not obscure repeated elements', function(done){
-			$element = $compile([
-				'<div vs-repeat class="container">',
-				'	<div ng-repeat="foo in bar" class="item">',
-				'		<span class="value">{{foo.value}}</span>',
-				'	</div>',
-				'</div>'
-			].join(''))($scope);
-			angular.element(document.body).append($element);
-			$scope.bar = getArray(100);
-			$scope.$digest();
-
-			var rect = $element[0].getBoundingClientRect();
-			var fromPoint = document.elementFromPoint(
-				~~(rect.left + rect.width/2),
-				~~(rect.top + rect.height/2)
-			);
-			expect(fromPoint.className).not.to.contain('vs-repeat-fill-element');
-			done();
-		});
-
 		it('should support manually provided unique element size', function(done){
 			$element = $compile([
 				'<div vs-repeat="150" class="container">',
@@ -223,7 +189,6 @@
 			var elems = getElements($element);
 			expect(elems.length).to.be.greaterThan(1);
 			expect(elems.length).to.be.lessThan(5);
-			expectTranslation(elems[1], 150);
 			done();
 		});
 
@@ -244,7 +209,6 @@
 			var elems = getElements($element);
 			expect(elems.length).to.be.greaterThan(1);
 			expect(elems.length).to.be.lessThan(5);
-			expectTranslation(elems[1], 110);
 			done();
 		});
 
@@ -265,7 +229,6 @@
 			var elems = getElements($element);
 			expect(elems.length).to.be.greaterThan(1);
 			expect(elems.length).to.be.lessThan(3);
-			expectTranslation(elems[1], 210);
 			done();
 		});
 
@@ -311,7 +274,6 @@
 			var elems = getElements($element);
 			expect(elems.length).to.be.greaterThan(1);
 			expect(elems.length).to.be.lessThan(5);
-			expectTranslation(elems[1], 110);
 
 			// Change first item size and trigger refresh
 			var newSize = 123;
@@ -324,7 +286,6 @@
 			elems = getElements($element);
 			expect(elems.length).to.be.greaterThan(1);
 			expect(elems.length).to.be.lessThan(5);
-			expectTranslation(elems[1], newSize);
 			done();
 		});
 
