@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.0.0-rc10 2015/06/03
+// Angular Virtual Scroll Repeat v1.0.0-rc13 2015/08/30
 //
 
 (function(window, angular) {
@@ -124,7 +124,7 @@
         return correction;
     }
 
-    angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', function($compile) {
+    var vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', function($compile) {
         return {
             restrict: 'A',
             scope: true,
@@ -395,6 +395,24 @@
                             _prevEndIndex,
                             _minStartIndex,
                             _maxEndIndex;
+
+                        $scope.$on('vsRenderAll', function() {//e , quantum) {
+                            if($$options.latch) {
+                                setTimeout(function() {
+                                    // var __endIndex = Math.min($scope.endIndex + (quantum || 1), originalLength);
+                                    var __endIndex = originalLength;
+                                    _maxEndIndex = Math.max(__endIndex, _maxEndIndex);
+                                    $scope.endIndex = $$options.latch ? _maxEndIndex : __endIndex;
+                                    $scope[collectionName] = originalCollection.slice($scope.startIndex, $scope.endIndex);
+                                    _prevEndIndex = $scope.endIndex;
+
+                                    $scope.$apply(function() {
+                                        $scope.$emit('vsRenderAllDone');
+                                    });
+                                });
+                            }
+                        });
+
                         function reinitialize(data) {
                             _prevStartIndex = void 0;
                             _prevEndIndex = void 0;
@@ -405,7 +423,11 @@
                                                 $scope.sizesCumulative[originalLength] :
                                                 $scope.elementSize * originalLength
                                             );
-                            $scope.$broadcast('vsSetOffset-refresh');
+
+                            // Allow Angular to update ng-repeat $index values before syncing offsets:
+                            $scope.$evalAsync(function(){
+                                $scope.$broadcast('vsSetOffset-refresh');
+                            });
                             $scope.$emit('vsRepeatReinitialized', $scope.startIndex, $scope.endIndex);
                         }
 
@@ -556,8 +578,8 @@
                                                         scrollChange = false;
                                                         // The current item scroll position
                                                         position = scrollIndexCumulativeSize - $scrollParent[0][scrollPos];
-                                                        }
-                                                        // The item is out of the viewport
+                                                    }
+                                                    // The item is out of the viewport
                                                     else {
                                                         if (data.scrollIndexPosition === 'inview#top' || data.scrollIndexPosition === 'inview') {
                                                             // Get it at the top
@@ -771,4 +793,8 @@
         '}' +
         '</style>'
     ].join(''));
+
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = vsRepeatModule.name;
+    }
 })(window, window.angular);
