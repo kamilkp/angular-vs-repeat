@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.0.0-rc13 2015/08/30
+// Angular Virtual Scroll Repeat v1.0.0-beta.0 2015/12/04
 //
 
 (function(window, angular) {
@@ -706,11 +706,6 @@
             }
         };
     }]);
-
-    angular.element(document.head).append([
-        '<style>' +
-        '</style>'
-    ].join(''));
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = vsRepeatModule.name;
