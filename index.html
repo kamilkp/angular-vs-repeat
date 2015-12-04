@@ -31,9 +31,14 @@
 				margin-top: 20px;
 				background: hsl(60, 100%, 90%);
 			}
+			.repeater-container.horizontal .vs-repeat-padding-element {
+				height: 100%;
+				white-space: nowrap;
+			}
 			.repeater-container.horizontal .item-element{
 				width: 50px;
 				height: 100%;
+				display: inline-block;
 			}
 			.repeater-container.horizontal.combined{
 				height: 145px;
@@ -144,10 +149,10 @@
 				return res;
 			}
 			function appController($scope, $location){
-				$scope.items = {
-					collection: getRegularArray(1000)
-				};
 				$scope.$root.arraySize = 1000;
+				$scope.items = {
+					collection: getRegularArray($scope.$root.arraySize)
+				};
 				$scope.switchCollection = function(){
 					var parsed = parseInt($scope.newArray.size, 10);
 					if(!isNaN(parsed)){
