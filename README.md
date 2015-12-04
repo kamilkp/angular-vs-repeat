@@ -1,5 +1,11 @@
 angular-vs-repeat v1.0.0-beta.0
 =================
+
+### Major changes in v1.0.0-beta.0
+  * elements are no longer absolutely positioned
+  * no need for a mousewheel helper dummy element on MacOS (to preserve inertia scrolling)
+  * no need for `top` updating directives - even better performance
+
 [![Build Status](https://travis-ci.org/kamilkp/angular-vs-repeat.svg?branch=master)](https://travis-ci.org/kamilkp/angular-vs-repeat) [![NPM version](https://badge.fury.io/js/angular-vs-repeat.svg)](http://badge.fury.io/js/angular-vs-repeat) [![Bower version](https://badge.fury.io/bo/angular-vs-repeat.svg)](http://badge.fury.io/bo/angular-vs-repeat)
 
 Virtual Scroll for AngularJS ngRepeat directive
