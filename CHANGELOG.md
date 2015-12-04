@@ -1,3 +1,11 @@
+Version 1.0.0-beta.0 (2015/12/04)
+=================
+
+### Major changes
+  * elements are no longer absolutely positioned
+  * no need for a mousewheel helper dummy element on MacOS (to preserve inertia scrolling)
+  * no need for `top` updating directives - even better performance
+
 Version 1.0.0-rc12 (2015/08/03)
 =================
 
