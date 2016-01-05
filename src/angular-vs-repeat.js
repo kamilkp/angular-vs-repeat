@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.0.1-beta.2 2016/01/05
+// Angular Virtual Scroll Repeat v1.0.1-beta.3 2016/01/05
 //
 
 (function(window, angular) {
@@ -23,6 +23,19 @@
     // example:
     // <div vs-repeat>
     //      <div ng-repeat="item in someArray">
+    //          <!-- content -->
+    //      </div>
+    // </div>
+    //
+    // or:
+    // <div vs-repeat>
+    //      <div ng-repeat-start="item in someArray">
+    //          <!-- content -->
+    //      </div>
+    //      <div>
+    //         <!-- something in the middle -->
+    //      </div>
+    //      <div ng-repeat-end>
     //          <!-- content -->
     //      </div>
     // </div>
@@ -196,7 +209,6 @@
                             $scrollParent = $attrs.vsScrollParent ?
                                 $attrs.vsScrollParent === 'window' ? angular.element(window) :
                                 closestElement.call($element, $attrs.vsScrollParent) : $element,
-                            positioningProperty = $$horizontal ? 'left' : 'top',
                             localScrollTrigger = false,
                             $$options = 'vsOptions' in $attrs ? $scope.$eval($attrs.vsOptions) : {},
                             clientSize = $$horizontal ? 'clientWidth' : 'clientHeight',
@@ -468,30 +480,7 @@
                             }
                         });
 
-                        // Scroll to required position
-                        // scrollTo - number of pixels to be scrolled to
-                        function scrollToPosition(scrollTo) {
-                            var scrolled = false;
-                            if (scrollTo !== undefined && (typeof scrollTo) === 'number') {
-                                // Set the position to be scrolled to
-                                scrolled = Math.max(scrollTo, 0);
-
-                                // Is there a scroll change?
-                                if ($scrollParent[0][scrollPos] !== scrolled) {
-                                    $scrollParent[0][scrollPos] = scrolled;
-                                    localScrollTrigger = true;
-                                }
-                                else {
-                                    scrolled = false;
-                                }
-
-                                // Emit the event
-                                $scope.$emit('vsRepeatScrolled', scrolled);
-                            }
-                            return scrolled;
-                        }
-
-                        function updateInnerCollection(data) {
+                        function updateInnerCollection() {
                             var $scrollPosition = getScrollPos($scrollParent[0], scrollPos);
                             var $clientSize = getClientSize($scrollParent[0], clientSize);
 
@@ -501,199 +490,47 @@
                                                     $$horizontal
                                                 );
 
-                            var scrollChange = true,
-                                position,
-                                visibleStartIndex,
-                                scrollIndexCumulativeSize,
-                                scrollIndexSize;
-
                             var __startIndex = $scope.startIndex;
                             var __endIndex = $scope.endIndex;
 
-                            if (data && data.elementSize !== undefined) {
-                                $scope.elementSize = data.elementSize;
-                            }
+                            if (sizesPropertyExists) {
+                                __startIndex = 0;
+                                while ($scope.sizesCumulative[__startIndex] < $scrollPosition - $scope.offsetBefore - scrollOffset) {
+                                    __startIndex++;
+                                }
+                                if (__startIndex > 0) { __startIndex--; }
 
-                            if (data && data.scrollIndex !== undefined) {
-                                if (typeof $scope.scrollSettings !== 'undefined') {
-                                    $scope.scrollSettings.scrollIndex = data.scrollIndex;
+                                // Adjust the start index according to the excess
+                                __startIndex = Math.max(
+                                    Math.floor(__startIndex - $scope.excess / 2),
+                                    0
+                                );
+
+                                __endIndex = __startIndex;
+                                while ($scope.sizesCumulative[__endIndex] < $scrollPosition - $scope.offsetBefore - scrollOffset + $clientSize) {
+                                    __endIndex++;
                                 }
 
-                                if (sizesPropertyExists) {
-                                    scrollIndexSize = $scope.sizes[data.scrollIndex];
-                                    scrollIndexCumulativeSize = $scope.sizesCumulative[data.scrollIndex];
-                                }
-                                else {
-                                    scrollIndexSize = $scope.elementSize;
-                                    scrollIndexCumulativeSize = data.scrollIndex * $scope.elementSize;
-                                }
-
-                                // Item scroll position relative to the view, i.e. position === 0 means the top of the view,
-                                // position === $clientSize means the bottom
-                                if (data.scrollIndexPosition !== undefined) {
-                                    if (typeof $scope.scrollSettings !== 'undefined') {
-                                        $scope.scrollSettings.scrollIndexPosition = data.scrollIndexPosition;
-                                    }
-                                    position = 0;
-                                    switch (typeof data.scrollIndexPosition) {
-                                        case 'number':
-                                            position = data.scrollIndexPosition + $scope.offsetBefore;
-                                            break;
-                                        case 'string':
-                                            switch (data.scrollIndexPosition) {
-                                                case 'top':
-                                                    position = $scope.offsetBefore;
-                                                    break;
-                                                case 'middle':
-                                                    position = ($clientSize - scrollIndexSize) / 2;
-                                                    break;
-                                                case 'bottom':
-                                                    position = $clientSize - scrollIndexSize - $scope.offsetAfter;
-                                                    break;
-                                                case 'inview':
-                                                case 'inview#top':
-                                                case 'inview#middle':
-                                                case 'inview#bottom':
-                                                case 'inview#auto':
-                                                        // The item is in the viewport, do nothing
-                                                    if (
-                                                            ($scrollParent[0][scrollPos] <= (scrollIndexCumulativeSize)) &&
-                                                            ($scrollParent[0][scrollPos] + $clientSize - scrollIndexSize >= scrollIndexCumulativeSize)) {
-                                                        scrollChange = false;
-                                                        // The current item scroll position
-                                                        position = scrollIndexCumulativeSize - $scrollParent[0][scrollPos];
-                                                    }
-                                                    // The item is out of the viewport
-                                                    else {
-                                                        if (data.scrollIndexPosition === 'inview#top' || data.scrollIndexPosition === 'inview') {
-                                                            // Get it at the top
-                                                            position = $scope.offsetBefore;
-                                                        }
-                                                        if (data.scrollIndexPosition === 'inview#bottom') {
-                                                            // Get it at the bottom
-                                                            position = $clientSize - scrollIndexSize + $scope.offsetAfter;
-                                                        }
-                                                        if (data.scrollIndexPosition === 'inview#middle') {
-                                                            // Get it at the middle
-                                                            position = ($clientSize - scrollIndexSize) / 2;
-                                                        }
-                                                        if (data.scrollIndexPosition === 'inview#auto') {
-                                                            // Get it at the bottom or at the top, depending on what is closer
-                                                            if ($scrollParent[0][scrollPos] <= scrollIndexCumulativeSize) {
-                                                                position = $clientSize - scrollIndexSize + $scope.offsetAfter;
-                                                            }
-                                                            else {
-                                                                position = $scope.offsetBefore;
-                                                            }
-                                                        }
-                                                    }
-                                                    break;
-                                                default:
-                                                    console.warn('Incorrect scrollIndexPosition string value');
-                                                    break;
-                                            }
-                                            break;
-                                        default:
-                                            console.warn('Incorrect scrollIndexPosition type');
-                                            break;
-                                    }
-                                }
-                                else {
-                                    // The item is not required to be in the viewport, do nothing
-                                    scrollChange = false;
-                                    // The current item scroll position
-                                    if (sizesPropertyExists) {
-                                        position = $scope.sizesCumulative[data.scrollIndex] - $scrollParent[0][scrollPos];
-                                    }
-                                    else {
-                                        position = (data.scrollIndex * $scope.elementSize) - $scrollParent[0][scrollPos];
-                                    }
-                                }
-
-                                __startIndex = data.scrollIndex;
-
-                                if (sizesPropertyExists) {
-
-                                    while ($scope.sizesCumulative[__startIndex] > $scope.sizesCumulative[data.scrollIndex] - position) {
-                                        __startIndex--;
-                                    }
-                                    // The real first item in the view
-                                    visibleStartIndex = Math.max(__startIndex, 0);
-
-                                    // Adjust the start index according to the excess
-                                    __startIndex = Math.max(
-                                        Math.floor(__startIndex - ($scope.excess / 2)),
-                                        0
-                                    );
-
-                                    __endIndex = __startIndex;
-                                    while ($scope.sizesCumulative[__endIndex] < $scope.sizesCumulative[visibleStartIndex] - $scope.offsetBefore + $clientSize) {
-                                        __endIndex++;
-                                    }
-                                    // Adjust the end index according to the excess
-                                    __endIndex = Math.min(
-                                        Math.ceil(__endIndex + ($scope.excess / 2)),
-                                        originalLength
-                                    );
-
-                                }
-                                else {
-
-                                    while ((__startIndex * $scope.elementSize) > (data.scrollIndex * $scope.elementSize) - position) {
-                                        __startIndex--;
-                                    }
-                                    // The real first item in the view
-                                    visibleStartIndex = Math.max(__startIndex, 0);
-                                    __startIndex = Math.max(
-                                        Math.floor(__startIndex - ($scope.excess / 2)),
-                                        0
-                                    );
-
-                                    __endIndex = Math.min(
-                                        __startIndex + Math.ceil($clientSize / $scope.elementSize) + $scope.excess / 2,
-                                        originalLength
-                                    );
-
-                                }
+                                // Adjust the end index according to the excess
+                                __endIndex = Math.min(
+                                    Math.ceil(__endIndex + $scope.excess / 2),
+                                    originalLength
+                                );
                             }
                             else {
-                                if (sizesPropertyExists) {
-                                    __startIndex = 0;
-                                    while ($scope.sizesCumulative[__startIndex] < $scrollPosition - $scope.offsetBefore - scrollOffset) {
-                                        __startIndex++;
-                                    }
-                                    if (__startIndex > 0) { __startIndex--; }
-                                    // Adjust the start index according to the excess
-                                    __startIndex = Math.max(
-                                        Math.floor(__startIndex - $scope.excess / 2),
-                                        0
-                                    );
+                                __startIndex = Math.max(
+                                    Math.floor(
+                                        ($scrollPosition - $scope.offsetBefore - scrollOffset) / $scope.elementSize
+                                    ) - $scope.excess / 2,
+                                    0
+                                );
 
-                                    __endIndex = __startIndex;
-                                    while ($scope.sizesCumulative[__endIndex] < $scrollPosition - $scope.offsetBefore - scrollOffset + $clientSize) {
-                                        __endIndex++;
-                                    }
-                                    // Adjust the end index according to the excess
-                                    __endIndex = Math.min(
-                                        Math.ceil(__endIndex + $scope.excess / 2),
-                                        originalLength
-                                    );
-                                }
-                                else {
-                                    __startIndex = Math.max(
-                                        Math.floor(
-                                            ($scrollPosition - $scope.offsetBefore - scrollOffset) / $scope.elementSize
-                                        ) - $scope.excess / 2,
-                                        0
-                                    );
-
-                                    __endIndex = Math.min(
-                                        __startIndex + Math.ceil(
-                                            $clientSize / $scope.elementSize
-                                        ) + $scope.excess,
-                                        originalLength
-                                    );
-                                }
+                                __endIndex = Math.min(
+                                    __startIndex + Math.ceil(
+                                        $clientSize / $scope.elementSize
+                                    ) + $scope.excess,
+                                    originalLength
+                                );
                             }
 
                             _minStartIndex = Math.min(__startIndex, _minStartIndex);
@@ -701,11 +538,6 @@
 
                             $scope.startIndex = $$options.latch ? _minStartIndex : __startIndex;
                             $scope.endIndex = $$options.latch ? _maxEndIndex : __endIndex;
-
-                            if (data !== undefined && data.scrollIndex !== undefined && position !== undefined && scrollChange) {
-                                // Scroll to the requested position
-                                scrollToPosition(scrollIndexCumulativeSize - position);
-                            }
 
                             var digestRequired = false;
                             if (_prevStartIndex == null) {
@@ -753,7 +585,6 @@
 
                                     $beforeContent.css(layoutProp, o1 + 'px');
                                     $afterContent.css(layoutProp, (total - o2) + 'px');
-                                    // console.log(o1, o2, total);
                                 });
                             }
 

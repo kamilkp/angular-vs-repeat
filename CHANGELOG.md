@@ -1,3 +1,8 @@
+Version 1.1.0 (2015/12/04)
+=================
+
+  * **breaking change** - the funcitonality implemented in https://github.com/kamilkp/angular-vs-repeat/pull/32 has been removed. It appears it can be implemented independently of vs-repeat and was causing the minified js file to be 50% larger.
+
 Version 1.0.1-beta.2 (2015/12/04)
 =================
 
