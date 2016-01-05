@@ -281,8 +281,11 @@
 					</div>
 					<div ng-show="shown">
 						<div class="repeater-container" vs-repeat>
-							<div class="item-element well" ng-repeat="item in items.collection">
-								<span>{{item.text}}</span>
+							<div class="item-element well" ng-repeat-start="item in items.collection">
+								<span>{{item.text}} start</span>
+							</div>
+							<div class="item-element well" ng-repeat-end>
+								<span>{{item.text}} end</span>
 							</div>
 						</div>
 					</div>
