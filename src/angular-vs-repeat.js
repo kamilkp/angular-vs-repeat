@@ -209,7 +209,6 @@
                             $scrollParent = $attrs.vsScrollParent ?
                                 $attrs.vsScrollParent === 'window' ? angular.element(window) :
                                 closestElement.call($element, $attrs.vsScrollParent) : $element,
-                            localScrollTrigger = false,
                             $$options = 'vsOptions' in $attrs ? $scope.$eval($attrs.vsOptions) : {},
                             clientSize = $$horizontal ? 'clientWidth' : 'clientHeight',
                             offsetSize = $$horizontal ? 'offsetWidth' : 'offsetHeight',
@@ -234,10 +233,6 @@
                         $scope.offsetBefore = 0;
                         $scope.offsetAfter = 0;
                         $scope.excess = 2;
-                        $scope.scrollSettings = {
-                            scrollIndex: 0,
-                            scrollIndexPosition: 'top'
-                        };
 
                         if ($$horizontal) {
                             $beforeContent.css('height', '100%');
@@ -247,14 +242,6 @@
                             $beforeContent.css('width', '100%');
                             $afterContent.css('width', '100%');
                         }
-
-                        $scope.$watch($attrs.vsScrollSettings, function(newValue) {
-                            if (typeof newValue === 'undefined') {
-                                return;
-                            }
-                            $scope.scrollSettings = newValue;
-                            reinitialize($scope.scrollSettings);
-                        }, true);
 
                         Object.keys(attributesDictionary).forEach(function(key) {
                             if ($attrs[key]) {
@@ -272,7 +259,7 @@
                             refresh();
                         });
 
-                        function refresh(event, data) {
+                        function refresh() {
                             if (!originalCollection || originalCollection.length < 1) {
                                 $scope[collectionName] = [];
                                 originalLength = 0;
@@ -306,7 +293,7 @@
                                 }
                             }
 
-                            reinitialize(data);
+                            reinitialize();
                         }
 
                         function setAutoSize() {
@@ -375,16 +362,8 @@
                         $scope.endIndex = 0;
 
                         $scrollParent.on('scroll', function scrollHandler() {
-                            // Check if the scrolling was triggerred by a local action to avoid
-                            // unnecessary inner collection updating
-
-                            if (localScrollTrigger) {
-                                localScrollTrigger = false;
-                            }
-                            else {
-                                if (updateInnerCollection()) {
-                                    $scope.$apply();
-                                }
+                            if (updateInnerCollection()) {
+                                $scope.$apply();
                             }
                         });
 
@@ -441,12 +420,12 @@
                             }
                         });
 
-                        function reinitialize(data) {
+                        function reinitialize() {
                             _prevStartIndex = void 0;
                             _prevEndIndex = void 0;
                             _minStartIndex = originalLength;
                             _maxEndIndex = 0;
-                            updateInnerCollection(data);
+                            updateInnerCollection();
                             updateTotalSize(sizesPropertyExists ?
                                                 $scope.sizesCumulative[originalLength] :
                                                 $scope.elementSize * originalLength
