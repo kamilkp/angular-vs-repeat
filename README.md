@@ -1,4 +1,4 @@
-angular-vs-repeat v1.0.1-beta
+angular-vs-repeat v1.0.1-beta.2
 =================
 
 ### Major changes in v1.0.0-beta.0
@@ -52,6 +52,7 @@ example:
 ```
 
 - the vsRepeat directive must be applied to a direct parent of an element with `ngRepeat`
+- since version 1.0.1-beta.2 the library also supports ng-repeat-start/ng-repeat-end syntax
 - the value of vsRepeat attribute is the single element's height/width measured in pixels. If none provided, the directive will compute it automatically
 
 

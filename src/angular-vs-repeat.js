@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.0.1-beta 2015/12/15
+// Angular Virtual Scroll Repeat v1.0.1-beta.2 2016/01/05
 //
 
 (function(window, angular) {
@@ -128,19 +128,58 @@
             scope: true,
             compile: function($element) {
                 var ngRepeatChild = $element.children().eq(0),
-                    ngRepeatExpression = ngRepeatChild.attr('ng-repeat') || ngRepeatChild.attr('data-ng-repeat'),
+                    ngRepeatExpression,
                     childCloneHtml = ngRepeatChild[0].outerHTML,
-                    expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+\S+)?$/.exec(ngRepeatExpression),
-                    lhs = expressionMatches[1],
-                    rhs = expressionMatches[2],
-                    rhsSuffix = expressionMatches[3],
+                    expressionMatches,
+                    lhs,
+                    rhs,
+                    rhsSuffix,
+                    originalNgRepeatAttr,
                     collectionName = '$vs_collection',
+                    isNgRepeatStart = false,
                     attributesDictionary = {
                         'vsRepeat': 'elementSize',
                         'vsOffsetBefore': 'offsetBefore',
                         'vsOffsetAfter': 'offsetAfter',
                         'vsExcess': 'excess'
                     };
+
+                if (ngRepeatChild.attr('ng-repeat')) {
+                    originalNgRepeatAttr = 'ng-repeat';
+                    ngRepeatExpression = ngRepeatChild.attr('ng-repeat');
+                }
+                else if (ngRepeatChild.attr('data-ng-repeat')) {
+                    originalNgRepeatAttr = 'data-ng-repeat';
+                    ngRepeatExpression = ngRepeatChild.attr('data-ng-repeat');
+                }
+                else if (ngRepeatChild.attr('ng-repeat-start')) {
+                    isNgRepeatStart = true;
+                    originalNgRepeatAttr = 'ng-repeat-start';
+                    ngRepeatExpression = ngRepeatChild.attr('ng-repeat-start');
+                }
+                else if (ngRepeatChild.attr('data-ng-repeat-start')) {
+                    isNgRepeatStart = true;
+                    originalNgRepeatAttr = 'data-ng-repeat-start';
+                    ngRepeatExpression = ngRepeatChild.attr('data-ng-repeat-start');
+                }
+                else {
+                    throw new Error('angular-vs-repeat: no ng-repeat directive on a child element');
+                }
+
+                expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+\S+)?$/.exec(ngRepeatExpression);
+                lhs = expressionMatches[1];
+                rhs = expressionMatches[2];
+                rhsSuffix = expressionMatches[3];
+
+                if (isNgRepeatStart) {
+                    var index = 0;
+                    var repeaterElement = $element.children().eq(0);
+                    while(repeaterElement.attr('ng-repeat-end') == null && repeaterElement.attr('data-ng-repeat-end') == null) {
+                        index++;
+                        repeaterElement = $element.children().eq(index);
+                        childCloneHtml += repeaterElement[0].outerHTML;
+                    }
+                }
 
                 $element.empty();
                 return {
@@ -263,20 +302,41 @@
                                 $scope.$$postDigest(function() {
                                     if ($element[0].offsetHeight || $element[0].offsetWidth) { // element is visible
                                         var children = $element.children(),
-                                            i = 0;
+                                            i = 0,
+                                            gotSomething = false,
+                                            insideStartEndSequence = false;
                                         while (i < children.length) {
-                                            if (children[i].attributes['ng-repeat'] != null || children[i].attributes['data-ng-repeat'] != null) {
+                                            if (children[i].attributes[originalNgRepeatAttr] != null || insideStartEndSequence) {
+                                                if (!gotSomething) {
+                                                    $scope.elementSize = 0;
+                                                }
+
+                                                gotSomething = true;
                                                 if (children[i][offsetSize]) {
-                                                    $scope.elementSize = children[i][offsetSize];
-                                                    reinitialize();
-                                                    autoSize = false;
-                                                    if ($scope.$root && !$scope.$root.$$phase) {
-                                                        $scope.$apply();
+                                                    $scope.elementSize += children[i][offsetSize];
+                                                }
+
+                                                if (isNgRepeatStart) {
+                                                    if (children[i].attributes['ng-repeat-end'] != null || children[i].attributes['data-ng-repeat-end'] != null) {
+                                                        break;
+                                                    }
+                                                    else {
+                                                        insideStartEndSequence = true;
                                                     }
                                                 }
-                                                break;
+                                                else {
+                                                    break;
+                                                }
                                             }
                                             i++;
+                                        }
+
+                                        if (gotSomething) {
+                                            reinitialize();
+                                            autoSize = false;
+                                            if ($scope.$root && !$scope.$root.$$phase) {
+                                                $scope.$apply();
+                                            }
                                         }
                                     }
                                     else {
@@ -291,8 +351,8 @@
                             }
                         }
 
-                        childClone.attr('ng-repeat', lhs + ' in ' + collectionName + (rhsSuffix ? ' ' + rhsSuffix : ''))
-                                .addClass('vs-repeat-repeated-element');
+                        childClone.eq(0).attr(originalNgRepeatAttr, lhs + ' in ' + collectionName + (rhsSuffix ? ' ' + rhsSuffix : ''));
+                        childClone.addClass('vs-repeat-repeated-element');
 
                         $element.append($beforeContent);
                         $element.append(childClone);

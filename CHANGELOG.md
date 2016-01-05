@@ -1,3 +1,8 @@
+Version 1.0.1-beta.2 (2015/12/04)
+=================
+
+  * support for ng-repeat-start/ng-repeat-end
+
 Version 1.0.0-beta.1 (2015/12/04)
 =================
 
