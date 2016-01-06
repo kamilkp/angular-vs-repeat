@@ -1,4 +1,4 @@
-angular-vs-repeat v1.1.1
+angular-vs-repeat v1.1.2
 =================
 
 ### Major changes in v1.0.0-beta.0

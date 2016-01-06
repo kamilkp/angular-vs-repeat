@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.0.1-beta.3 2016/01/05
+// Angular Virtual Scroll Repeat v1.1.2 2016/01/06
 //
 
 (function(window, angular) {
@@ -551,20 +551,18 @@
                                 _prevStartIndex = $scope.startIndex;
                                 _prevEndIndex = $scope.endIndex;
 
-                                $scope.$$postDigest(function() {
-                                    var offsetCalculationString = sizesPropertyExists ?
-                                        '(sizesCumulative[$index + startIndex] + offsetBefore)' :
-                                        '(($index + startIndex) * elementSize + offsetBefore)';
+                                var offsetCalculationString = sizesPropertyExists ?
+                                    '(sizesCumulative[$index + startIndex] + offsetBefore)' :
+                                    '(($index + startIndex) * elementSize + offsetBefore)';
 
-                                    var parsed = $parse(offsetCalculationString);
-                                    var o1 = parsed($scope, {$index: 0});
-                                    var o2 = parsed($scope, {$index: $scope[collectionName].length});
-                                    var total = $scope.totalSize;
-                                    var layoutProp = $$horizontal ? 'width' : 'height';
+                                var parsed = $parse(offsetCalculationString);
+                                var o1 = parsed($scope, {$index: 0});
+                                var o2 = parsed($scope, {$index: $scope[collectionName].length});
+                                var total = $scope.totalSize;
+                                var layoutProp = $$horizontal ? 'width' : 'height';
 
-                                    $beforeContent.css(layoutProp, o1 + 'px');
-                                    $afterContent.css(layoutProp, (total - o2) + 'px');
-                                });
+                                $beforeContent.css(layoutProp, o1 + 'px');
+                                $afterContent.css(layoutProp, (total - o2) + 'px');
                             }
 
                             return digestRequired;
