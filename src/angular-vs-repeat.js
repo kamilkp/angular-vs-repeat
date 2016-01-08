@@ -141,6 +141,7 @@
             scope: true,
             compile: function($element) {
                 var ngRepeatChild = $element.children().eq(0),
+                    ngRepeatChildren = $element.children(),
                     ngRepeatExpression,
                     childCloneHtml = ngRepeatChild[0].outerHTML,
                     expressionMatches,
@@ -197,6 +198,12 @@
                 $element.empty();
                 return {
                     pre: function($scope, $element, $attrs) {
+                        if (!$scope.$eval($attrs.vsRepeatIf)){
+                            //evaluate condition if angular-vs-repeat should be applied
+                            $element.append($compile(ngRepeatChildren)($scope));
+                            return;
+                        }
+
                         var childClone = angular.element(childCloneHtml),
                             childTagName = childClone[0].tagName.toLowerCase(),
                             originalCollection = [],
