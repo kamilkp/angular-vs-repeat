@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.1.2 2016/01/06
+// Angular Virtual Scroll Repeat v1.1.3 2016/01/14
 //
 
 (function(window, angular) {
@@ -363,7 +363,7 @@
 
                         $scrollParent.on('scroll', function scrollHandler() {
                             if (updateInnerCollection()) {
-                                $scope.$apply();
+                                $scope.$digest();
                             }
                         });
 
