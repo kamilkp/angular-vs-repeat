@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.1.3 2016/01/14
+// Angular Virtual Scroll Repeat v1.1.4 2016/01/17
 //
 
 (function(window, angular) {
@@ -425,11 +425,11 @@
                             _prevEndIndex = void 0;
                             _minStartIndex = originalLength;
                             _maxEndIndex = 0;
-                            updateInnerCollection();
                             updateTotalSize(sizesPropertyExists ?
                                                 $scope.sizesCumulative[originalLength] :
                                                 $scope.elementSize * originalLength
                                             );
+                            updateInnerCollection();
 
                             $scope.$emit('vsRepeatReinitialized', $scope.startIndex, $scope.endIndex);
                         }
