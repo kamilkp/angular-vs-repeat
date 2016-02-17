@@ -408,7 +408,7 @@
                                     _prevEndIndex = $scope.endIndex;
 
                                     $scope.$$postDigest(function() {
-                                        var layoutProp = $$horizontal ? 'width' : 'height';
+                                        var layoutProp = $$horizontal ? 'min-width' : 'min-height';
                                         $beforeContent.css(layoutProp, 0);
                                         $afterContent.css(layoutProp, 0);
                                     });
@@ -559,7 +559,7 @@
                                 var o1 = parsed($scope, {$index: 0});
                                 var o2 = parsed($scope, {$index: $scope[collectionName].length});
                                 var total = $scope.totalSize;
-                                var layoutProp = $$horizontal ? 'width' : 'height';
+                                var layoutProp = $$horizontal ? 'min-width' : 'min-height';
 
                                 $beforeContent.css(layoutProp, o1 + 'px');
                                 $afterContent.css(layoutProp, (total - o2) + 'px');
