@@ -327,5 +327,65 @@
 
 			done();
 		});
-	});
+
+        it ('should support ngRepeater container selector', function (done) {
+            $element = angular.element([
+                '	<div vs-repeat vs-repeat-container=".container">',
+                '	    <div class="container">',
+                '		    <div ng-repeat="foo in bar" class="item">',
+                '			    <span class="value">{{foo.value}}</span>',
+                '		    </div>',
+                '	    </div>',
+                '	</div>'
+            ].join(''));
+
+            angular.element(document.body).append($element);
+            $compile($element)($scope);
+            $scope.bar = getArray(100);
+            $scope.$digest();
+
+            var elems, count;
+
+            elems = getElements($element);
+            count = elems.length;
+            expect(count).to.be.greaterThan(0);
+            expect(count).to.be.lessThan(20);
+
+            done();
+        });
+
+        it ('should execute function when scrolled to offset', function (done) {
+            $element = angular.element([
+                '	<div vs-repeat="20" vs-scrolled-to-end="updateCounter()" vs-scrolled-to-end-offset="20" class="container">',
+                '       <div ng-repeat="foo in bar" class="item">',
+                '		    <span class="value">{{foo.value}}</span>',
+                '		</div>',
+                '	</div>'
+            ].join(''));
+
+            angular.element(document.body).append($element);
+            $compile($element)($scope);
+            $scope.bar = getArray(100);
+            $scope.$digest();
+
+            var counter = 0;
+            $scope.updateCounter = function(){
+                counter += 1;
+            };
+
+            $element[0].scrollTop = $element[0].scrollHeight * 0.6;
+            $element.triggerHandler('scroll');
+            $scope.$digest();
+
+            expect(counter).to.be(0);
+
+            $element[0].scrollTop = $element[0].scrollHeight * 0.8;
+            $element.triggerHandler('scroll');
+            $scope.$digest();
+
+            expect(counter).to.be(1);
+
+            done();
+        });
+    });
 })();
