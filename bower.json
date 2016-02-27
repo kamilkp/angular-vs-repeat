@@ -1,6 +1,6 @@
 {
   "name": "angular-vs-repeat",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Virtual Scroll for AngularJS ngRepeat directive",
   "homepage": "http://kamilkp.github.io/angular-vs-repeat",
   "main": "src/angular-vs-repeat.js",
