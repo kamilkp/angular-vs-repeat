@@ -1,3 +1,10 @@
+Version 1.1.5 (2016/02/27)
+=================
+
+  * bugfixes and PRs merged
+  * use `vs-repeat-container` to specify another repeat conainer (see readme)
+  * use `vs-scrolled-to-end` to do something when last element gets rendered (see readme)
+
 Version 1.1.4 (2016/01/17)
 =================
 
