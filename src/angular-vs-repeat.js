@@ -202,7 +202,8 @@
                 repeatContainer.empty();
                 return {
                     pre: function($scope, $element, $attrs) {
-                        var childClone = angular.element(childCloneHtml),
+                        var repeatContainer = angular.isDefined($attrs.vsRepeatContainer) ? angular.element($element[0].querySelector($attrs.vsRepeatContainer)) : $element,
+                            childClone = angular.element(childCloneHtml),
                             childTagName = childClone[0].tagName.toLowerCase(),
                             originalCollection = [],
                             originalLength,
