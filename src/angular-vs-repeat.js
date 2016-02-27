@@ -269,9 +269,7 @@
                             if (!originalCollection || originalCollection.length < 1) {
                                 $scope[collectionName] = [];
                                 originalLength = 0;
-                                updateTotalSize(0);
                                 $scope.sizesCumulative = [0];
-                                return;
                             }
                             else {
                                 originalLength = originalCollection.length;
