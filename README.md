@@ -80,6 +80,8 @@ example:
 - `vs-size="expression"` - an angular expression evaluated on the item scope that should return the item size. Can be a function or a property name or whatever
 - `vs-autoresize` - use this attribute without `vs-size` and without specifying element's size. The automatically computed element style will readjust upon window resize if the size is dependable on the viewport size
 - `vs-options="{latch: true}"` enables latching mode - elements once rendered are not being removed when scrolled away (improves scrolling performance when the rendering of each element is time consuming)
+- `vs-scrolled-to-end="callback"` callback will be called when the last item of the list is rendered
+- `vs-scrolled-to-end-offset="integer"` - set this number to trigger the scrolledToEnd callback n items before the last gets rendered
 
 ###EVENTS:
 - `vsRepeatTrigger` - an event the directive listens for to manually trigger reinitialization
