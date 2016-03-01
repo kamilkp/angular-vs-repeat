@@ -1,3 +1,8 @@
+Version 1.1.6 (2016/03/01)
+=================
+
+  * table fill content element fix
+
 Version 1.1.5 (2016/02/27)
 =================
 

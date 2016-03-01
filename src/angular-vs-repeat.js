@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.1.5 2016/02/27
+// Angular Virtual Scroll Repeat v1.1.6 2016/03/01
 //
 
 (function(window, angular) {
@@ -355,6 +355,12 @@
                             }
                         }
 
+                        function getLayoutProp() {
+                            var layoutPropPrefix = childTagName === 'tr' ? '' : 'min-';
+                            var layoutProp = $$horizontal ? layoutPropPrefix + 'width' : layoutPropPrefix + 'height';
+                            return layoutProp;
+                        }
+
                         childClone.eq(0).attr(originalNgRepeatAttr, lhs + ' in ' + collectionName + (rhsSuffix ? ' ' + rhsSuffix : ''));
                         childClone.addClass('vs-repeat-repeated-element');
 
@@ -413,9 +419,8 @@
                                     _prevEndIndex = $scope.endIndex;
 
                                     $scope.$$postDigest(function() {
-                                        var layoutProp = $$horizontal ? 'min-width' : 'min-height';
-                                        $beforeContent.css(layoutProp, 0);
-                                        $afterContent.css(layoutProp, 0);
+                                        $beforeContent.css(getLayoutProp(), 0);
+                                        $afterContent.css(getLayoutProp(), 0);
                                     });
 
                                     $scope.$apply(function() {
@@ -572,10 +577,9 @@
                                 var o1 = parsed($scope, {$index: 0});
                                 var o2 = parsed($scope, {$index: $scope[collectionName].length});
                                 var total = $scope.totalSize;
-                                var layoutProp = $$horizontal ? 'min-width' : 'min-height';
 
-                                $beforeContent.css(layoutProp, o1 + 'px');
-                                $afterContent.css(layoutProp, (total - o2) + 'px');
+                                $beforeContent.css(getLayoutProp(), o1 + 'px');
+                                $afterContent.css(getLayoutProp(), (total - o2) + 'px');
                             }
 
                             return digestRequired;
