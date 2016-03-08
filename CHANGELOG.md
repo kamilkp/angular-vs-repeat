@@ -1,3 +1,8 @@
+Version 1.1.7 (2016/03/08)
+=================
+
+  * memory leak fixed when using `vs-scroll-parent`
+
 Version 1.1.6 (2016/03/01)
 =================
 

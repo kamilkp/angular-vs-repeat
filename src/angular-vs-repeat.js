@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.1.6 2016/03/01
+// Angular Virtual Scroll Repeat v1.1.7 2016/03/08
 //
 
 (function(window, angular) {
@@ -372,11 +372,13 @@
                         $scope.startIndex = 0;
                         $scope.endIndex = 0;
 
-                        $scrollParent.on('scroll', function scrollHandler() {
+                        function scrollHandler() {
                             if (updateInnerCollection()) {
                                 $scope.$digest();
                             }
-                        });
+                        }
+
+                        $scrollParent.on('scroll', scrollHandler);
 
                         function onWindowResize() {
                             if (typeof $attrs.vsAutoresize !== 'undefined') {
@@ -394,6 +396,7 @@
                         angular.element(window).on('resize', onWindowResize);
                         $scope.$on('$destroy', function() {
                             angular.element(window).off('resize', onWindowResize);
+                            $scrollParent.off('scroll', scrollHandler);
                         });
 
                         $scope.$on('vsRepeatTrigger', refresh);

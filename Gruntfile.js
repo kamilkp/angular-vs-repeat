@@ -13,7 +13,7 @@ module.exports = function(grunt){
 					banner: [
 						'//',
 						'// Copyright Kamil Pękala http://github.com/kamilkp',
-						'// Angular Virtual Scroll Repeat v1.0.0-rc12 2015/08/03',
+						'// Angular Virtual Scroll Repeat v1.1.7 2016/03/08',
 						'//',
 						''
 					].join('\n')
