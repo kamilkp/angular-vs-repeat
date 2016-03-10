@@ -69,6 +69,8 @@
     //              readjust upon window resize if the size is dependable on the viewport size
     // vs-scrolled-to-end="callback" - callback will be called when the last item of the list is rendered
     // vs-scrolled-to-end-offset="integer" - set this number to trigger the scrolledToEnd callback n items before the last gets rendered
+    // vs-before-class="class-name" - class will be added to element before list elements
+    // vs-after-class="class-name" - class will be added to element after list elements
 
     // EVENTS:
     // - 'vsRepeatTrigger' - an event the directive listens for to manually trigger reinitialization
@@ -208,8 +210,10 @@
                             originalCollection = [],
                             originalLength,
                             $$horizontal = typeof $attrs.vsHorizontal !== 'undefined',
-                            $beforeContent = angular.element('<' + childTagName + ' class="vs-repeat-before-content"></' + childTagName + '>'),
-                            $afterContent = angular.element('<' + childTagName + ' class="vs-repeat-after-content"></' + childTagName + '>'),
+                            beforeClass = $attrs.vsBeforeClass ? ' ' + $attrs.vsBeforeClass : '',
+                            afterClass = $attrs.vsAfterClass ? ' ' + $attrs.vsAfterClass : '',
+                            $beforeContent = angular.element('<' + childTagName + ' class="vs-repeat-before-content' + beforeClass + '"></' + childTagName + '>'),
+                            $afterContent = angular.element('<' + childTagName + ' class="vs-repeat-after-content' + afterClass + '"></' + childTagName + '>'),
                             autoSize = !$attrs.vsRepeat,
                             sizesPropertyExists = !!$attrs.vsSize || !!$attrs.vsSizeProperty,
                             $scrollParent = $attrs.vsScrollParent ?
