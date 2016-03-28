@@ -70,6 +70,10 @@
     // vs-scrolled-to-end="callback" - callback will be called when the last item of the list is rendered
     // vs-scrolled-to-end-offset="integer" - set this number to trigger the scrolledToEnd callback n items before the last gets rendered
 
+    // Override start index to start repater from specified index
+    // start-index - set this number to start the repeater from specified index
+    // vs-override-start-index - set this flag to start from the specified start index
+
     // EVENTS:
     // - 'vsRepeatTrigger' - an event the directive listens for to manually trigger reinitialization
     // - 'vsRepeatReinitialized' - an event the directive emits upon reinitialization done
@@ -219,6 +223,7 @@
                             clientSize = $$horizontal ? 'clientWidth' : 'clientHeight',
                             offsetSize = $$horizontal ? 'offsetWidth' : 'offsetHeight',
                             scrollPos = $$horizontal ? 'scrollLeft' : 'scrollTop';
+                        $scope.overrideStartIndex = $scope.$eval($attrs.vsOverrideStartIndex);
 
                         $scope.totalSize = 0;
                         if (!('vsSize' in $attrs) && 'vsSizeProperty' in $attrs) {
@@ -369,10 +374,14 @@
                         $compile(childClone)($scope);
                         repeatContainer.append($afterContent);
 
-                        $scope.startIndex = 0;
+                        $scope.startIndex =  $scope.$eval($attrs.startIndex) || 0;
                         $scope.endIndex = 0;
 
                         function scrollHandler() {
+
+                            //On user action remove forced start index override
+                            $scope.overrideStartIndex = false;
+
                             if (updateInnerCollection()) {
                                 $scope.$digest();
                             }
@@ -528,8 +537,28 @@
                             _minStartIndex = Math.min(__startIndex, _minStartIndex);
                             _maxEndIndex = Math.max(__endIndex, _maxEndIndex);
 
-                            $scope.startIndex = $$options.latch ? _minStartIndex : __startIndex;
-                            $scope.endIndex = $$options.latch ? _maxEndIndex : __endIndex;
+                            //Override start index to start the repeater from specified index
+                            if(!$scope.overrideStartIndex) {
+                                $scope.startIndex = $$options.latch ? _minStartIndex : __startIndex;
+                                $scope.endIndex = $$options.latch ? _maxEndIndex : __endIndex;
+                            } else {
+                                var startIndex = $scope.$eval($attrs.startIndex);
+                                if (startIndex >= 0) {
+                                    if (__endIndex) {
+                                        //Adjust end index to overriden start index
+                                        $scope.endIndex = $scope.startIndex + (__endIndex - __startIndex);
+                                    } else {
+                                        $scope.endIndex = $scope.startIndex;
+                                    }
+                                    __startIndex = $scope.startIndex;
+                                    __endIndex = $scope.endIndex;
+                                } else {
+                                    //Fall back to default if provided start index is not valid
+                                    $scope.startIndex = $$options.latch ? _minStartIndex : __startIndex;
+                                    $scope.endIndex = $$options.latch ? _maxEndIndex : __endIndex;
+                                    $scope.overrideStartIndex = false;
+                                }
+                            }
 
                             var digestRequired = false;
                             if (_prevStartIndex == null) {
