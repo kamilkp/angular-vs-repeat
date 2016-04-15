@@ -510,11 +510,14 @@
                                 );
                             }
                             else {
-                                __startIndex = Math.max(
-                                    Math.floor(
-                                        ($scrollPosition - $scope.offsetBefore - scrollOffset) / $scope.elementSize
-                                    ) - $scope.excess / 2,
-                                    0
+                                __startIndex = Math.min(
+                                    Math.max(
+                                        Math.floor(
+                                            ($scrollPosition - $scope.offsetBefore - scrollOffset) / $scope.elementSize
+                                        ) - $scope.excess / 2,
+                                        0
+                                    ),
+                                    originalLength
                                 );
 
                                 __endIndex = Math.min(
