@@ -1,6 +1,13 @@
 angular-vs-repeat v1.1.7
 =================
 
+Looking for a version for Angular 2?
+===
+
+Check out https://github.com/kamilkp/ng2-vs-for
+
+---
+
 ### Major changes in v1.0.0-beta.0
   * elements are no longer absolutely positioned
   * no need for a mousewheel helper dummy element on MacOS (to preserve inertia scrolling)
