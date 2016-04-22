@@ -89,6 +89,8 @@ example:
 - `vs-options="{latch: true}"` enables latching mode - elements once rendered are not being removed when scrolled away (improves scrolling performance when the rendering of each element is time consuming)
 - `vs-scrolled-to-end="callback"` callback will be called when the last item of the list is rendered
 - `vs-scrolled-to-end-offset="integer"` - set this number to trigger the scrolledToEnd callback n items before the last gets rendered
+- `vs-before-class="class-name"` - class will be added to element before list elements
+- `vs-after-class="class-name"` - class will be added to element after list elements
 
 ###EVENTS:
 - `vsRepeatTrigger` - an event the directive listens for to manually trigger reinitialization
