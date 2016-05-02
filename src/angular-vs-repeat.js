@@ -528,8 +528,9 @@
                             _minStartIndex = Math.min(__startIndex, _minStartIndex);
                             _maxEndIndex = Math.max(__endIndex, _maxEndIndex);
 
-                            $scope.startIndex = $$options.latch ? _minStartIndex : __startIndex;
-                            $scope.endIndex = $$options.latch ? _maxEndIndex : __endIndex;
+                            // fix issue #129 where index is not properly adjusted when data-set is reduced in size - not only when latch is ON
+                            $scope.startIndex = _minStartIndex;
+                            $scope.endIndex = _maxEndIndex;
 
                             var digestRequired = false;
                             if (_prevStartIndex == null) {
