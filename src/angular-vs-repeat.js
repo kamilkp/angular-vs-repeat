@@ -566,6 +566,7 @@
                                     var triggerIndex = originalCollection.length - ($scope.scrolledToEndOffset || 0);
                                     if (($scope.endIndex >= triggerIndex && _prevEndIndex < triggerIndex) || (originalCollection.length && $scope.endIndex === originalCollection.length)) {
                                         $scope.$eval($attrs.vsScrolledToEnd);
+                                        $scope.$apply();
                                     }
                                 }
 
