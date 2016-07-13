@@ -43,7 +43,8 @@ module.exports = function(grunt){
 		}
 	});
 
-	grunt.registerTask('min', 'Minify javascript source code', 'uglify');
+
+	grunt.registerTask('build', 'Minify javascript source code', 'uglify');
 	grunt.registerTask('test', 'Run unit tests', ['jshint', 'min', 'karma:unit']);
 	grunt.registerTask('default', ['test']);
 	grunt.registerTask('travis', ['jshint', 'min', 'karma:travis']);

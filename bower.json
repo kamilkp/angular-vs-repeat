@@ -26,5 +26,8 @@
   ],
   "authors": [
     "Kamil Pękala <kamilkp@gmail.com>"
-  ]
+  ],
+  "dependencies": {
+    "lodash": "^4.13.1"
+  }
 }

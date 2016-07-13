@@ -380,6 +380,9 @@
 
                         $scrollParent.on('scroll', scrollHandler);
 
+                        var onResize = _.debounce(function(){
+                            onWindowResize();
+                        }, 300);
                         function onWindowResize() {
                             if (typeof $attrs.vsAutoresize !== 'undefined') {
                                 autoSize = true;
@@ -393,9 +396,23 @@
                             }
                         }
 
+                        // see https://github.com/sdecima/javascript-detect-element-resize
+                        if (typeof window.addResizeListener === 'function') {
+                            window.addResizeListener($element[0], onResize);
+                        } else {
+                            //console.error('no resize listener');
+                            /*
+                             scope.$watch(function() {
+                             return $elem[0].offsetWidth || parseInt($elem.css('width'), 10);
+                             }, resize);
+                             */
+                        }
                         angular.element(window).on('resize', onWindowResize);
                         $scope.$on('$destroy', function() {
                             angular.element(window).off('resize', onWindowResize);
+                            if (typeof window.removeResizeListener === 'function') {
+                                window.removeResizeListener($element[0], onResize);
+                            }
                             $scrollParent.off('scroll', scrollHandler);
                         });
 
