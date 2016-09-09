@@ -510,12 +510,20 @@
                                 );
                             }
                             else {
-                                __startIndex = Math.max(
-                                    Math.floor(
-                                        ($scrollPosition - $scope.offsetBefore - scrollOffset) / $scope.elementSize
-                                    ) - $scope.excess / 2,
-                                    0
-                                );
+                                // if $scope.elementSize is 0:
+                                // - any positive value of scroll-difference yields Infinity, which isn't good for Math.max
+                                // - any negative value of scroll-difference yields -Infinity, which is covered
+                                // - a zero scroll-difference yields NaN, which makes the list disappear
+                                if (!$scope.elementSize) {
+                                    __startIndex = 0;
+                                } else {
+                                    __startIndex = Math.max(
+                                        Math.floor(
+                                            ($scrollPosition - $scope.offsetBefore - scrollOffset) / $scope.elementSize
+                                        ) - $scope.excess / 2,
+                                        0
+                                    );
+                                }
 
                                 __endIndex = Math.min(
                                     __startIndex + Math.ceil(
