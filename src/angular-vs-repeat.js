@@ -129,6 +129,20 @@
         return element === window ? getWindowScroll()[scrollProp] : element[scrollProp];
     }
 
+    function getScrollPosByTranslate(element, isTranslateX) {
+        return 0 - getComputedTranslate(element, isTranslateX);
+    }
+
+    function getComputedTranslate(obj, isTranslateX) {
+        if(!window.getComputedStyle) return;
+        var matrixXValue = 4, matrixYValue = 5, matrix3dXValue = 12, matrix3dYValue = 13;
+        var style = getComputedStyle(obj), transform = style.transform || style.webkitTransform || style.mozTransform;
+        var mat = transform.match(/^matrix3d\((.+)\)$/);
+        if(mat) return parseFloat(mat[1].split(', ')[isTranslateX ? matrix3dXValue : matrix3dYValue]);
+        mat = transform.match(/^matrix\((.+)\)$/);
+        return mat ? parseFloat(mat[1].split(', ')[isTranslateX ? matrixXValue : matrixYValue]) : 0;
+    }
+
     function getScrollOffset(vsElement, scrollElement, isHorizontal) {
         var vsPos = vsElement.getBoundingClientRect()[isHorizontal ? 'left' : 'top'];
         var scrollPos = scrollElement === window ? 0 : scrollElement.getBoundingClientRect()[isHorizontal ? 'left' : 'top'];
@@ -218,7 +232,8 @@
                             $$options = 'vsOptions' in $attrs ? $scope.$eval($attrs.vsOptions) : {},
                             clientSize = $$horizontal ? 'clientWidth' : 'clientHeight',
                             offsetSize = $$horizontal ? 'offsetWidth' : 'offsetHeight',
-                            scrollPos = $$horizontal ? 'scrollLeft' : 'scrollTop';
+                            scrollPos = $$horizontal ? 'scrollLeft' : 'scrollTop',
+                            translateMode = typeof $attrs.vsTranslateMode !== 'undefined';
 
                         $scope.totalSize = 0;
                         if (!('vsSize' in $attrs) && 'vsSizeProperty' in $attrs) {
@@ -490,7 +505,7 @@
                         });
 
                         function updateInnerCollection() {
-                            var $scrollPosition = getScrollPos($scrollParent[0], scrollPos);
+                            var $scrollPosition = translateMode ? getScrollPosByTranslate($scrollParent[0], $$horizontal) : getScrollPos($scrollParent[0], scrollPos);
                             var $clientSize = getClientSize($scrollParent[0], clientSize);
 
                             var scrollOffset = repeatContainer[0] === $scrollParent[0] ? 0 : getScrollOffset(
