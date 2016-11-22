@@ -137,9 +137,9 @@
         if(!window.getComputedStyle) return;
         var matrixXValue = 4, matrixYValue = 5, matrix3dXValue = 12, matrix3dYValue = 13;
         var style = getComputedStyle(obj), transform = style.transform || style.webkitTransform || style.mozTransform;
-        var mat = transform.match(/^matrix3d\((.+)\)$/);
+        var mat = transform && transform.match(/^matrix3d\((.+)\)$/);
         if(mat) return parseFloat(mat[1].split(', ')[isTranslateX ? matrix3dXValue : matrix3dYValue]);
-        mat = transform.match(/^matrix\((.+)\)$/);
+        mat = transform && transform.match(/^matrix\((.+)\)$/);
         return mat ? parseFloat(mat[1].split(', ')[isTranslateX ? matrixXValue : matrixYValue]) : 0;
     }
 
