@@ -564,15 +564,15 @@
 
                                 // Emit the event
                                 $scope.$emit('vsRepeatInnerCollectionUpdated', $scope.startIndex, $scope.endIndex, _prevStartIndex, _prevEndIndex);
-
+                                var triggerIndex;
                                 if ($attrs.vsScrolledToEnd) {
-                                    var triggerIndex = originalCollection.length - ($scope.scrolledToEndOffset || 0);
+                                    triggerIndex = originalCollection.length - ($scope.scrolledToEndOffset || 0);
                                     if (($scope.endIndex >= triggerIndex && _prevEndIndex < triggerIndex) || (originalCollection.length && $scope.endIndex === originalCollection.length)) {
                                         $scope.$eval($attrs.vsScrolledToEnd);
                                     }
                                 }
                                 if ($attrs.vsScrolledToBeginning) {
-                                    var triggerIndex = $scope.scrolledToBeginningOffset || 0;
+                                    triggerIndex = $scope.scrolledToBeginningOffset || 0;
                                     if (($scope.startIndex <= triggerIndex && _prevStartIndex > $scope.startIndex)) {
                                         $scope.$eval($attrs.vsScrolledToBeginning);
                                     }
