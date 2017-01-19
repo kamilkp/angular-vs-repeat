@@ -476,6 +476,8 @@
                                             );
                             updateInnerCollection();
 
+                            $scope.$scrollParent && $scope.$scrollParent.scrollTop(0);
+
                             $scope.$emit('vsRepeatReinitialized', $scope.startIndex, $scope.endIndex);
                         }
 
