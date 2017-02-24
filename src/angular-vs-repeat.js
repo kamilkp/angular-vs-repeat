@@ -69,6 +69,8 @@
     //              readjust upon window resize if the size is dependable on the viewport size
     // vs-scrolled-to-end="callback" - callback will be called when the last item of the list is rendered
     // vs-scrolled-to-end-offset="integer" - set this number to trigger the scrolledToEnd callback n items before the last gets rendered
+    // vs-scrolled-to-beginning="callback" - callback will be called when the first item of the list is rendered
+    // vs-scrolled-to-beginning-offset="integer" - set this number to trigger the scrolledToBeginning callback n items before the first gets rendered
 
     // EVENTS:
     // - 'vsRepeatTrigger' - an event the directive listens for to manually trigger reinitialization
@@ -159,6 +161,7 @@
                         'vsOffsetBefore': 'offsetBefore',
                         'vsOffsetAfter': 'offsetAfter',
                         'vsScrolledToEndOffset': 'scrolledToEndOffset',
+                        'vsScrolledToBeginningOffset': 'scrolledToBeginningOffset',
                         'vsExcess': 'excess'
                     };
 
@@ -561,11 +564,17 @@
 
                                 // Emit the event
                                 $scope.$emit('vsRepeatInnerCollectionUpdated', $scope.startIndex, $scope.endIndex, _prevStartIndex, _prevEndIndex);
-
+                                var triggerIndex;
                                 if ($attrs.vsScrolledToEnd) {
-                                    var triggerIndex = originalCollection.length - ($scope.scrolledToEndOffset || 0);
+                                    triggerIndex = originalCollection.length - ($scope.scrolledToEndOffset || 0);
                                     if (($scope.endIndex >= triggerIndex && _prevEndIndex < triggerIndex) || (originalCollection.length && $scope.endIndex === originalCollection.length)) {
                                         $scope.$eval($attrs.vsScrolledToEnd);
+                                    }
+                                }
+                                if ($attrs.vsScrolledToBeginning) {
+                                    triggerIndex = $scope.scrolledToBeginningOffset || 0;
+                                    if (($scope.startIndex <= triggerIndex && _prevStartIndex > $scope.startIndex)) {
+                                        $scope.$eval($attrs.vsScrolledToBeginning);
                                     }
                                 }
 
