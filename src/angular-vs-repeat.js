@@ -265,7 +265,7 @@
 
                         $scope.$watchCollection(rhs, function(coll) {
                             originalCollection = coll || [];
-                            refresh();
+                            refresh($scope.scrollSettings);
                         });
 
                         function refresh() {
@@ -458,7 +458,7 @@
                         function reinitOnClientHeightChange() {
                             var ch = getClientSize($scrollParent[0], clientSize);
                             if (ch !== _prevClientSize) {
-                                reinitialize();
+                                reinitialize($scope.scrollSettings);
                                 if ($scope.$root && !$scope.$root.$$phase) {
                                     $scope.$apply();
                                 }
