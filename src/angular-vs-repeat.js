@@ -594,7 +594,7 @@
                                 $afterContent.css(getLayoutProp(), (total - o2) + 'px');
                             }
 
-                            return digestRequired;
+                            return digestRequired && $scope.$root && !$scope.$root.$$phase;
                         }
                     }
                 };
