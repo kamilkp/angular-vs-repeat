@@ -144,7 +144,7 @@
         return {
             restrict: 'A',
             scope: true,
-            compile: function($element, $attrs) {
+            compile: function($element, $attrs, transclude) {
                 var repeatContainer = angular.isDefined($attrs.vsRepeatContainer) ? angular.element($element[0].querySelector($attrs.vsRepeatContainer)) : $element,
                     ngRepeatChild = repeatContainer.children().eq(0),
                     ngRepeatExpression,
@@ -369,7 +369,7 @@
 
                         repeatContainer.append($beforeContent);
                         repeatContainer.append(childClone);
-                        $compile(childClone)($scope);
+                        $compile(childClone, transclude)($scope);
                         repeatContainer.append($afterContent);
 
                         $scope.startIndex = 0;
