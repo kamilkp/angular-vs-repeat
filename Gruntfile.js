@@ -1,7 +1,7 @@
 module.exports = function(grunt){
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-karma');
+	/*grunt.loadNpmTasks('grunt-karma');*/
 
 	grunt.initConfig({
 		uglify: {
@@ -12,8 +12,8 @@ module.exports = function(grunt){
 				options: {
 					banner: [
 						'//',
-						'// Copyright Kamil Pękala http://github.com/kamilkp',
-						'// Angular Virtual Scroll Repeat v1.1.7 2016/03/08',
+						'// Copyright shilon5',
+						'// Virtual Angular 1.x Repeat',
 						'//',
 						''
 					].join('\n')
@@ -27,11 +27,11 @@ module.exports = function(grunt){
 				'test/spec.js',
 				'karma.conf.js'
 			]
-		},
+		}/*,
 		karma: {
 			unit: {
 				configFile: 'karma.conf.js',
-				singleRun: true,
+				singleRun: true
 			},
 			travis: {
 				configFile: 'karma.conf.js',
@@ -40,12 +40,12 @@ module.exports = function(grunt){
 					'Firefox'
 				]
 			}
-		}
+		}*/
 	});
 
 
 	grunt.registerTask('build', 'Minify javascript source code', 'uglify');
-	grunt.registerTask('test', 'Run unit tests', ['jshint', 'min', 'karma:unit']);
-	grunt.registerTask('default', ['test']);
-	grunt.registerTask('travis', ['jshint', 'min', 'karma:travis']);
+	/*grunt.registerTask('test', 'Run unit tests', ['jshint', 'min', 'karma:unit']);*/
+	/*grunt.registerTask('default', ['test']);*/
+	/*grunt.registerTask('travis', ['jshint', 'min', 'karma:travis']);*/
 };

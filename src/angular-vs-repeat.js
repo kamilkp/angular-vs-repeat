@@ -470,13 +470,19 @@
                             _prevEndIndex = void 0;
                             _minStartIndex = originalLength;
                             _maxEndIndex = 0;
+
+                            var prevTotalSize = $scope.totalSize || 0;
+
                             updateTotalSize(sizesPropertyExists ?
                                                 $scope.sizesCumulative[originalLength] :
                                                 $scope.elementSize * originalLength
                                             );
                             updateInnerCollection();
 
-                            $scope.$scrollParent && $scope.$scrollParent.scrollTop(0);
+                            if ( prevTotalSize > $scope.totalSize ) {
+                                // number of items reduced..
+                                $scope.$scrollParent && $scope.$scrollParent.scrollTop(0);
+                            }
 
                             $scope.$emit('vsRepeatReinitialized', $scope.startIndex, $scope.endIndex);
                         }
