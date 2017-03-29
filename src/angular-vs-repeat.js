@@ -479,9 +479,9 @@
                                             );
                             updateInnerCollection();
 
-                            if ( prevTotalSize > $scope.totalSize ) {
+                            if ( $scope.$scrollParent && ($scope.$scrollParent.scrollTop() > $scope.totalSize) ) {
                                 // number of items reduced..
-                                $scope.$scrollParent && $scope.$scrollParent.scrollTop(0);
+                                $scope.$scrollParent && $scope.$scrollParent.scrollTop(Math.max(0, $scope.totalSize));
                             }
 
                             $scope.$emit('vsRepeatReinitialized', $scope.startIndex, $scope.endIndex);
