@@ -83,19 +83,19 @@ bugfixes
 Version 1.0.0-rc6 (2014/09/29)
 =================
 
-###FEATURES
+### FEATURES
   * added support for resizing items by changing the item size property and then `$broadcasting()`ing the ``vsRepeatTrigger`` event.
 
 Version 1.0.0-rc5 (2014/08/01)
 =================
 
-###FEATURES
+### FEATURES
   * added an optional `vs-autoresize` attribute. You can use it without `vs-size-property` and without specifying element's size. The automatically computed element style will readjust upon window resize if the size is dependable on the viewport size.
 
 Version 1.0.0-rc4 (2014/07/15)
 =================
 
-###FEATURES
+### FEATURES
   * added support for filters in the `ngRepeat` expression
   * added support for variable items sizes (if they are known up front)
 
@@ -110,7 +110,7 @@ Semver compatible version name
 Version 1.0.0rc1 (2014/06/02)
 =================
 
-###FEATURES
+### FEATURES
 - added travis-ci integration
 - added unit tests
 - added minified version of the library
@@ -120,26 +120,26 @@ Version 1.0.0rc1 (2014/06/02)
 Version 0.3 (2014/05/30)
 =================
 
-###FEATURES
+### FEATURES
 - support for automatic computation of repeated elements' `height`/`width`
 
-###BREAKING CHANGE:
+### BREAKING CHANGE:
 - specifying the single element's size as a value of the `vs-repeat` attribute is no longer required. If it isn't provided the directive will calculate it automatically (once, the first time it renders at least one element). If for some reason you want to override that size, you can still provide is as a value of the `vs-repeat` attribute.
 
 Version 0.2 (2014/05/25)
 =================
 
-###FEATURES
+### FEATURES
 - support for horizontally stacked elements (a `vs-horizontal` attribute must be placed on the element)
 - no need to use jQuery, `vsRepeat` can now work with angular (jqLite) only
 - support for before/after offsets (in pixels) via `vs-offset-before` and `vs-offset-after`
 - full support for nested `vsRepeat`s and scrolling in both directions even within the same container
 
-###BREAKING CHANGE:
+### BREAKING CHANGE:
 - `vs-top-offset` attribute is now called `vs-offset-before`
 
 Version 0.1
 =================
 
-###FEATURES
+### FEATURES
 - support for vertically stacked elements

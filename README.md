@@ -23,17 +23,17 @@ You can find the source code for this demo on branch "gh-pages".
 
 Changelog: https://github.com/kamilkp/angular-vs-repeat/blob/master/CHANGELOG.md
 
-###DESCRIPTION:
+### DESCRIPTION:
 `vsRepeat` directive stands for **Virtual Scroll Repeat**. It turns a standard ngRepeated set of elements in a scrollable container
 into a component, where the user thinks he has all the elements rendered and all he needs to do is scroll (without any kind of
 pagination - which most users loath) and at the same time the browser isn't overloaded by that many elements/angular bindings etc.
 The directive renders only so many elements that can fit into current container's `clientHeight`/`clientWidth`.
 
-###LIMITATIONS:
+### LIMITATIONS:
 - current version only supports an Array as a right-hand-side object for `ngRepeat`
 - all rendered elements must have the same height/width or the sizes of the elements must be known up front
 
-###USAGE:
+### USAGE:
 First include `vs-repeat` as a module dependency in your app.
 In order to use the vsRepeat directive you need to place a vs-repeat attribute on a direct parent of an element with ng-repeat
 example:
@@ -78,7 +78,7 @@ example:
 - the library also supports ng-repeat-start/ng-repeat-end syntax
 - the value of vsRepeat attribute is the single element's height/width measured in pixels. If none provided, the directive will compute it automatically
 
-###OPTIONAL PARAMETERS (attributes):
+### OPTIONAL PARAMETERS (attributes):
 - `vs-scroll-parent="selector"` - selector to the scrollable container. The directive will look for a closest parent matching the given selector (defaults to the current element). It can also have the value of "window" in which case the directive will hook on the main window scrollbar
 - `vs-offset-before="value"` - top/left offset in pixels (defaults to 0)
 - `vs-offset-after="value"` - bottom/right offset in pixels (defaults to 0)
@@ -90,7 +90,7 @@ example:
 - `vs-scrolled-to-end="callback"` callback will be called when the last item of the list is rendered
 - `vs-scrolled-to-end-offset="integer"` - set this number to trigger the scrolledToEnd callback n items before the last gets rendered
 
-###EVENTS:
+### EVENTS:
 - `vsRepeatTrigger` - an event the directive listens for to manually trigger reinitialization
 - `vsRepeatResize` - an event the directive listens for to manually trigger the autosizing algorithm
 - `vsRepeatReinitialized` - an event the directive emits upon reinitialization done; the listener may accepts three arguments: `event`, `startIndex` and `endIndex`
