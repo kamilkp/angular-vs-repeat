@@ -534,6 +534,10 @@
                             $scope.startIndex = $$options.latch ? _minStartIndex : __startIndex;
                             $scope.endIndex = $$options.latch ? _maxEndIndex : __endIndex;
 
+                            // Move to the end of the collection if we are now past it
+                            if (_maxEndIndex < $scope.startIndex)
+                                $scope.startIndex = _maxEndIndex;
+
                             var digestRequired = false;
                             if (_prevStartIndex == null) {
                                 digestRequired = true;
