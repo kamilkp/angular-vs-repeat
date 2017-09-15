@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.1.7 2016/03/08
+// Angular Virtual Scroll Repeat v1.1.8 2017/09/15
 //
 
 (function(window, angular) {
@@ -512,7 +512,7 @@
                                     originalLength
                                 );
                             }
-                            else {
+                            else if ($scope.elementSize > 0) {
                                 __startIndex = Math.max(
                                     Math.floor(
                                         ($scrollPosition - $scope.offsetBefore - scrollOffset) / $scope.elementSize
@@ -526,6 +526,12 @@
                                     ) + $scope.excess,
                                     originalLength
                                 );
+                            }
+                            else {
+                                // Don't try to divide by zero, just default to the size of the
+                                // array
+                                __startIndex = 0;
+                                __endIndex = originalLength;
                             }
 
                             _minStartIndex = Math.min(__startIndex, _minStartIndex);
