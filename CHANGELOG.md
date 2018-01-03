@@ -1,3 +1,8 @@
+Version 1.1.8 (2017/09/15)
+=================
+
+  * Fixed a divide-by-zero issue that could prevent items from rendering
+
 Version 1.1.7 (2016/03/08)
 =================
 

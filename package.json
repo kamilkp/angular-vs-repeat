@@ -1,6 +1,6 @@
 {
   "name": "angular-vs-repeat",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "Virtual Scroll for AngularJS ngRepeat directive",
   "homepage": "http://kamilkp.github.io/angular-vs-repeat",
   "author": {
@@ -26,7 +26,10 @@
     "karma-firefox-launcher": "~0.1.3"
   },
   "scripts": {
-    "test": "grunt travis"
+    "test": "grunt travis --force"
   },
-  "dependencies": {}
+  "dependencies": {
+    "grunt-cli": "^1.2.0",
+    "travis": "^0.1.1"
+  }
 }
