@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.1.8 2018/03/07
+// Angular Virtual Scroll Repeat v1.1.9 2018/03/07
 //
 
 (function(window, angular) {
@@ -379,7 +379,7 @@
                             if (updateInnerCollection()) {
                                 $scope.$digest();
 
-                                const expectedSize = sizesPropertyExists ?
+                                var expectedSize = sizesPropertyExists ?
                                                         $scope.sizesCumulative[originalLength] :
                                                         $scope.elementSize * originalLength;
 
