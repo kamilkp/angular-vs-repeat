@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.1.9 2018/03/07
+// Angular Virtual Scroll Repeat v1.1.10 2018/03/07
 //
 
 (function(window, angular) {
@@ -383,8 +383,8 @@
                                                         $scope.sizesCumulative[originalLength] :
                                                         $scope.elementSize * originalLength;
 
-                                if (expectedSize !== $element[0].offsetHeight) {
-                                    console.warn('vsRepeat: size mismatch. Expected size ' + expectedSize + 'px whereas actual size is ' + $element[0].offsetHeight + 'px. Fix vsSize on element:', $element[0]);
+                                if (expectedSize !== $element[0].clientHeight) {
+                                    console.warn('vsRepeat: size mismatch. Expected size ' + expectedSize + 'px whereas actual size is ' + $element[0].clientHeight + 'px. Fix vsSize on element:', $element[0]);
                                 }
                             }
                         }
