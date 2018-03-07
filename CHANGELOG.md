@@ -1,3 +1,8 @@
+Version 1.1.7 (2017/03/07)
+=================
+
+  * added some logging when there is size mismatch
+
 Version 1.1.7 (2016/03/08)
 =================
 
