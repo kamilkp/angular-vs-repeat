@@ -69,6 +69,8 @@
     //              readjust upon window resize if the size is dependable on the viewport size
     // vs-scrolled-to-end="callback" - callback will be called when the last item of the list is rendered
     // vs-scrolled-to-end-offset="integer" - set this number to trigger the scrolledToEnd callback n items before the last gets rendered
+    // vs-scrolled-to-beginning="callback" - callback will be called when the first item of the list is rendered
+    // vs-scrolled-to-beginning-offset="integer" - set this number to trigger the scrolledToBeginning callback n items before the first gets rendered
 
     // EVENTS:
     // - 'vsRepeatTrigger' - an event the directive listens for to manually trigger reinitialization
@@ -173,6 +175,7 @@
                         'vsOffsetBefore': 'offsetBefore',
                         'vsOffsetAfter': 'offsetAfter',
                         'vsScrolledToEndOffset': 'scrolledToEndOffset',
+                        'vsScrolledToBeginningOffset': 'scrolledToBeginningOffset',
                         'vsExcess': 'excess'
                     };
 
@@ -390,6 +393,14 @@
                         function scrollHandler() {
                             if (updateInnerCollection()) {
                                 $scope.$digest();
+
+                                var expectedSize = sizesPropertyExists ?
+                                                        $scope.sizesCumulative[originalLength] :
+                                                        $scope.elementSize * originalLength;
+
+                                if (expectedSize !== $element[0].clientHeight) {
+                                    console.warn('vsRepeat: size mismatch. Expected size ' + expectedSize + 'px whereas actual size is ' + $element[0].clientHeight + 'px. Fix vsSize on element:', $element[0]);
+                                }
                             }
                         }
 
@@ -416,11 +427,6 @@
                             window.addResizeListener($element[0], onResize);
                         } else {
                             //console.error('no resize listener');
-                            /*
-                             scope.$watch(function() {
-                             return $elem[0].offsetWidth || parseInt($elem.css('width'), 10);
-                             }, resize);
-                             */
                         }
                         angular.element(window).on('resize', onWindowResize);
                         $scope.$on('$destroy', function() {
@@ -470,19 +476,11 @@
                             _prevEndIndex = void 0;
                             _minStartIndex = originalLength;
                             _maxEndIndex = 0;
-
-                            var prevTotalSize = $scope.totalSize || 0;
-
                             updateTotalSize(sizesPropertyExists ?
                                                 $scope.sizesCumulative[originalLength] :
                                                 $scope.elementSize * originalLength
                                             );
                             updateInnerCollection();
-
-                            if ( $scope.$scrollParent && ($scope.$scrollParent.scrollTop() > $scope.totalSize) ) {
-                                // number of items reduced..
-                                $scope.$scrollParent && $scope.$scrollParent.scrollTop(Math.max(0, $scope.totalSize));
-                            }
 
                             $scope.$emit('vsRepeatReinitialized', $scope.startIndex, $scope.endIndex);
                         }
@@ -571,6 +569,10 @@
                             $scope.startIndex = $$options.latch ? _minStartIndex : __startIndex;
                             $scope.endIndex = $$options.latch ? _maxEndIndex : __endIndex;
 
+                            // Move to the end of the collection if we are now past it
+                            if (_maxEndIndex < $scope.startIndex)
+                                $scope.startIndex = _maxEndIndex;
+
                             var digestRequired = false;
                             if (_prevStartIndex == null) {
                                 digestRequired = true;
@@ -601,11 +603,17 @@
 
                                 // Emit the event
                                 $scope.$emit('vsRepeatInnerCollectionUpdated', $scope.startIndex, $scope.endIndex, _prevStartIndex, _prevEndIndex);
-
+                                var triggerIndex;
                                 if ($attrs.vsScrolledToEnd) {
-                                    var triggerIndex = originalCollection.length - ($scope.scrolledToEndOffset || 0);
+                                    triggerIndex = originalCollection.length - ($scope.scrolledToEndOffset || 0);
                                     if (($scope.endIndex >= triggerIndex && _prevEndIndex < triggerIndex) || (originalCollection.length && $scope.endIndex === originalCollection.length)) {
                                         $scope.$eval($attrs.vsScrolledToEnd);
+                                    }
+                                }
+                                if ($attrs.vsScrolledToBeginning) {
+                                    triggerIndex = $scope.scrolledToBeginningOffset || 0;
+                                    if (($scope.startIndex <= triggerIndex && _prevStartIndex > $scope.startIndex)) {
+                                        $scope.$eval($attrs.vsScrolledToBeginning);
                                     }
                                 }
 
