@@ -536,6 +536,9 @@
                                 );
                             }
 
+                            __startIndex = Math.floor(__startIndex);
+                            __endIndex = Math.ceil(__endIndex);
+                            
                             _minStartIndex = Math.min(__startIndex, _minStartIndex);
                             _maxEndIndex = Math.max(__endIndex, _maxEndIndex);
 
