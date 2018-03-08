@@ -71,6 +71,7 @@
     // vs-scrolled-to-end-offset="integer" - set this number to trigger the scrolledToEnd callback n items before the last gets rendered
     // vs-scrolled-to-beginning="callback" - callback will be called when the first item of the list is rendered
     // vs-scrolled-to-beginning-offset="integer" - set this number to trigger the scrolledToBeginning callback n items before the first gets rendered
+    // vs-refresh="event" - custom event to watch to trigger a refresh
 
     // EVENTS:
     // - 'vsRepeatTrigger' - an event the directive listens for to manually trigger reinitialization
@@ -148,12 +149,15 @@
                 var repeatContainer = angular.isDefined($attrs.vsRepeatContainer) ? angular.element($element[0].querySelector($attrs.vsRepeatContainer)) : $element,
                     ngRepeatChild = repeatContainer.children().eq(0),
                     ngRepeatExpression,
+                    ngHideExpression,
                     childCloneHtml = ngRepeatChild[0].outerHTML,
                     expressionMatches,
                     lhs,
                     rhs,
                     rhsSuffix,
                     originalNgRepeatAttr,
+                    originalNgHideAttr,
+                    ngHideFn,
                     collectionName = '$vs_collection',
                     isNgRepeatStart = false,
                     attributesDictionary = {
@@ -187,6 +191,16 @@
                     throw new Error('angular-vs-repeat: no ng-repeat directive on a child element');
                 }
 
+
+                if (ngRepeatChild.attr('ng-hide')) {
+                    originalNgHideAttr = 'ng-hide';
+                    ngHideExpression = ngRepeatChild.attr('ng-hide');
+                }
+                else if (ngRepeatChild.attr('data-ng-hide')) {
+                    originalNgHideAttr = 'data-ng-hide';
+                    ngHideExpression = ngRepeatChild.attr('data-ng-hide');
+                }
+
                 expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+\S+)?$/.exec(ngRepeatExpression);
                 lhs = expressionMatches[1];
                 rhs = expressionMatches[2];
@@ -209,9 +223,11 @@
                             childClone = angular.element(childCloneHtml),
                             childTagName = childClone[0].tagName.toLowerCase(),
                             originalCollection = [],
+                            _originalCollection = [],
                             originalLength,
                             $$horizontal = typeof $attrs.vsHorizontal !== 'undefined',
                             $beforeContent = angular.element('<' + childTagName + ' class="vs-repeat-before-content"></' + childTagName + '>'),
+                            $dummyContent = angular.element('<' + childTagName + ' class="vs-repeat-dummy-content"></' + childTagName + '>'),
                             $afterContent = angular.element('<' + childTagName + ' class="vs-repeat-after-content"></' + childTagName + '>'),
                             autoSize = !$attrs.vsRepeat,
                             sizesPropertyExists = !!$attrs.vsSize || !!$attrs.vsSizeProperty,
@@ -245,10 +261,14 @@
 
                         if ($$horizontal) {
                             $beforeContent.css('height', '100%');
+                            $dummyContent.css('height', '100%');
+                            $dummyContent.css('width', '0px');
                             $afterContent.css('height', '100%');
                         }
                         else {
                             $beforeContent.css('width', '100%');
+                            $dummyContent.css('width', '100%');
+                            $dummyContent.css('height', '0px');
                             $afterContent.css('width', '100%');
                         }
 
@@ -264,11 +284,31 @@
 
 
                         $scope.$watchCollection(rhs, function(coll) {
-                            originalCollection = coll || [];
+                            _originalCollection = coll || [];
                             refresh();
                         });
 
+                        if (ngHideExpression) {
+                            ngHideFn = $parse(ngHideExpression);
+                        }
+
+                        if ($attrs.vsRefresh) {
+                            $scope.$on($attrs.vsRefresh, refresh);
+                        }
+
                         function refresh() {
+                            originalCollection = [];
+
+                            if (ngHideExpression) {
+                                for (var i = 0; i < _originalCollection.length; i++) {
+                                    if (!ngHideFn($scope.$parent, { node: _originalCollection[i] })) {
+                                        originalCollection.push(_originalCollection[i]);
+                                    }
+                                }
+                            } else {
+                                originalCollection = _originalCollection;
+                            }
+
                             if (!originalCollection || originalCollection.length < 1) {
                                 $scope[collectionName] = [];
                                 originalLength = 0;
@@ -365,6 +405,7 @@
                         }
 
                         childClone.eq(0).attr(originalNgRepeatAttr, lhs + ' in ' + collectionName + (rhsSuffix ? ' ' + rhsSuffix : ''));
+                        childClone.eq(0).removeAttr(originalNgHideAttr);
                         childClone.addClass('vs-repeat-repeated-element');
 
                         repeatContainer.append($beforeContent);
@@ -602,6 +643,11 @@
                                 var o2 = parsed($scope, {$index: $scope[collectionName].length});
                                 var total = $scope.totalSize;
 
+                                if ($scope.startIndex % 2 === 1) {
+                                    $beforeContent.after($dummyContent);
+                                } else {
+                                    $dummyContent.remove();
+                                }
                                 $beforeContent.css(getLayoutProp(), o1 + 'px');
                                 $afterContent.css(getLayoutProp(), (total - o2) + 'px');
                             }
