@@ -1,3 +1,8 @@
+Version 1.1.11 (2017/03/09)
+=================
+
+  * `vs-scroll-margin` option (documentation on that will come shortly)
+
 Version 1.1.10 (2017/03/07)
 =================
 

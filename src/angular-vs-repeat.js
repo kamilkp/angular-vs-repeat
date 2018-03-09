@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// Angular Virtual Scroll Repeat v1.1.10 2018/03/07
+// Angular Virtual Scroll Repeat v1.1.11 2018/03/09
 //
 
 (function(window, angular) {
@@ -162,7 +162,8 @@
                         'vsOffsetAfter': 'offsetAfter',
                         'vsScrolledToEndOffset': 'scrolledToEndOffset',
                         'vsScrolledToBeginningOffset': 'scrolledToBeginningOffset',
-                        'vsExcess': 'excess'
+                        'vsExcess': 'excess',
+                        'vsScrollMargin': 'scrollMargin'
                     };
 
                 if (ngRepeatChild.attr('ng-repeat')) {
@@ -241,6 +242,7 @@
                         $scope.elementSize = (+$attrs.vsRepeat) || getClientSize($scrollParent[0], clientSize) || 50;
                         $scope.offsetBefore = 0;
                         $scope.offsetAfter = 0;
+                        $scope.scrollMargin = 0;
                         $scope.excess = 2;
 
                         if ($$horizontal) {
@@ -498,7 +500,7 @@
 
                             if (sizesPropertyExists) {
                                 __startIndex = 0;
-                                while ($scope.sizesCumulative[__startIndex] < $scrollPosition - $scope.offsetBefore - scrollOffset) {
+                                while ($scope.sizesCumulative[__startIndex] < $scrollPosition - $scope.offsetBefore - scrollOffset - $scope.scrollMargin) {
                                     __startIndex++;
                                 }
                                 if (__startIndex > 0) { __startIndex--; }
@@ -510,7 +512,7 @@
                                 );
 
                                 __endIndex = __startIndex;
-                                while ($scope.sizesCumulative[__endIndex] < $scrollPosition - $scope.offsetBefore - scrollOffset + $clientSize) {
+                                while ($scope.sizesCumulative[__endIndex] < $scrollPosition - $scope.offsetBefore - scrollOffset + $scope.scrollMargin + $clientSize) {
                                     __endIndex++;
                                 }
 
