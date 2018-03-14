@@ -1,12 +1,11 @@
 module.exports = function(config) {
 	config.set({
-		frameworks: ['mocha'],
+		frameworks: ['mocha', 'chai'],
 
 		// list of files / patterns to load in the browser
 		files: [
-			'node_modules/expect.js/index.js',
 			'lib/angular.js',
-			'src/angular-vs-repeat.min.js',
+			'dist/angular-vs-repeat.min.js',
 			'lib/angular-mocks.js',
 			'test/spec.js',
 		],
@@ -62,6 +61,7 @@ module.exports = function(config) {
 
 		plugins: [
 			'karma-mocha',
+			'karma-chai',
 			'karma-chrome-launcher',
 			'karma-firefox-launcher'
 		]
