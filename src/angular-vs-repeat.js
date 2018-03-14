@@ -238,6 +238,17 @@
                             $scope.sizesCumulative = [];
                         }
 
+                        if ($attrs.vsDebug === 'true') {
+                            var $debugParent = $attrs.vsScrollParent === 'window' ? angular.element(document.body) : $scrollParent;
+                            var $debug = angular.element('<div class="vs-repeat-debug-element"></div>');
+                            $debug.css('position', $attrs.vsScrollParent === 'window' ? 'fixed' : 'absolute');
+                            $debugParent.append($debug);
+
+                            $scope.$on('$destroy', () => {
+                                $debug.remove();
+                            });
+                        }
+
                         //initial defaults
                         $scope.elementSize = (+$attrs.vsRepeat) || getClientSize($scrollParent[0], clientSize) || 50;
                         $scope.offsetBefore = 0;
@@ -489,6 +500,10 @@
                             var $scrollPosition = getScrollPos($scrollParent[0], scrollPos);
                             var $clientSize = getClientSize($scrollParent[0], clientSize);
 
+                            if ($attrs.vsDebug === 'true') {
+                                $clientSize /= 2;
+                            }
+
                             var scrollOffset = repeatContainer[0] === $scrollParent[0] ? 0 : getScrollOffset(
                                                     repeatContainer[0],
                                                     $scrollParent[0],
@@ -525,7 +540,7 @@
                             else {
                                 __startIndex = Math.max(
                                     Math.floor(
-                                        ($scrollPosition - $scope.offsetBefore - scrollOffset) / $scope.elementSize
+                                        ($scrollPosition - $scope.offsetBefore - scrollOffset - $scope.scrollMargin) / $scope.elementSize
                                     ) - $scope.excess / 2,
                                     0
                                 );
@@ -615,6 +630,23 @@
             }
         };
     }]);
+
+    angular.element(document.head).append([
+		'<style id="angular-vs-repeat-style">' +
+		'.vs-repeat-debug-element {' +
+            'top: 50%;' +
+            'left: 0;' +
+            'right: 0;' +
+            'height: 1px;' +
+            'background: red;' +
+            'z-index: 99999999;' +
+            'box-shadow: 0 0 20px red' +
+        '}' +
+        '.vs-repeat-debug-element + .vs-repeat-debug-element {' +
+        '   display: none;' +
+        '}' +
+		'</style>'
+	].join(''));
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = vsRepeatModule.name;
