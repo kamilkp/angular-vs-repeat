@@ -81,8 +81,7 @@
     'msMatchesSelector',
     'mozMatches',
     'mozMatchesSelector',
-  ].reduce((res, prop) => res ?? prop in document.documentElement ? prop : null, null);
-  console.warn(matchingFunction);
+  ].reduce((res, prop) => res ?? (prop in document.documentElement ? prop : null), null);
 
   var closestElement = angular.element.prototype.closest || function (selector) {
     var el = this[0].parentNode;

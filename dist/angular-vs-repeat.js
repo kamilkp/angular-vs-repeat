@@ -69,9 +69,8 @@
   var matchingFunction = ['matches', 'matchesSelector', 'webkitMatches', 'webkitMatchesSelector', 'msMatches', 'msMatchesSelector', 'mozMatches', 'mozMatchesSelector'].reduce(function (res, prop) {
     var _res;
 
-    return ((_res = res) !== null && _res !== void 0 ? _res : prop in document.documentElement) ? prop : null;
+    return (_res = res) !== null && _res !== void 0 ? _res : prop in document.documentElement ? prop : null;
   }, null);
-  console.warn(matchingFunction);
 
   var closestElement = angular.element.prototype.closest || function (selector) {
     var el = this[0].parentNode;
