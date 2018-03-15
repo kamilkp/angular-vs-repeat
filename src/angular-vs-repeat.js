@@ -219,6 +219,7 @@
               $$options = 'vsOptions' in $attrs ? $scope.$eval($attrs.vsOptions) : {},
               clientSize = $$horizontal ? 'clientWidth' : 'clientHeight',
               offsetSize = $$horizontal ? 'offsetWidth' : 'offsetHeight',
+              scrollSize = $$horizontal ? 'scrollWidth' : 'scrollHeight',
               scrollPos = $$horizontal ? 'scrollLeft' : 'scrollTop';
 
             $scope.totalSize = 0;
@@ -393,7 +394,7 @@
                   $scope.sizesCumulative[originalLength] :
                   $scope.elementSize * originalLength;
 
-                if (expectedSize !== $element[0].clientHeight) {
+                if (expectedSize !== $element[0][scrollSize]) {
                   console.warn('vsRepeat: size mismatch. Expected size ' + expectedSize + 'px whereas actual size is ' + $element[0].clientHeight + 'px. Fix vsSize on element:', $element[0]);
                 }
               }
