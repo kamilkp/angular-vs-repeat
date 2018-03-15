@@ -3,6 +3,8 @@
  * Angular Virtual Scroll Repeat v2.0.0 2018/03/15
  */
 
+ /* global console */
+
 ((window, angular) => {
   // DESCRIPTION:
   // vsRepeat directive stands for Virtual Scroll Repeat. It turns a standard ngRepeated set of elements in a scrollable container
@@ -103,8 +105,8 @@
   function getWindowScroll() {
     if ('pageYOffset' in window) {
       return {
-        scrollTop: pageYOffset,
-        scrollLeft: pageXOffset,
+        scrollTop: window.pageYOffset,
+        scrollLeft: window.pageXOffset,
       };
     }
 
@@ -150,16 +152,63 @@
     throw new Error('angular-vs-repeat: no ng-repeat directive on a child element');
   }
 
+  function printDeprecationWarning(message) {
+    console.warn(`vs-repeat deprecation: ${message}`);
+  }
+
+  function attrDeprecated(attrname) {
+    printDeprecationWarning(`${attrname} attribute is deprecated. Use vs-repeat-options <link> instead.`);
+  }
+
+  const defaultOptions = {
+    latch: false,
+    hunked: false,
+    container: null,
+    scrollParent: null,
+    size: null,
+    offsetBefore: 0,
+    offsetAfter: 0,
+    scrolledToBeginning: angular.noop,
+    scrolledToEnd: angular.noop,
+    scrolledToBeginningOffset: 0,
+    scrolledToEndOffset: 0,
+    scrollMargin: 0,
+    horizontal: false,
+    autoresize: false,
+  };
+
   const vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', function($compile, $parse) {
     return {
       restrict: 'A',
       scope: true,
-      compile($element, $attrs) {
-        const repeatContainer = 'vsRepeatContainer' in $attrs ? angular.element($element[0].querySelector($attrs.vsRepeatContainer)) : $element;
-        const repeatContainerChildren = repeatContainer.children();
+      compile(compileElement, compileAttrs) {
+        const compileRepeatContainer = 'vsRepeatContainer' in compileAttrs ? angular.element(compileElement[0].querySelector(compileAttrs.vsRepeatContainer)) : compileElement;
+        const repeatContainerChildren = compileRepeatContainer.children();
         const ngRepeatChild = repeatContainerChildren.eq(0);
         let childCloneHtml = ngRepeatChild[0].outerHTML;
         const collectionName = '$vs_collection'; // TODO: make configurable?
+
+        [
+          'vsSize',
+          'vsScrollParent',
+          'vsSizeProperty',
+          'vsHorizontal',
+          'vsOffsetBefore',
+          'vsOffsetAfter',
+          'vsScrolledToEndOffset',
+          'vsScrolledToBeginningOffset',
+          'vsExcess',
+          'vsScrollMargin',
+        ].forEach((attrname) => {
+          if (attrname in compileAttrs) {
+            attrDeprecated(attrname);
+          }
+        });
+
+        if (compileAttrs.vsRepeat) {
+          attrDeprecated('vsRepeat');
+        }
+
         const attributesDictionary = {
           'vsRepeat': 'elementSize',
           'vsOffsetBefore': 'offsetBefore',
@@ -185,32 +234,36 @@
           }
         }
 
-        repeatContainer.empty();
+        compileRepeatContainer.empty();
         return {
           pre: function($scope, $element, $attrs) {
-            let repeatContainer = angular.isDefined($attrs.vsRepeatContainer) ? angular.element($element[0].querySelector($attrs.vsRepeatContainer)) : $element,
-              childClone = angular.element(childCloneHtml),
-              childTagName = childClone[0].tagName.toLowerCase(),
-              originalCollection = [],
-              originalLength,
-              $$horizontal = typeof $attrs.vsHorizontal !== 'undefined',
-              $beforeContent = angular.element('<' + childTagName + ' class="vs-repeat-before-content"></' + childTagName + '>'),
-              $afterContent = angular.element('<' + childTagName + ' class="vs-repeat-after-content"></' + childTagName + '>'),
-              autoSize = !$attrs.vsRepeat && !$attrs.vsSize,
-              sizesPropertyExists = !!$attrs.vsSize || !!$attrs.vsSizeProperty,
-              $scrollParent = $attrs.vsScrollParent ?
-                $attrs.vsScrollParent === 'window' ? angular.element(window) :
-                  closestElement.call(repeatContainer, $attrs.vsScrollParent) : repeatContainer,
-              $$options = 'vsOptions' in $attrs ? $scope.$eval($attrs.vsOptions) : {},
-              clientSize = $$horizontal ? 'clientWidth' : 'clientHeight',
-              offsetSize = $$horizontal ? 'offsetWidth' : 'offsetHeight',
-              scrollSize = $$horizontal ? 'scrollWidth' : 'scrollHeight',
-              scrollPos = $$horizontal ? 'scrollLeft' : 'scrollTop';
+            $scope.vsRepeat = {
+              options: {
+                ...defaultOptions,
+                ...('vsRepeatOptions' in $attrs ? $scope.$eval($attrs.vsRepeatOptions) : {}),
+              },
+            };
+
+            const { options } = $scope.vsRepeat;
+
+            const repeatContainer = angular.isDefined($attrs.vsRepeatContainer) ? angular.element($element[0].querySelector($attrs.vsRepeatContainer)) : $element;
+            const childClone = angular.element(childCloneHtml);
+            const childTagName = childClone[0].tagName.toLowerCase();
+            let originalCollection = [];
+            let originalLength;
+            const $beforeContent = angular.element('<' + childTagName + ' class="vs-repeat-before-content"></' + childTagName + '>');
+            const $afterContent = angular.element('<' + childTagName + ' class="vs-repeat-after-content"></' + childTagName + '>');
+            let autosizingRequired = options.size === null;
+            let sizesPropertyExists = !autosizingRequired;
+            let $scrollParent = options.scrollParent ?
+                  options.scrollParent === 'window' ? angular.element(window) :
+                  closestElement.call(repeatContainer, options.scrollParent) : repeatContainer;
+            let clientSize = options.horizontal ? 'clientWidth' : 'clientHeight';
+            let offsetSize = options.horizontal ? 'offsetWidth' : 'offsetHeight';
+            let scrollSize = options.horizontal ? 'scrollWidth' : 'scrollHeight';
+            let scrollPos = options.horizontal ? 'scrollLeft' : 'scrollTop';
 
             $scope.totalSize = 0;
-            if (!('vsSize' in $attrs) && 'vsSizeProperty' in $attrs) {
-              console.warn('vs-size-property attribute is deprecated. Please use vs-size attribute which also accepts angular expressions.');
-            }
 
             if ($scrollParent.length === 0) {
               throw 'Specified scroll parent selector did not match any element';
@@ -221,10 +274,10 @@
               $scope.sizesCumulative = [];
             }
 
-            if ($attrs.vsDebug === 'true') {
-              const $debugParent = $attrs.vsScrollParent === 'window' ? angular.element(document.body) : $scrollParent;
+            if (options.debug) {
+              const $debugParent = options.scrollParent === 'window' ? angular.element(document.body) : $scrollParent;
               const $debug = angular.element('<div class="vs-repeat-debug-element"></div>');
-              $debug.css('position', $attrs.vsScrollParent === 'window' ? 'fixed' : 'absolute');
+              $debug.css('position', options.scrollParent === 'window' ? 'fixed' : 'absolute');
               $debugParent.append($debug);
 
               $scope.$on('$destroy', () => {
@@ -233,13 +286,10 @@
             }
 
             //initial defaults
-            $scope.elementSize = (+$attrs.vsRepeat) || getClientSize($scrollParent[0], clientSize) || 50;
-            $scope.offsetBefore = 0;
-            $scope.offsetAfter = 0;
-            $scope.scrollMargin = 0;
-            $scope.excess = 2;
+            $scope.elementSize = getClientSize($scrollParent[0], clientSize) || 50;
+            options.excess = 2;
 
-            if ($$horizontal) {
+            if (options.horizontal) {
               $beforeContent.css('height', '100%');
               $afterContent.css('height', '100%');
             } else {
@@ -247,19 +297,22 @@
               $afterContent.css('width', '100%');
             }
 
-            Object.keys(attributesDictionary).forEach(function(key) {
-              if ($attrs[key]) {
-                $attrs.$observe(key, function(value) {
-                  // '+' serves for getting a number from the string as the attributes are always strings
-                  $scope[attributesDictionary[key]] = +value;
+            if ($attrs.vsRepeatOptions) {
+              $scope.$watchCollection($attrs.vsRepeatOptions, (newOpts) => {
+                const mergedOptions = {
+                  ...options,
+                  ...newOpts,
+                };
+
+                if (JSON.stringify(mergedOptions) !== JSON.stringify(options)) {
+                  Object.assign(options, newOpts);
                   reinitialize();
-                });
-              }
-            });
+                }
+              });
+            }
 
-
-            $scope.$watchCollection(rhs, function(coll) {
-              originalCollection = coll || [];
+            $scope.$watchCollection(rhs, (coll = []) => {
+              originalCollection = coll;
               refresh();
             });
 
@@ -275,8 +328,8 @@
                     const s = $scope.$new(false);
                     angular.extend(s, item);
                     s[lhs] = item;
-                    const size = ($attrs.vsSize || $attrs.vsSizeProperty) ?
-                      s.$eval($attrs.vsSize || $attrs.vsSizeProperty) :
+                    const size = sizesPropertyExists ?
+                      s.$eval(String(options.size)) :
                       $scope.elementSize;
                     s.$destroy();
                     return size;
@@ -297,7 +350,7 @@
             }
 
             function setAutoSize() {
-              if (autoSize) {
+              if (autosizingRequired) {
                 $scope.$$postDigest(function() {
                   if (repeatContainer[0].offsetHeight || repeatContainer[0].offsetWidth) { // element is visible
                     let children = repeatContainer.children(),
@@ -331,7 +384,7 @@
 
                     if (gotSomething) {
                       reinitialize();
-                      autoSize = false;
+                      autosizingRequired = false;
                       if ($scope.$root && !$scope.$root.$$phase) {
                         $scope.$apply();
                       }
@@ -350,7 +403,7 @@
 
             function getLayoutProp() {
               const layoutPropPrefix = childTagName === 'tr' ? '' : 'min-';
-              const layoutProp = $$horizontal ? layoutPropPrefix + 'width' : layoutPropPrefix + 'height';
+              const layoutProp = options.horizontal ? layoutPropPrefix + 'width' : layoutPropPrefix + 'height';
               return layoutProp;
             }
 
@@ -382,8 +435,8 @@
             $scrollParent.on('scroll', scrollHandler);
 
             function onWindowResize() {
-              if (typeof $attrs.vsAutoresize !== 'undefined') {
-                autoSize = true;
+              if (options.autoresize) {
+                autosizingRequired = true;
                 setAutoSize();
                 if ($scope.$root && !$scope.$root.$$phase) {
                   $scope.$apply();
@@ -395,15 +448,15 @@
             }
 
             angular.element(window).on('resize', onWindowResize);
-            $scope.$on('$destroy', function() {
+            $scope.$on('$destroy', () => {
               angular.element(window).off('resize', onWindowResize);
               $scrollParent.off('scroll', scrollHandler);
             });
 
             $scope.$on('vsRepeatTrigger', refresh);
 
-            $scope.$on('vsRepeatResize', function() {
-              autoSize = true;
+            $scope.$on('vsRepeatResize', () => {
+              autosizingRequired = true;
               setAutoSize();
             });
 
@@ -413,12 +466,12 @@
               _maxEndIndex;
 
             $scope.$on('vsRenderAll', function() {//e , quantum) {
-              if ($$options.latch) {
+              if (options.latch) {
                 setTimeout(function() {
                   // var __endIndex = Math.min($scope.endIndex + (quantum || 1), originalLength);
                   const __endIndex = originalLength;
                   _maxEndIndex = Math.max(__endIndex, _maxEndIndex);
-                  $scope.endIndex = $$options.latch ? _maxEndIndex : __endIndex;
+                  $scope.endIndex = options.latch ? _maxEndIndex : __endIndex;
                   $scope[collectionName] = originalCollection.slice($scope.startIndex, $scope.endIndex);
                   _prevEndIndex = $scope.endIndex;
 
@@ -449,7 +502,7 @@
             }
 
             function updateTotalSize(size) {
-              $scope.totalSize = $scope.offsetBefore + size + $scope.offsetAfter;
+              $scope.totalSize = options.offsetBefore + size + options.offsetAfter;
             }
 
             let _prevClientSize;
@@ -476,14 +529,14 @@
               const $scrollPosition = getScrollPos($scrollParent[0], scrollPos);
               let $clientSize = getClientSize($scrollParent[0], clientSize);
 
-              if ($attrs.vsDebug === 'true') {
+              if (options.debug) {
                 $clientSize /= 2;
               }
 
               const scrollOffset = repeatContainer[0] === $scrollParent[0] ? 0 : getScrollOffset(
                 repeatContainer[0],
                 $scrollParent[0],
-                $$horizontal
+                options.horizontal,
               );
 
               let __startIndex = $scope.startIndex;
@@ -491,7 +544,7 @@
 
               if (sizesPropertyExists) {
                 __startIndex = 0;
-                while ($scope.sizesCumulative[__startIndex] < $scrollPosition - $scope.offsetBefore - scrollOffset - $scope.scrollMargin) {
+                while ($scope.sizesCumulative[__startIndex] < $scrollPosition - options.offsetBefore - scrollOffset - options.scrollMargin) {
                   __startIndex++;
                 }
                 if (__startIndex > 0) {
@@ -500,37 +553,37 @@
 
                 // Adjust the start index according to the excess
                 __startIndex = Math.max(
-                  Math.floor(__startIndex - $scope.excess / 2),
+                  Math.floor(__startIndex - options.excess / 2),
                   0
                 );
 
                 __endIndex = __startIndex;
-                while ($scope.sizesCumulative[__endIndex] < $scrollPosition - $scope.offsetBefore - scrollOffset + $scope.scrollMargin + $clientSize) {
+                while ($scope.sizesCumulative[__endIndex] < $scrollPosition - options.offsetBefore - scrollOffset + options.scrollMargin + $clientSize) {
                   __endIndex++;
                 }
 
                 // Adjust the end index according to the excess
                 __endIndex = Math.min(
-                  Math.ceil(__endIndex + $scope.excess / 2),
+                  Math.ceil(__endIndex + options.excess / 2),
                   originalLength
                 );
               } else {
                 __startIndex = Math.max(
                   Math.floor(
-                    ($scrollPosition - $scope.offsetBefore - scrollOffset - $scope.scrollMargin) / $scope.elementSize
-                  ) - $scope.excess / 2,
+                    ($scrollPosition - options.offsetBefore - scrollOffset - options.scrollMargin) / $scope.elementSize
+                  ) - options.excess / 2,
                   0
                 );
 
                 __endIndex = Math.min(
                   __startIndex + Math.ceil(
                     $clientSize / $scope.elementSize
-                  ) + $scope.excess,
+                  ) + options.excess,
                   originalLength
                 );
 
                 // autosizing needs at least one element to measure it
-                if (autoSize && __startIndex === __endIndex && __endIndex < originalLength - 1) {
+                if (autosizingRequired && __startIndex === __endIndex && __endIndex < originalLength - 1) {
                   __endIndex++;
                 }
               }
@@ -538,8 +591,8 @@
               _minStartIndex = Math.min(__startIndex, _minStartIndex);
               _maxEndIndex = Math.max(__endIndex, _maxEndIndex);
 
-              $scope.startIndex = $$options.latch ? _minStartIndex : __startIndex;
-              $scope.endIndex = $$options.latch ? _maxEndIndex : __endIndex;
+              $scope.startIndex = options.latch ? _minStartIndex : __startIndex;
+              $scope.endIndex = options.latch ? _maxEndIndex : __endIndex;
 
               // Move to the end of the collection if we are now past it
               if (_maxEndIndex < $scope.startIndex)
@@ -553,11 +606,11 @@
               }
 
               if (!digestRequired) {
-                if ($$options.hunked) {
-                  if (Math.abs($scope.startIndex - _prevStartIndex) >= $scope.excess / 2 ||
+                if (options.hunked) {
+                  if (Math.abs($scope.startIndex - _prevStartIndex) >= options.excess / 2 ||
                                         ($scope.startIndex === 0 && _prevStartIndex !== 0)) {
                     digestRequired = true;
-                  } else if (Math.abs($scope.endIndex - _prevEndIndex) >= $scope.excess / 2 ||
+                  } else if (Math.abs($scope.endIndex - _prevEndIndex) >= options.excess / 2 ||
                                         ($scope.endIndex === originalLength && _prevEndIndex !== originalLength)) {
                     digestRequired = true;
                   }
@@ -573,16 +626,16 @@
                 // Emit the event
                 $scope.$emit('vsRepeatInnerCollectionUpdated', $scope.startIndex, $scope.endIndex, _prevStartIndex, _prevEndIndex);
                 let triggerIndex;
-                if ($attrs.vsScrolledToEnd) {
-                  triggerIndex = originalCollection.length - ($scope.scrolledToEndOffset || 0);
+                if (options.scrolledToEnd) {
+                  triggerIndex = originalCollection.length - options.scrolledToEndOffset;
                   if (($scope.endIndex >= triggerIndex && _prevEndIndex < triggerIndex) || (originalCollection.length && $scope.endIndex === originalCollection.length)) {
-                    $scope.$eval($attrs.vsScrolledToEnd);
+                    $scope.$eval(options.scrolledToEnd);
                   }
                 }
-                if ($attrs.vsScrolledToBeginning) {
-                  triggerIndex = $scope.scrolledToBeginningOffset || 0;
+                if (options.scrolledToBeginning) {
+                  triggerIndex = options.scrolledToBeginningOffset;
                   if (($scope.startIndex <= triggerIndex && _prevStartIndex > $scope.startIndex)) {
-                    $scope.$eval($attrs.vsScrolledToBeginning);
+                    $scope.$eval(options.scrolledToBeginning);
                   }
                 }
 

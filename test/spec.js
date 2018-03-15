@@ -140,7 +140,7 @@
 
     it('should support horizontal stacking of elements', function(done){
       $element = $compile([
-        '<div vs-repeat class="container horizontal" vs-horizontal>',
+        '<div vs-repeat class="container horizontal" vs-repeat-options="{horizontal: true}">',
         '	<div ng-repeat="foo in bar" class="item">',
         '		<span class="value">{{foo.value}}</span>',
         '	</div>',
@@ -176,7 +176,7 @@
 
     it('should support manually provided unique element size', function(done){
       $element = $compile([
-        '<div vs-repeat="150" class="container">',
+        '<div vs-repeat vs-repeat-options="{size: 150}" class="container">',
         '	<div ng-repeat="foo in bar" class="item">',
         '		<span class="value">{{foo.value}}</span>',
         '	</div>',
@@ -186,15 +186,17 @@
       $scope.bar = getArray(100);
       $scope.$digest();
 
-      var elems = getElements($element);
-      expect(elems.length).to.be.greaterThan(1);
-      expect(elems.length).to.be.lessThan(5);
-      done();
+      setTimeout(() => {
+        var elems = getElements($element);
+        expect(elems.length).to.be.greaterThan(1);
+        expect(elems.length).to.be.lessThan(5);
+        done();
+      });
     });
 
     it('should support manually provided size per element', function(done){
       $element = $compile([
-        '<div vs-repeat vs-size="size" class="container">',
+        '<div vs-repeat vs-repeat-options="{size: \'foo.size\'}" class="container">',
         '	<div ng-repeat="foo in bar" class="item">',
         '		<span class="value">{{foo.value}}</span>',
         '	</div>',
@@ -214,7 +216,7 @@
 
     it('should support angular expression as vs-size attribute value', function(done){
       $element = $compile([
-        '<div vs-repeat vs-size="2*foo.size - 10" class="container">',
+        '<div vs-repeat vs-repeat-options="{size: \'2*foo.size - 10\'}" class="container">',
         '	<div ng-repeat="foo in bar" class="item" ng-style="{ height: (2*foo.size - 10) + \'px\' }">',
         '		<span class="value">{{foo.value}}</span>',
         '	</div>',
@@ -234,7 +236,7 @@
 
     it('should support latching mode', function(done){
       $element = $compile([
-        '<div vs-repeat vs-size="foo.size" vs-options="{latch: true}" class="container">',
+        '<div vs-repeat vs-repeat-options="{size: \'foo.size\', latch: true}" class="container">',
         '	<div ng-repeat="foo in bar" class="item" ng-style="{ height: foo.size + \'px\' }">',
         '		<span class="value">{{foo.value}}</span>',
         '	</div>',
@@ -259,7 +261,7 @@
 
     it('should support changing manually provided size per element', function(done){
       $element = $compile([
-        '<div vs-repeat vs-size="foo.size" class="container">',
+        '<div vs-repeat vs-repeat-options="{size: \'foo.size\'}" class="container">',
         '	<div ng-repeat="foo in bar" class="item" ng-style="{ height: foo.size + \'px\' }">',
         '		<span class="value">{{foo.value}}</span>',
         '	</div>',
@@ -292,7 +294,7 @@
     it('should support non-default scrollable container', function(done){
       $element = angular.element([
         '<div class="scroll">',
-        '	<div vs-repeat vs-scroll-parent=".scroll">',
+        '	<div vs-repeat vs-repeat-options="{scrollParent: \'.scroll\'}">',
         '		<div ng-repeat="foo in bar" class="item">',
         '			<span class="value">{{foo.value}}</span>',
         '		</div>',
@@ -354,9 +356,9 @@
       done();
     });
 
-    it.only('should work with ng-repeat-start', function (done) {
+    it('should work with ng-repeat-start', function (done) {
       $element = angular.element([
-        '	<div vs-repeat vs-repeat-container=".container" vs-excess="0">',
+        '	<div vs-repeat vs-repeat-container=".container" vs-repeat-options="{excess: 0}">',
         '	    <div class="container">',
         '		    <div ng-repeat-start="foo in bar" class="item">',
         '			    <span class="value">{{foo.value}}</span>',
@@ -395,7 +397,7 @@
 
     it('should execute function when scrolled to end offset', function (done) {
       $element = angular.element([
-        '	<div vs-repeat="20" vs-scrolled-to-end="updateCounter()" vs-scrolled-to-end-offset="20" class="container">',
+        '	<div vs-repeat vs-repeat-options="{size: 20, scrolledToEnd: \'updateCounter()\', scrolledToEndOffset: 20}" class="container">',
         '       <div ng-repeat="foo in bar" class="item" ng-style="{ height: \'20px\' }">',
         '		    <span class="value">{{foo.value}}</span>',
         '		</div>',
@@ -429,7 +431,7 @@
 
     it ('should execute function when scrolled to beginning offset', function (done) {
       $element = angular.element([
-        '	<div vs-repeat="20" vs-scrolled-to-beginning="updateCounter()" vs-scrolled-to-beginning-offset="20" class="container">',
+        '	<div vs-repeat vs-repeat-options="{size: 20, scrolledToBeginning: \'updateCounter()\', scrolledToBeginningOffset: 20}" class="container">',
         '       <div ng-repeat="foo in bar" class="item" ng-style="{ height: \'20px\' }">',
         '		    <span class="value">{{foo.value}}</span>',
         '		</div>',

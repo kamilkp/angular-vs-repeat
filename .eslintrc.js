@@ -12,6 +12,7 @@ module.exports = {
     'no-useless-concat': ['error'],
     'no-redeclare': ['error'],
     'no-undef': ['error'],
+    'no-shadow': ['error'],
     'comma-dangle': ['error', 'always-multiline'],
     'indent': ['error', 2, {
       FunctionDeclaration: { parameters: 'first' },
