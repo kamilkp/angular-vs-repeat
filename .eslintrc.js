@@ -2,9 +2,14 @@ module.exports = {
   parser: 'babel-eslint',
   rules: {
     'prefer-const': ['error', { destructuring: 'all' }],
+    'no-var': ['error'],
     'semi-spacing': ['error', { 'before': false, 'after': true }],
     'space-infix-ops': ['error'],
     'keyword-spacing': ['error'],
+    'brace-style': ['error'],
+    'no-else-return': ['error'],
+    'semi': ['error'],
+    'no-useless-concat': ['error'],
     'comma-dangle': ['error', 'always-multiline'],
     'indent': ['error', 2, {
       FunctionDeclaration: { parameters: 'first' },

@@ -1,71 +1,69 @@
 module.exports = function(config) {
-	config.set({
-		frameworks: ['mocha', 'chai'],
+  config.set({
+    frameworks: ['mocha', 'chai'],
 
-		// list of files / patterns to load in the browser
-		files: [
-			'lib/angular.js',
-			'dist/angular-vs-repeat.min.js',
-			'lib/angular-mocks.js',
-			'test/spec.js',
-		],
+    // list of files / patterns to load in the browser
+    files: [
+      'lib/angular.js',
+      'dist/angular-vs-repeat.min.js',
+      'lib/angular-mocks.js',
+      'test/spec.js',
+    ],
 
-		// use dots reporter, as travis terminal does not support escaping sequences
-		// possible values: 'dots', 'progress',
-		// CLI --reporters progress
-		reporters: ['progress'],
+    // use dots reporter, as travis terminal does not support escaping sequences
+    // possible values: 'dots', 'progress',
+    // CLI --reporters progress
+    reporters: ['progress'],
 
-		// web server port
-		// CLI --port 9876
-		port: 9876,
+    // web server port
+    // CLI --port 9876
+    port: 9876,
 
-		// enable / disable colors in the output (reporters and logs)
-		// CLI --colors --no-colors
-		colors: true,
+    // enable / disable colors in the output (reporters and logs)
+    // CLI --colors --no-colors
+    colors: true,
 
-		// level of logging
-		// possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-		// CLI --log-level debug
-		logLevel: config.LOG_INFO,
+    // level of logging
+    // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
+    // CLI --log-level debug
+    logLevel: config.LOG_INFO,
 
-		// enable / disable watching file and executing tests whenever any file changes
-		// CLI --auto-watch --no-auto-watch
-		autoWatch: true,
+    // enable / disable watching file and executing tests whenever any file changes
+    // CLI --auto-watch --no-auto-watch
+    autoWatch: true,
 
-		// Start these browsers, currently available:
-		// - Chrome
-		// - ChromeCanary
-		// - Firefox
-		// - Opera
-		// - Safari (only Mac)
-		// - PhantomJS
-		// - IE (only Windows)
-		browsers: [
-			'Chrome',
-			//'Firefox',
-			//'Opera',
-			//'IE',
-		],
+    // Start these browsers, currently available:
+    // - Chrome
+    // - ChromeCanary
+    // - Firefox
+    // - Opera
+    // - Safari (only Mac)
+    // - PhantomJS
+    // - IE (only Windows)
+    browsers: [
+      'Chrome',
+      //'Firefox',
+      //'Opera',
+      //'IE',
+    ],
 
-		// If browser does not capture in given timeout [ms], kill it
-		// CLI --capture-timeout 5000
+    // If browser does not capture in given timeout [ms], kill it
+    // CLI --capture-timeout 5000
     captureTimeout: 300000,
-    // browserDisconnectTimeout: 9999999999,
-    // browserNoActivityTimeout: 9999999999,
 
-		// Auto run tests on start (when browsers are captured) and exit
-		// CLI --single-run --no-single-run
-		singleRun: false,
+    // Auto run tests on start (when browsers are captured) and exit
+    // CLI --single-run --no-single-run
+    singleRun: false,
 
-		// report which specs are slower than 500ms
-		// CLI --report-slower-than 500
-		reportSlowerThan: 5000,
+    // report which specs are slower than 500ms
+    // CLI --report-slower-than 500
+    reportSlowerThan: 5000,
 
-		plugins: [
-			'karma-mocha',
-			'karma-chai',
-			'karma-chrome-launcher',
-			'karma-firefox-launcher'
-		]
-	});
+    plugins: [
+      'karma-mocha',
+      'karma-chai',
+      'karma-chrome-launcher',
+      'karma-firefox-launcher',
+    ],
+  });
 };

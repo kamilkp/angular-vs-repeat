@@ -66,53 +66,54 @@
   // EVENTS:
   // - 'vsRepeatTrigger' - an event the directive listens for to manually trigger reinitialization
   // - 'vsRepeatReinitialized' - an event the directive emits upon reinitialization done
-  var matchingFunction = ['matches', 'matchesSelector', 'webkitMatches', 'webkitMatchesSelector', 'msMatches', 'msMatchesSelector', 'mozMatches', 'mozMatchesSelector'].reduce(function (res, prop) {
-    var _res;
+  var closestElement = angular.element.prototype.closest;
 
-    return (_res = res) !== null && _res !== void 0 ? _res : prop in document.documentElement ? prop : null;
-  }, null);
+  if (!closestElement) {
+    var matchingFunction = ['matches', 'matchesSelector', 'webkitMatches', 'webkitMatchesSelector', 'msMatches', 'msMatchesSelector', 'mozMatches', 'mozMatchesSelector'].reduce(function (res, prop) {
+      var _res;
 
-  var closestElement = angular.element.prototype.closest || function (selector) {
-    var el = this[0].parentNode;
+      return (_res = res) !== null && _res !== void 0 ? _res : prop in document.documentElement ? prop : null;
+    }, null);
 
-    while (el !== document.documentElement && el != null && !el[matchingFunction](selector)) {
-      el = el.parentNode;
-    }
+    closestElement = function closestElement(selector) {
+      var _el;
 
-    if (el && el[matchingFunction](selector)) {
-      return angular.element(el);
-    } else {
+      var el = this[0].parentNode;
+
+      while (el !== document.documentElement && el != null && !el[matchingFunction](selector)) {
+        el = el.parentNode;
+      }
+
+      if ((_el = el) === null || _el === void 0 ? void 0 : _el[matchingFunction](selector)) {
+        return angular.element(el);
+      }
+
       return angular.element();
-    }
-  };
+    };
+  }
 
   function getWindowScroll() {
+    var _ref, _document$documentEle, _ref2, _document$documentEle2;
+
     if ('pageYOffset' in window) {
       return {
         scrollTop: pageYOffset,
         scrollLeft: pageXOffset
       };
-    } else {
-      var sx,
-          sy,
-          d = document,
-          r = d.documentElement,
-          b = d.body;
-      sx = r.scrollLeft || b.scrollLeft || 0;
-      sy = r.scrollTop || b.scrollTop || 0;
-      return {
-        scrollTop: sy,
-        scrollLeft: sx
-      };
     }
+
+    return {
+      scrollTop: (_ref = (_document$documentEle = document.documentElement.scrollTop) !== null && _document$documentEle !== void 0 ? _document$documentEle : document.body.scrollTop) !== null && _ref !== void 0 ? _ref : 0,
+      scrollLeft: (_ref2 = (_document$documentEle2 = document.documentElement.scrollLeft) !== null && _document$documentEle2 !== void 0 ? _document$documentEle2 : document.body.scrollLeft) !== null && _ref2 !== void 0 ? _ref2 : 0
+    };
   }
 
   function getClientSize(element, sizeProp) {
     if (element === window) {
       return sizeProp === 'clientWidth' ? window.innerWidth : window.innerHeight;
-    } else {
-      return element[sizeProp];
     }
+
+    return element[sizeProp];
   }
 
   function getScrollPos(element, scrollProp) {
@@ -122,8 +123,8 @@
   function getScrollOffset(vsElement, scrollElement, isHorizontal) {
     var vsPos = vsElement.getBoundingClientRect()[isHorizontal ? 'left' : 'top'];
     var scrollPos = scrollElement === window ? 0 : scrollElement.getBoundingClientRect()[isHorizontal ? 'left' : 'top'];
-    var correction = vsPos - scrollPos + (scrollElement === window ? getWindowScroll() : scrollElement)[isHorizontal ? 'scrollLeft' : 'scrollTop'];
-    return correction;
+    var scrollValue = (scrollElement === window ? getWindowScroll() : scrollElement)[isHorizontal ? 'scrollLeft' : 'scrollTop'];
+    return vsPos - scrollPos + scrollValue;
   }
 
   var vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', function ($compile, $parse) {
@@ -571,7 +572,7 @@
       }
     };
   }]);
-  angular.element(document.head).append(['<style id="angular-vs-repeat-style">' + '.vs-repeat-debug-element {' + 'top: 50%;' + 'left: 0;' + 'right: 0;' + 'height: 1px;' + 'background: red;' + 'z-index: 99999999;' + 'box-shadow: 0 0 20px red' + '}' + '.vs-repeat-debug-element + .vs-repeat-debug-element {' + '   display: none;' + '}' + '</style>'].join(''));
+  angular.element(document.head).append("<style id=\"angular-vs-repeat-style\">\n\t  \t.vs-repeat-debug-element {\n        top: 50%;\n        left: 0;\n        right: 0;\n        height: 1px;\n        background: red;\n        z-index: 99999999;\n        box-shadow: 0 0 20px red;\n      }\n\n      .vs-repeat-debug-element + .vs-repeat-debug-element {\n        display: none;\n      }\n    </style>");
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = vsRepeatModule.name;
