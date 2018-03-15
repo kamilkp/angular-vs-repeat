@@ -156,7 +156,8 @@
       scope: true,
       compile($element, $attrs) {
         const repeatContainer = 'vsRepeatContainer' in $attrs ? angular.element($element[0].querySelector($attrs.vsRepeatContainer)) : $element;
-        const ngRepeatChild = repeatContainer.children().eq(0);
+        const repeatContainerChildren = repeatContainer.children();
+        const ngRepeatChild = repeatContainerChildren.eq(0);
         let childCloneHtml = ngRepeatChild[0].outerHTML;
         const collectionName = '$vs_collection'; // TODO: make configurable?
         const attributesDictionary = {
@@ -176,10 +177,10 @@
 
         if (isNgRepeatStart) {
           let index = 0;
-          let repeaterElement = repeatContainer.children().eq(0);
+          let repeaterElement = repeatContainerChildren.eq(index);
           while (repeaterElement.attr('ng-repeat-end') == null && repeaterElement.attr('data-ng-repeat-end') == null) {
             index++;
-            repeaterElement = repeatContainer.children().eq(index);
+            repeaterElement = repeatContainerChildren.eq(index);
             childCloneHtml += repeaterElement[0].outerHTML;
           }
         }
@@ -195,7 +196,7 @@
               $$horizontal = typeof $attrs.vsHorizontal !== 'undefined',
               $beforeContent = angular.element('<' + childTagName + ' class="vs-repeat-before-content"></' + childTagName + '>'),
               $afterContent = angular.element('<' + childTagName + ' class="vs-repeat-after-content"></' + childTagName + '>'),
-              autoSize = !$attrs.vsRepeat,
+              autoSize = !$attrs.vsRepeat && !$attrs.vsSize,
               sizesPropertyExists = !!$attrs.vsSize || !!$attrs.vsSizeProperty,
               $scrollParent = $attrs.vsScrollParent ?
                 $attrs.vsScrollParent === 'window' ? angular.element(window) :
@@ -372,8 +373,8 @@
                   $scope.sizesCumulative[originalLength] :
                   $scope.elementSize * originalLength;
 
-                if (expectedSize !== $element[0][scrollSize]) {
-                  console.warn('vsRepeat: size mismatch. Expected size ' + expectedSize + 'px whereas actual size is ' + $element[0].clientHeight + 'px. Fix vsSize on element:', $element[0]);
+                if (expectedSize !== repeatContainer[0][scrollSize]) {
+                  console.warn('vsRepeat: size mismatch. Expected size ' + expectedSize + 'px whereas actual size is ' + repeatContainer[0][scrollSize] + 'px. Fix vsSize on element:', $element[0]);
                 }
               }
             }
@@ -527,6 +528,11 @@
                   ) + $scope.excess,
                   originalLength
                 );
+
+                // autosizing needs at least one element to measure it
+                if (autoSize && __startIndex === __endIndex && __endIndex < originalLength - 1) {
+                  __endIndex++;
+                }
               }
 
               _minStartIndex = Math.min(__startIndex, _minStartIndex);

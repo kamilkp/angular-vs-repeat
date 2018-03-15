@@ -11,7 +11,7 @@
     return res;
   }
 
-  const getElements = $element => $element[0].querySelectorAll('[ng-repeat] .value');
+  const getElements = $element => $element[0].querySelectorAll('.value');
 
   function getValues(elems){
     return Array.prototype.map.call(elems, function(elem){
@@ -54,7 +54,8 @@
             flex-flow: row nowrap;
          	}
          	.item{
-         		width: 100%;
+             width: 100%;
+             height: 20px;
          	}
          	.horizontal .item{
          		display: inline-block;
@@ -351,6 +352,45 @@
       expect(count).to.be.lessThan(20);
 
       done();
+    });
+
+    it.only('should work with ng-repeat-start', function (done) {
+      $element = angular.element([
+        '	<div vs-repeat vs-repeat-container=".container" vs-excess="0">',
+        '	    <div class="container">',
+        '		    <div ng-repeat-start="foo in bar" class="item">',
+        '			    <span class="value">{{foo.value}}</span>',
+        '		    </div>',
+        '		    <div class="item">',
+        '			    <span class="value">{{foo.value}}</span>',
+        '		    </div>',
+        '		    <div ng-repeat-end class="item">',
+        '			    <span class="value">{{foo.value}}</span>',
+        '		    </div>',
+        '	    </div>',
+        '	</div>',
+      ].join(''));
+
+      angular.element(document.body).append($element);
+      $compile($element)($scope);
+      $scope.bar = getArray(100);
+      $scope.$digest();
+      $scope.$digest();
+
+      const elems = getElements($element);
+      const count = elems.length;
+      expect(count).to.be.greaterThan(0);
+      expect(count).to.be.lessThan(20);
+
+      expect($element[0].innerText.startsWith('0\n0\n0')).to.be.true;
+
+      $element.children()[0].scrollTop += 61;
+      $element.triggerHandler('scroll');
+
+      setTimeout(() => {
+        expect($element[0].innerText.startsWith('1\n1\n1')).to.be.true;
+        done();
+      });
     });
 
     it('should execute function when scrolled to end offset', function (done) {

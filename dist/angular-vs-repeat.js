@@ -151,7 +151,8 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
       scope: true,
       compile: function compile($element, $attrs) {
         var repeatContainer = 'vsRepeatContainer' in $attrs ? angular.element($element[0].querySelector($attrs.vsRepeatContainer)) : $element;
-        var ngRepeatChild = repeatContainer.children().eq(0);
+        var repeatContainerChildren = repeatContainer.children();
+        var ngRepeatChild = repeatContainerChildren.eq(0);
         var childCloneHtml = ngRepeatChild[0].outerHTML;
         var collectionName = '$vs_collection'; // TODO: make configurable?
 
@@ -180,11 +181,11 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
 
         if (isNgRepeatStart) {
           var index = 0;
-          var repeaterElement = repeatContainer.children().eq(0);
+          var repeaterElement = repeatContainerChildren.eq(index);
 
           while (repeaterElement.attr('ng-repeat-end') == null && repeaterElement.attr('data-ng-repeat-end') == null) {
             index++;
-            repeaterElement = repeatContainer.children().eq(index);
+            repeaterElement = repeatContainerChildren.eq(index);
             childCloneHtml += repeaterElement[0].outerHTML;
           }
         }
@@ -200,7 +201,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                 $$horizontal = typeof $attrs.vsHorizontal !== 'undefined',
                 $beforeContent = angular.element('<' + childTagName + ' class="vs-repeat-before-content"></' + childTagName + '>'),
                 $afterContent = angular.element('<' + childTagName + ' class="vs-repeat-after-content"></' + childTagName + '>'),
-                autoSize = !$attrs.vsRepeat,
+                autoSize = !$attrs.vsRepeat && !$attrs.vsSize,
                 sizesPropertyExists = !!$attrs.vsSize || !!$attrs.vsSizeProperty,
                 $scrollParent = $attrs.vsScrollParent ? $attrs.vsScrollParent === 'window' ? angular.element(window) : closestElement.call(repeatContainer, $attrs.vsScrollParent) : repeatContainer,
                 $$options = 'vsOptions' in $attrs ? $scope.$eval($attrs.vsOptions) : {},
@@ -371,8 +372,8 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                 $scope.$digest();
                 var expectedSize = sizesPropertyExists ? $scope.sizesCumulative[originalLength] : $scope.elementSize * originalLength;
 
-                if (expectedSize !== $element[0][scrollSize]) {
-                  console.warn('vsRepeat: size mismatch. Expected size ' + expectedSize + 'px whereas actual size is ' + $element[0].clientHeight + 'px. Fix vsSize on element:', $element[0]);
+                if (expectedSize !== repeatContainer[0][scrollSize]) {
+                  console.warn('vsRepeat: size mismatch. Expected size ' + expectedSize + 'px whereas actual size is ' + repeatContainer[0][scrollSize] + 'px. Fix vsSize on element:', $element[0]);
                 }
               }
             }
@@ -501,7 +502,11 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                 __endIndex = Math.min(Math.ceil(__endIndex + $scope.excess / 2), originalLength);
               } else {
                 __startIndex = Math.max(Math.floor(($scrollPosition - $scope.offsetBefore - scrollOffset - $scope.scrollMargin) / $scope.elementSize) - $scope.excess / 2, 0);
-                __endIndex = Math.min(__startIndex + Math.ceil($clientSize / $scope.elementSize) + $scope.excess, originalLength);
+                __endIndex = Math.min(__startIndex + Math.ceil($clientSize / $scope.elementSize) + $scope.excess, originalLength); // autosizing needs at least one element to measure it
+
+                if (autoSize && __startIndex === __endIndex && __endIndex < originalLength - 1) {
+                  __endIndex++;
+                }
               }
 
               _minStartIndex = Math.min(__startIndex, _minStartIndex);
