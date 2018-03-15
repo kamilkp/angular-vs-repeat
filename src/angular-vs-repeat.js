@@ -133,54 +133,46 @@
     return vsPos - scrollPos + scrollValue;
   }
 
+  function analyzeNgRepeatUsage(element) {
+    const options = [
+      'ng-repeat',
+      'data-ng-repeat',
+      'ng-repeat-start',
+      'data-ng-repeat-start',
+    ];
+
+    for (const opt of options) {
+      if (element.attr(opt)) {
+        return [opt, element.attr(opt), opt.indexOf('-start') >= 0];
+      }
+    }
+
+    throw new Error('angular-vs-repeat: no ng-repeat directive on a child element');
+  }
+
   const vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', function($compile, $parse) {
     return {
       restrict: 'A',
       scope: true,
-      compile: function($element, $attrs) {
-        let repeatContainer = angular.isDefined($attrs.vsRepeatContainer) ? angular.element($element[0].querySelector($attrs.vsRepeatContainer)) : $element,
-          ngRepeatChild = repeatContainer.children().eq(0),
-          ngRepeatExpression,
-          childCloneHtml = ngRepeatChild[0].outerHTML,
-          expressionMatches,
-          lhs,
-          rhs,
-          rhsSuffix,
-          originalNgRepeatAttr,
-          collectionName = '$vs_collection',
-          isNgRepeatStart = false,
-          attributesDictionary = {
-            'vsRepeat': 'elementSize',
-            'vsOffsetBefore': 'offsetBefore',
-            'vsOffsetAfter': 'offsetAfter',
-            'vsScrolledToEndOffset': 'scrolledToEndOffset',
-            'vsScrolledToBeginningOffset': 'scrolledToBeginningOffset',
-            'vsExcess': 'excess',
-            'vsScrollMargin': 'scrollMargin',
-          };
+      compile($element, $attrs) {
+        const repeatContainer = 'vsRepeatContainer' in $attrs ? angular.element($element[0].querySelector($attrs.vsRepeatContainer)) : $element;
+        const ngRepeatChild = repeatContainer.children().eq(0);
+        let childCloneHtml = ngRepeatChild[0].outerHTML;
+        const collectionName = '$vs_collection'; // TODO: make configurable?
+        const attributesDictionary = {
+          'vsRepeat': 'elementSize',
+          'vsOffsetBefore': 'offsetBefore',
+          'vsOffsetAfter': 'offsetAfter',
+          'vsScrolledToEndOffset': 'scrolledToEndOffset',
+          'vsScrolledToBeginningOffset': 'scrolledToBeginningOffset',
+          'vsExcess': 'excess',
+          'vsScrollMargin': 'scrollMargin',
+        };
 
-        if (ngRepeatChild.attr('ng-repeat')) {
-          originalNgRepeatAttr = 'ng-repeat';
-          ngRepeatExpression = ngRepeatChild.attr('ng-repeat');
-        } else if (ngRepeatChild.attr('data-ng-repeat')) {
-          originalNgRepeatAttr = 'data-ng-repeat';
-          ngRepeatExpression = ngRepeatChild.attr('data-ng-repeat');
-        } else if (ngRepeatChild.attr('ng-repeat-start')) {
-          isNgRepeatStart = true;
-          originalNgRepeatAttr = 'ng-repeat-start';
-          ngRepeatExpression = ngRepeatChild.attr('ng-repeat-start');
-        } else if (ngRepeatChild.attr('data-ng-repeat-start')) {
-          isNgRepeatStart = true;
-          originalNgRepeatAttr = 'data-ng-repeat-start';
-          ngRepeatExpression = ngRepeatChild.attr('data-ng-repeat-start');
-        } else {
-          throw new Error('angular-vs-repeat: no ng-repeat directive on a child element');
-        }
+        const [originalNgRepeatAttr, ngRepeatExpression, isNgRepeatStart] = analyzeNgRepeatUsage(ngRepeatChild);
 
-        expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+\S+)?$/.exec(ngRepeatExpression);
-        lhs = expressionMatches[1];
-        rhs = expressionMatches[2];
-        rhsSuffix = expressionMatches[3];
+        const expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+\S+)?$/.exec(ngRepeatExpression);
+        const [, lhs, rhs, rhsSuffix] = expressionMatches;
 
         if (isNgRepeatStart) {
           let index = 0;

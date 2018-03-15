@@ -1,3 +1,7 @@
+function _sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return _sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }
+
 /**
  * Copyright Kamil Pękala http://github.com/kamilkp
  * Angular Virtual Scroll Repeat v2.0.0 2018/03/15
@@ -127,23 +131,31 @@
     return vsPos - scrollPos + scrollValue;
   }
 
+  function analyzeNgRepeatUsage(element) {
+    var options = ['ng-repeat', 'data-ng-repeat', 'ng-repeat-start', 'data-ng-repeat-start'];
+
+    for (var _i = 0; _i < options.length; _i++) {
+      var opt = options[_i];
+
+      if (element.attr(opt)) {
+        return [opt, element.attr(opt), opt.indexOf('-start') >= 0];
+      }
+    }
+
+    throw new Error('angular-vs-repeat: no ng-repeat directive on a child element');
+  }
+
   var vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', function ($compile, $parse) {
     return {
       restrict: 'A',
       scope: true,
       compile: function compile($element, $attrs) {
-        var repeatContainer = angular.isDefined($attrs.vsRepeatContainer) ? angular.element($element[0].querySelector($attrs.vsRepeatContainer)) : $element,
-            ngRepeatChild = repeatContainer.children().eq(0),
-            ngRepeatExpression,
-            childCloneHtml = ngRepeatChild[0].outerHTML,
-            expressionMatches,
-            lhs,
-            rhs,
-            rhsSuffix,
-            originalNgRepeatAttr,
-            collectionName = '$vs_collection',
-            isNgRepeatStart = false,
-            attributesDictionary = {
+        var repeatContainer = 'vsRepeatContainer' in $attrs ? angular.element($element[0].querySelector($attrs.vsRepeatContainer)) : $element;
+        var ngRepeatChild = repeatContainer.children().eq(0);
+        var childCloneHtml = ngRepeatChild[0].outerHTML;
+        var collectionName = '$vs_collection'; // TODO: make configurable?
+
+        var attributesDictionary = {
           'vsRepeat': 'elementSize',
           'vsOffsetBefore': 'offsetBefore',
           'vsOffsetAfter': 'offsetAfter',
@@ -153,28 +165,18 @@
           'vsScrollMargin': 'scrollMargin'
         };
 
-        if (ngRepeatChild.attr('ng-repeat')) {
-          originalNgRepeatAttr = 'ng-repeat';
-          ngRepeatExpression = ngRepeatChild.attr('ng-repeat');
-        } else if (ngRepeatChild.attr('data-ng-repeat')) {
-          originalNgRepeatAttr = 'data-ng-repeat';
-          ngRepeatExpression = ngRepeatChild.attr('data-ng-repeat');
-        } else if (ngRepeatChild.attr('ng-repeat-start')) {
-          isNgRepeatStart = true;
-          originalNgRepeatAttr = 'ng-repeat-start';
-          ngRepeatExpression = ngRepeatChild.attr('ng-repeat-start');
-        } else if (ngRepeatChild.attr('data-ng-repeat-start')) {
-          isNgRepeatStart = true;
-          originalNgRepeatAttr = 'data-ng-repeat-start';
-          ngRepeatExpression = ngRepeatChild.attr('data-ng-repeat-start');
-        } else {
-          throw new Error('angular-vs-repeat: no ng-repeat directive on a child element');
-        }
+        var _analyzeNgRepeatUsage = analyzeNgRepeatUsage(ngRepeatChild),
+            _analyzeNgRepeatUsage2 = _slicedToArray(_analyzeNgRepeatUsage, 3),
+            originalNgRepeatAttr = _analyzeNgRepeatUsage2[0],
+            ngRepeatExpression = _analyzeNgRepeatUsage2[1],
+            isNgRepeatStart = _analyzeNgRepeatUsage2[2];
 
-        expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+\S+)?$/.exec(ngRepeatExpression);
-        lhs = expressionMatches[1];
-        rhs = expressionMatches[2];
-        rhsSuffix = expressionMatches[3];
+        var expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+\S+)?$/.exec(ngRepeatExpression);
+
+        var _expressionMatches = _slicedToArray(expressionMatches, 4),
+            lhs = _expressionMatches[1],
+            rhs = _expressionMatches[2],
+            rhsSuffix = _expressionMatches[3];
 
         if (isNgRepeatStart) {
           var index = 0;

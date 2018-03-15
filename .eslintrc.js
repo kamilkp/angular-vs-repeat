@@ -10,6 +10,7 @@ module.exports = {
     'no-else-return': ['error'],
     'semi': ['error'],
     'no-useless-concat': ['error'],
+    'no-redeclare': ['error'],
     'comma-dangle': ['error', 'always-multiline'],
     'indent': ['error', 2, {
       FunctionDeclaration: { parameters: 'first' },
