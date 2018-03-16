@@ -535,9 +535,11 @@
                 __startIndex = 0;
                 __endIndex = 1;
               } else {
+                let ITERATIONS = 0;
                 __startIndex = 0;
                 while ($scope.vsRepeat.sizesCumulative[__startIndex] <= $scrollPosition - options.offsetBefore - scrollOffset - options.scrollMargin) {
                   __startIndex++;
+                  ITERATIONS++;
                 }
                 if (__startIndex > 0) {
                   __startIndex--;
@@ -548,8 +550,10 @@
                 __endIndex = __startIndex;
                 while ($scope.vsRepeat.sizesCumulative[__endIndex] < $scrollPosition - options.offsetBefore - scrollOffset + options.scrollMargin + $clientSize) {
                   __endIndex++;
+                  ITERATIONS++;
                 }
 
+                console.log(ITERATIONS);
                 __endIndex = Math.min(__endIndex, originalLength);
               }
 
