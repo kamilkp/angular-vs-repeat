@@ -289,7 +289,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
               });
             }
 
-            $scope.vsRepeat.elementSize = getClientSize($scrollParent[0], clientSize) || 50;
+            var measuredSize = getClientSize($scrollParent[0], clientSize) || 50;
 
             if (options.horizontal) {
               $beforeContent.css('height', '100%');
@@ -328,22 +328,29 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                 originalLength = originalCollection.length;
 
                 if (options.size) {
-                  var sizes = originalCollection.map(function (item) {
-                    return options.getSize(item);
-                  });
-                  var sum = 0;
-                  $scope.vsRepeat.sizesCumulative = [0].concat(_toConsumableArray(sizes.map(function (size) {
-                    return sum += size;
-                  })));
+                  _mapSize();
                 } else {
-                  setAutoSize();
+                  getFromMeasured();
                 }
               }
 
               reinitialize();
             }
 
-            function setAutoSize() {
+            function _mapSize() {
+              var hardSize = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+              var sizes = originalCollection.map(function (item) {
+                var _hardSize;
+
+                return (_hardSize = hardSize) !== null && _hardSize !== void 0 ? _hardSize : options.getSize(item);
+              });
+              var sum = 0;
+              $scope.vsRepeat.sizesCumulative = [0].concat(_toConsumableArray(sizes.map(function (size) {
+                return sum += size;
+              })));
+            }
+
+            function getFromMeasured() {
               if (autosizingRequired) {
                 $scope.$$postDigest(function () {
                   if (repeatContainer[0].offsetHeight || repeatContainer[0].offsetWidth) {
@@ -356,13 +363,13 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                     while (i < children.length) {
                       if (children[i].attributes[originalNgRepeatAttr] != null || insideStartEndSequence) {
                         if (!gotSomething) {
-                          $scope.vsRepeat.elementSize = 0;
+                          measuredSize = 0;
                         }
 
                         gotSomething = true;
 
                         if (children[i][offsetSize]) {
-                          $scope.vsRepeat.elementSize += children[i][offsetSize];
+                          measuredSize += children[i][offsetSize];
                         }
 
                         if (isNgRepeatStart) {
@@ -380,6 +387,8 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                     }
 
                     if (gotSomething) {
+                      _mapSize(measuredSize);
+
                       reinitialize();
                       autosizingRequired = false;
 
@@ -391,11 +400,13 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                     var dereg = $scope.$watch(function () {
                       if (repeatContainer[0].offsetHeight || repeatContainer[0].offsetWidth) {
                         dereg();
-                        setAutoSize();
+                        getFromMeasured();
                       }
                     });
                   }
                 });
+              } else {
+                _mapSize(measuredSize);
               }
             }
 
@@ -417,7 +428,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
             function scrollHandler() {
               if (updateInnerCollection()) {
                 $scope.$digest();
-                var expectedSize = options.size ? $scope.vsRepeat.sizesCumulative[originalLength] : $scope.vsRepeat.elementSize * originalLength;
+                var expectedSize = $scope.vsRepeat.sizesCumulative[originalLength];
 
                 if (expectedSize !== repeatContainer[0][scrollSize]) {
                   console.warn('vsRepeat: size mismatch. Expected size ' + expectedSize + 'px whereas actual size is ' + repeatContainer[0][scrollSize] + 'px. Fix vsSize on element:', $element[0]);
@@ -430,7 +441,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
             function onWindowResize() {
               if (options.autoresize) {
                 autosizingRequired = true;
-                setAutoSize();
+                getFromMeasured();
 
                 if ($scope.$root && !$scope.$root.$$phase) {
                   $scope.$apply();
@@ -450,7 +461,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
             $scope.$on('vsRepeatTrigger', refresh);
             $scope.$on('vsRepeatResize', function () {
               autosizingRequired = true;
-              setAutoSize();
+              getFromMeasured();
             });
 
             var _prevStartIndex, _prevEndIndex, _minStartIndex, _maxEndIndex;
@@ -481,7 +492,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
               _prevEndIndex = void 0;
               _minStartIndex = originalLength;
               _maxEndIndex = 0;
-              updateTotalSize(options.size ? $scope.vsRepeat.sizesCumulative[originalLength] : $scope.vsRepeat.elementSize * originalLength);
+              updateTotalSize($scope.vsRepeat.sizesCumulative[originalLength]);
               updateInnerCollection();
               $scope.$emit('vsRepeatReinitialized', $scope.startIndex, $scope.endIndex);
             }
@@ -526,7 +537,10 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
               var __startIndex = $scope.startIndex;
               var __endIndex = $scope.endIndex;
 
-              if (options.size) {
+              if (autosizingRequired && !options.size) {
+                __startIndex = 0;
+                __endIndex = 1;
+              } else {
                 __startIndex = 0;
 
                 while ($scope.vsRepeat.sizesCumulative[__startIndex] < $scrollPosition - options.offsetBefore - scrollOffset - options.scrollMargin) {
@@ -547,13 +561,6 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
 
 
                 __endIndex = Math.min(Math.ceil(__endIndex + options.excess / 2), originalLength);
-              } else {
-                __startIndex = Math.max(Math.floor(($scrollPosition - options.offsetBefore - scrollOffset - options.scrollMargin) / $scope.vsRepeat.elementSize) - options.excess / 2, 0);
-                __endIndex = Math.min(__startIndex + Math.ceil($clientSize / $scope.vsRepeat.elementSize) + options.excess, originalLength); // autosizing needs at least one element to measure it
-
-                if (autosizingRequired && __startIndex === __endIndex && __endIndex < originalLength - 1) {
-                  __endIndex++;
-                }
               }
 
               _minStartIndex = Math.min(__startIndex, _minStartIndex);
@@ -606,14 +613,8 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
 
                 _prevStartIndex = $scope.startIndex;
                 _prevEndIndex = $scope.endIndex;
-                var offsetCalculationString = options.size ? '(vsRepeat.sizesCumulative[$index + startIndex] + offsetBefore)' : '(($index + startIndex) * vsRepeat.elementSize + offsetBefore)';
-                var parsed = $parse(offsetCalculationString);
-                var o1 = parsed($scope, {
-                  $index: 0
-                });
-                var o2 = parsed($scope, {
-                  $index: $scope[collectionName].length
-                });
+                var o1 = $scope.vsRepeat.sizesCumulative[$scope.startIndex] + options.offsetBefore;
+                var o2 = $scope.vsRepeat.sizesCumulative[$scope.startIndex + $scope[collectionName].length] + options.offsetBefore;
                 var total = $scope.totalSize;
                 $beforeContent.css(getLayoutProp(), o1 + 'px');
                 $afterContent.css(getLayoutProp(), total - o2 + 'px');

@@ -63,7 +63,8 @@ this.timeout(99999999999);
              height: 20px;
          	}
          	.horizontal .item{
-         		display: inline-block;
+            display: inline-block;
+            width: auto;
          		min-width: 20px;
          		height: 100%;
          	}
