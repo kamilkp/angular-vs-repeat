@@ -1,3 +1,8 @@
+/**
+setInterval(() => { console.log(1); }, 1000);
+this.timeout(99999999999);
+ */
+
 (() => {
   function getArray(size){
     var res = [];
@@ -229,7 +234,7 @@
       $scope.$digest();
 
       var elems = getElements($element);
-      expect(elems.length).to.be.greaterThan(1);
+      expect(elems.length).to.be.greaterThan(0);
       expect(elems.length).to.be.lessThan(3);
       done();
     });

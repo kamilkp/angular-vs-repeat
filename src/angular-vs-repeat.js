@@ -175,6 +175,7 @@
     scrollMargin: 0,
     horizontal: false,
     autoresize: false,
+    excess: 0,
   };
 
   const vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', function($compile, $parse) {
@@ -333,13 +334,7 @@
                 if (options.size) {
                   const sizes = originalCollection.map(item => options.getSize(item));
                   let sum = 0;
-                  $scope.vsRepeat.sizesCumulative = sizes.map(function(size) {
-                    const res = sum;
-                    sum += size;
-                    return res;
-                  });
-                  $scope.vsRepeat.sizesCumulative.push(sum);
-                  console.log($scope.vsRepeat.sizesCumulative);
+                  $scope.vsRepeat.sizesCumulative = [0, ...sizes.map((size) => (sum += size))];
                 } else {
                   setAutoSize();
                 }
@@ -642,8 +637,8 @@
                 _prevEndIndex = $scope.endIndex;
 
                 const offsetCalculationString = options.size ?
-                  '(sizesCumulative[$index + startIndex] + offsetBefore)' :
-                  '(($index + startIndex) * elementSize + offsetBefore)';
+                  '(vsRepeat.sizesCumulative[$index + startIndex] + offsetBefore)' :
+                  '(($index + startIndex) * vsRepeat.elementSize + offsetBefore)';
 
                 const parsed = $parse(offsetCalculationString);
                 const o1 = parsed($scope, {$index: 0});
