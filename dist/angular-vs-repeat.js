@@ -10,7 +10,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
 
 /**
  * Copyright Kamil Pękala http://github.com/kamilkp
- * Angular Virtual Scroll Repeat v2.0.2 2018/03/16
+ * Angular Virtual Scroll Repeat v2.0.3 2018/03/16
  */
 
 /* global console, setTimeout, module */

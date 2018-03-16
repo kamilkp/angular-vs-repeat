@@ -1,4 +1,4 @@
-Version 2.0.2 (2018/03/16)
+Version 2.0.3 (2018/03/16)
 =================
 
   * BREAKING CHANGE: options are now passed as an object to the `vs-repeat` attribute
