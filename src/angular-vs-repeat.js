@@ -515,7 +515,6 @@
             });
 
             function binaryFind(array, threshold, a = 0, b = array.length - 1, d = 1) {
-              // console.log(`BF: ${a}, ${b}, ${threshold}, ${array.slice(0, 5)}`);
               if (array[a] === threshold) {
                 return [a, a, d];
               }
@@ -527,10 +526,10 @@
               if (b - a > 1) {
                 const m = Math.floor((a + b) / 2);
                 if (array[m] > threshold) {
-                  return binaryFind(array, threshold, a, m, d++);
+                  return binaryFind(array, threshold, a, m, d + 1);
                 }
 
-                return binaryFind(array, threshold, m, b, d++);
+                return binaryFind(array, threshold, m, b, d + 1);
               }
 
               return [a, b, d];
