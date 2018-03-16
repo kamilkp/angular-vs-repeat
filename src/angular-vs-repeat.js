@@ -514,6 +514,28 @@
               }
             });
 
+            function binaryFind(array, threshold, a = 0, b = array.length - 1, d = 1) {
+              // console.log(`BF: ${a}, ${b}, ${threshold}, ${array.slice(0, 5)}`);
+              if (array[a] === threshold) {
+                return [a, a, d];
+              }
+
+              if (array[b] === threshold) {
+                return [b, b, d];
+              }
+
+              if (b - a > 1) {
+                const m = Math.floor((a + b) / 2);
+                if (array[m] > threshold) {
+                  return binaryFind(array, threshold, a, m, d++);
+                }
+
+                return binaryFind(array, threshold, m, b, d++);
+              }
+
+              return [a, b, d];
+            }
+
             function updateInnerCollection() {
               const $scrollPosition = getScrollPos($scrollParent[0], scrollPos);
               let $clientSize = getClientSize($scrollParent[0], clientSize);
@@ -535,25 +557,12 @@
                 __startIndex = 0;
                 __endIndex = 1;
               } else {
-                let ITERATIONS = 0;
-                __startIndex = 0;
-                while ($scope.vsRepeat.sizesCumulative[__startIndex] <= $scrollPosition - options.offsetBefore - scrollOffset - options.scrollMargin) {
-                  __startIndex++;
-                  ITERATIONS++;
-                }
-                if (__startIndex > 0) {
-                  __startIndex--;
-                }
+                const relativeScroll = $scrollPosition - options.offsetBefore - scrollOffset;
 
+                ([__startIndex] = binaryFind($scope.vsRepeat.sizesCumulative, relativeScroll - options.scrollMargin));
                 __startIndex = Math.max(__startIndex, 0);
 
-                __endIndex = __startIndex;
-                while ($scope.vsRepeat.sizesCumulative[__endIndex] < $scrollPosition - options.offsetBefore - scrollOffset + options.scrollMargin + $clientSize) {
-                  __endIndex++;
-                  ITERATIONS++;
-                }
-
-                console.log(ITERATIONS);
+                ([, __endIndex] = binaryFind($scope.vsRepeat.sizesCumulative, relativeScroll + options.scrollMargin + $clientSize, __startIndex));
                 __endIndex = Math.min(__endIndex, originalLength);
               }
 

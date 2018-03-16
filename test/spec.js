@@ -469,7 +469,7 @@ this.timeout(99999999999);
       done();
     });
 
-    it.only('should properly calculate start and end index', function (done) {
+    it('should properly calculate start and end index', function (done) {
       $element = angular.element(`
         <div vs-repeat vs-repeat-options="{size: 20}" class="container" style="height: 200px">
           <div ng-repeat="foo in bar" class="item">

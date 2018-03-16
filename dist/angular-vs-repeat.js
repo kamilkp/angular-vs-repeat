@@ -515,6 +515,33 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
               }
             });
 
+            function binaryFind(array, threshold) {
+              var a = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+              var b = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : array.length - 1;
+              var d = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 1;
+
+              // console.log(`BF: ${a}, ${b}, ${threshold}, ${array.slice(0, 5)}`);
+              if (array[a] === threshold) {
+                return [a, a, d];
+              }
+
+              if (array[b] === threshold) {
+                return [b, b, d];
+              }
+
+              if (b - a > 1) {
+                var m = Math.floor((a + b) / 2);
+
+                if (array[m] > threshold) {
+                  return binaryFind(array, threshold, a, m, d++);
+                }
+
+                return binaryFind(array, threshold, m, b, d++);
+              }
+
+              return [a, b, d];
+            }
+
             function updateInnerCollection() {
               var $scrollPosition = getScrollPos($scrollParent[0], scrollPos);
               var $clientSize = getClientSize($scrollParent[0], clientSize);
@@ -531,23 +558,20 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                 __startIndex = 0;
                 __endIndex = 1;
               } else {
-                __startIndex = 0;
+                var relativeScroll = $scrollPosition - options.offsetBefore - scrollOffset;
 
-                while ($scope.vsRepeat.sizesCumulative[__startIndex] <= $scrollPosition - options.offsetBefore - scrollOffset - options.scrollMargin) {
-                  __startIndex++;
-                }
+                var _binaryFind = binaryFind($scope.vsRepeat.sizesCumulative, relativeScroll - options.scrollMargin);
 
-                if (__startIndex > 0) {
-                  __startIndex--;
-                }
+                var _binaryFind2 = _slicedToArray(_binaryFind, 1);
 
+                __startIndex = _binaryFind2[0];
                 __startIndex = Math.max(__startIndex, 0);
-                __endIndex = __startIndex;
 
-                while ($scope.vsRepeat.sizesCumulative[__endIndex] < $scrollPosition - options.offsetBefore - scrollOffset + options.scrollMargin + $clientSize) {
-                  __endIndex++;
-                }
+                var _binaryFind3 = binaryFind($scope.vsRepeat.sizesCumulative, relativeScroll + options.scrollMargin + $clientSize, __startIndex);
 
+                var _binaryFind4 = _slicedToArray(_binaryFind3, 2);
+
+                __endIndex = _binaryFind4[1];
                 __endIndex = Math.min(__endIndex, originalLength);
               }
 
