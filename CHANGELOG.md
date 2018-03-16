@@ -1,4 +1,11 @@
-Version 1.1.11 (2017/03/09)
+Version 2.0.0 (2018/03/16)
+=================
+
+  * BREAKING CHANGE: options are now passed as an object to the `vs-repeat` attribute
+  * binary search algorithm to find which portion or the original collection should be rendered
+  * scope variables like `startIndex`, `endIndex` etc. are now stored under `vsRepeat` object
+
+Version 2.0.0 (2018/03/09)
 =================
 
   * `vs-scroll-margin` option (documentation on that will come shortly)

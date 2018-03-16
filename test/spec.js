@@ -1,12 +1,14 @@
-/**
-setInterval(() => { console.log(1); }, 1000);
-this.timeout(99999999999);
- */
+/* global setInterval, console */
 
 (() => {
+  function stall() {
+    setInterval(() => console.log(1), 1000);
+    this.timeout(99999999999);
+  }
+
   function getArray(size){
-    var res = [];
-    for (var i = 0; i < size; i++){
+    const res = [];
+    for (let i = 0; i < size; i++){
       res.push({
         value: i,
         size: 110,
@@ -146,7 +148,7 @@ this.timeout(99999999999);
 
     it('should support horizontal stacking of elements', function(done){
       $element = $compile([
-        '<div vs-repeat class="container horizontal" vs-repeat-options="{horizontal: true}">',
+        '<div vs-repeat="{horizontal: true}" class="container horizontal">',
         '	<div ng-repeat="foo in bar" class="item">',
         '		<span class="value">{{foo.value}}</span>',
         '	</div>',
@@ -182,7 +184,7 @@ this.timeout(99999999999);
 
     it('should support manually provided unique element size', function(done){
       $element = $compile([
-        '<div vs-repeat vs-repeat-options="{size: 150}" class="container">',
+        '<div vs-repeat="{size: 150}" class="container">',
         '	<div ng-repeat="foo in bar" class="item">',
         '		<span class="value">{{foo.value}}</span>',
         '	</div>',
@@ -202,7 +204,7 @@ this.timeout(99999999999);
 
     it('should support manually provided size per element', function(done){
       $element = $compile([
-        '<div vs-repeat vs-repeat-options="{size: \'foo.size\'}" class="container">',
+        '<div vs-repeat="{size: \'foo.size\'}" class="container">',
         '	<div ng-repeat="foo in bar" class="item">',
         '		<span class="value">{{foo.value}}</span>',
         '	</div>',
@@ -222,7 +224,7 @@ this.timeout(99999999999);
 
     it('should support angular expression as vs-size attribute value', function(done){
       $element = $compile([
-        '<div vs-repeat vs-repeat-options="{size: \'2*foo.size - 10\'}" class="container">',
+        '<div vs-repeat="{size: \'2*foo.size - 10\'}" class="container">',
         '	<div ng-repeat="foo in bar" class="item" ng-style="{ height: (2*foo.size - 10) + \'px\' }">',
         '		<span class="value">{{foo.value}}</span>',
         '	</div>',
@@ -242,7 +244,7 @@ this.timeout(99999999999);
 
     it('should support latching mode', function(done){
       $element = $compile([
-        '<div vs-repeat vs-repeat-options="{size: \'foo.size\', latch: true}" class="container">',
+        '<div vs-repeat="{size: \'foo.size\', latch: true}" class="container">',
         '	<div ng-repeat="foo in bar" class="item" ng-style="{ height: foo.size + \'px\' }">',
         '		<span class="value">{{foo.value}}</span>',
         '	</div>',
@@ -267,7 +269,7 @@ this.timeout(99999999999);
 
     it('should support changing manually provided size per element', function(done){
       $element = $compile([
-        '<div vs-repeat vs-repeat-options="{size: \'foo.size\'}" class="container">',
+        '<div vs-repeat="{size: \'foo.size\'}" class="container">',
         '	<div ng-repeat="foo in bar" class="item" ng-style="{ height: foo.size + \'px\' }">',
         '		<span class="value">{{foo.value}}</span>',
         '	</div>',
@@ -300,7 +302,7 @@ this.timeout(99999999999);
     it('should support non-default scrollable container', function(done){
       $element = angular.element([
         '<div class="scroll">',
-        '	<div vs-repeat vs-repeat-options="{scrollParent: \'.scroll\'}">',
+        '	<div vs-repeat="{scrollParent: \'.scroll\'}">',
         '		<div ng-repeat="foo in bar" class="item">',
         '			<span class="value">{{foo.value}}</span>',
         '		</div>',
@@ -403,7 +405,7 @@ this.timeout(99999999999);
 
     it('should execute function when scrolled to end offset', function (done) {
       $element = angular.element([
-        '	<div vs-repeat vs-repeat-options="{size: 20, scrolledToEnd: \'updateCounter()\', scrolledToEndOffset: 20}" class="container">',
+        '	<div vs-repeat="{size: 20, scrolledToEnd: \'updateCounter()\', scrolledToEndOffset: 20}" class="container">',
         '       <div ng-repeat="foo in bar" class="item" ng-style="{ height: \'20px\' }">',
         '		    <span class="value">{{foo.value}}</span>',
         '		</div>',
@@ -437,7 +439,7 @@ this.timeout(99999999999);
 
     it ('should execute function when scrolled to beginning offset', function (done) {
       $element = angular.element([
-        '	<div vs-repeat vs-repeat-options="{size: 20, scrolledToBeginning: \'updateCounter()\', scrolledToBeginningOffset: 20}" class="container">',
+        '	<div vs-repeat="{size: 20, scrolledToBeginning: \'updateCounter()\', scrolledToBeginningOffset: 20}" class="container">',
         '       <div ng-repeat="foo in bar" class="item" ng-style="{ height: \'20px\' }">',
         '		    <span class="value">{{foo.value}}</span>',
         '		</div>',
@@ -471,7 +473,7 @@ this.timeout(99999999999);
 
     it('should properly calculate start and end index', function (done) {
       $element = angular.element(`
-        <div vs-repeat vs-repeat-options="{size: 20}" class="container" style="height: 200px">
+        <div vs-repeat="{size: 20}" class="container" style="height: 200px">
           <div ng-repeat="foo in bar" class="item">
             <span class="value">{{foo.value}}</span>
           </div>
@@ -503,7 +505,7 @@ this.timeout(99999999999);
 
     it('should properly calculate start and end index with scroll margin', function (done) {
       $element = angular.element(`
-        <div vs-repeat vs-repeat-options="{size: 20, scrollMargin: 40}" class="container" style="height: 200px">
+        <div vs-repeat="{size: 20, scrollMargin: 40}" class="container" style="height: 200px">
           <div ng-repeat="foo in bar" class="item">
             <span class="value">{{foo.value}}</span>
           </div>
@@ -529,6 +531,51 @@ this.timeout(99999999999);
       expect(count).to.equal(14);
       expect($element.scope().vsRepeat.startIndex).to.equal(18);
       expect($element.scope().vsRepeat.endIndex).to.equal(32);
+
+      done();
+    });
+
+    it.only('should properly calculate start and end index with element beyond', function (done) {
+      $element = angular.element(`
+        <div class="container" style="height: 200px;">
+          <div vs-repeat="{size: 20, scrollParent: '.container'}" style="margin: 300px 0">
+            <div ng-repeat="foo in bar" class="item">
+              <span class="value">{{foo.value}}</span>
+            </div>
+          </div>
+        </div>
+      `);
+
+      angular.element(document.body).append($element);
+      $compile($element)($scope);
+      $scope.bar = getArray(100);
+      $scope.$digest();
+
+      const $vsRepeat = $element.children().eq(0);
+
+      let elems = getElements($element);
+      let count = elems.length;
+      expect(count).to.equal(0);
+      expect($vsRepeat.scope().vsRepeat.startIndex).to.equal(0);
+      expect($vsRepeat.scope().vsRepeat.endIndex).to.equal(0);
+
+      $element[0].scrollTop = 500;
+      $element.triggerHandler('scroll');
+
+      elems = getElements($element);
+      count = elems.length;
+      expect(count).to.equal(10);
+      expect($vsRepeat.scope().vsRepeat.startIndex).to.equal(10);
+      expect($vsRepeat.scope().vsRepeat.endIndex).to.equal(20);
+
+      $element[0].scrollTop = $element[0].scrollHeight + $element[0].clientHeight;
+      $element.triggerHandler('scroll');
+
+      elems = getElements($element);
+      count = elems.length;
+      expect(count).to.equal(0);
+      expect($vsRepeat.scope().vsRepeat.startIndex).to.equal(100);
+      expect($vsRepeat.scope().vsRepeat.endIndex).to.equal(100);
 
       done();
     });

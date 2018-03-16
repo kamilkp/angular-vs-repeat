@@ -10,74 +10,74 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
 
 /**
  * Copyright Kamil Pękala http://github.com/kamilkp
- * Angular Virtual Scroll Repeat v2.0.0 2018/03/15
+ * Angular Virtual Scroll Repeat v2.0.0 2018/03/16
  */
 
 /* global console, setTimeout, module */
 (function (window, angular) {
-  // DESCRIPTION:
-  // vsRepeat directive stands for Virtual Scroll Repeat. It turns a standard ngRepeated set of elements in a scrollable container
-  // into a component, where the user thinks he has all the elements rendered and all he needs to do is scroll (without any kind of
-  // pagination - which most users loath) and at the same time the browser isn't overloaded by that many elements/angular bindings etc.
-  // The directive renders only so many elements that can fit into current container's clientHeight/clientWidth.
-  // LIMITATIONS:
-  // - current version only supports an Array as a right-hand-side object for ngRepeat
-  // - all rendered elements must have the same height/width or the sizes of the elements must be known up front
-  // USAGE:
-  // In order to use the vsRepeat directive you need to place a vs-repeat attribute on a direct parent of an element with ng-repeat
-  // example:
-  // <div vs-repeat>
-  //      <div ng-repeat="item in someArray">
-  //          <!-- content -->
-  //      </div>
-  // </div>
-  //
-  // or:
-  // <div vs-repeat>
-  //      <div ng-repeat-start="item in someArray">
-  //          <!-- content -->
-  //      </div>
-  //      <div>
-  //         <!-- something in the middle -->
-  //      </div>
-  //      <div ng-repeat-end>
-  //          <!-- content -->
-  //      </div>
-  // </div>
-  //
-  // You can also measure the single element's height/width (including all paddings and margins), and then speficy it as a value
-  // of the attribute 'vs-repeat'. This can be used if one wants to override the automatically computed element size.
-  // example:
-  // <div vs-repeat="50"> <!-- the specified element height is 50px -->
-  //      <div ng-repeat="item in someArray">
-  //          <!-- content -->
-  //      </div>
-  // </div>
-  //
-  // IMPORTANT!
-  //
-  // - the vsRepeat directive must be applied to a direct parent of an element with ngRepeat
-  // - the value of vsRepeat attribute is the single element's height/width measured in pixels. If none provided, the directive
-  //      will compute it automatically
-  // OPTIONAL PARAMETERS (attributes):
-  // vs-repeat-container="selector" - selector for element containing ng-repeat. (defaults to the current element)
-  // vs-scroll-parent="selector" - selector to the scrollable container. The directive will look for a closest parent matching
-  //                              the given selector (defaults to the current element)
-  // vs-horizontal - stack repeated elements horizontally instead of vertically
-  // vs-offset-before="value" - top/left offset in pixels (defaults to 0)
-  // vs-offset-after="value" - bottom/right offset in pixels (defaults to 0)
-  // vs-excess="value" - an integer number representing the number of elements to be rendered outside of the current container's viewport
-  //                      (defaults to 2)
-  // vs-size - a property name of the items in collection that is a number denoting the element size (in pixels)
-  // vs-autoresize - use this attribute without vs-size and without specifying element's size. The automatically computed element style will
-  //              readjust upon window resize if the size is dependable on the viewport size
-  // vs-scrolled-to-end="callback" - callback will be called when the last item of the list is rendered
-  // vs-scrolled-to-end-offset="integer" - set this number to trigger the scrolledToEnd callback n items before the last gets rendered
-  // vs-scrolled-to-beginning="callback" - callback will be called when the first item of the list is rendered
-  // vs-scrolled-to-beginning-offset="integer" - set this number to trigger the scrolledToBeginning callback n items before the first gets rendered
-  // EVENTS:
-  // - 'vsRepeatTrigger' - an event the directive listens for to manually trigger reinitialization
-  // - 'vsRepeatReinitialized' - an event the directive emits upon reinitialization done
+  /**
+   * DESCRIPTION:
+   * vsRepeat directive stands for Virtual Scroll Repeat. It turns a standard ngRepeated set of elements in a scrollable container
+   * into a component, where the user thinks he has all the elements rendered and all he needs to do is scroll (without any kind of
+   * pagination - which most users loath) and at the same time the browser isn't overloaded by that many elements/angular bindings etc.
+   * The directive renders only so many elements that can fit into current container's clientHeight/clientWidth.
+    * LIMITATIONS:
+   * - current version only supports an Array as a right-hand-side object for ngRepeat
+   * - all rendered elements must have the same height/width or the sizes of the elements must be known up front
+    * USAGE:
+   * In order to use the vsRepeat directive you need to place a vs-repeat attribute on a direct parent of an element with ng-repeat
+   * example:
+   * <div vs-repeat="options">
+   *      <div ng-repeat="item in someArray">
+   *          <!-- content -->
+   *      </div>
+   * </div>
+    * or:
+   * <div vs-repeat="options">
+   *      <div ng-repeat-start="item in someArray">
+   *          <!-- content -->
+   *      </div>
+   *      <div>
+   *         <!-- something in the middle -->
+   *      </div>
+   *      <div ng-repeat-end>
+   *          <!-- content -->
+   *      </div>
+   * </div>
+    * You can also measure the single element's height/width (including all paddings and margins), and then speficy it as a value
+   * of the option's `size` property. This can be used if one wants to override the automatically computed element size.
+   * example:
+   * <div vs-repeat="{size: 50}"> <!-- the specified element height is 50px -->
+   *      <div ng-repeat="item in someArray">
+   *          <!-- content -->
+   *      </div>
+   * </div>
+    * IMPORTANT!
+    * - the vsRepeat directive must be applied to a direct parent of an element with ngRepeat
+   * - the value of vsRepeat attribute is the single element's height/width measured in pixels. If none provided, the directive
+   *      will compute it automatically
+    * OPTIONAL PARAMETERS (attributes):
+   * vs-repeat-container="selector" - selector for element containing ng-repeat. (defaults to the current element)
+    * OPTIONS:
+   * Options shall be passed as an object to the `vs-repeat` attribute e.g.: `<div vs-repeat="{scrollParent: 'window', size: 20}"></div>`
+   *
+   * Available options:
+   * `horizontal` - stack repeated elements horizontally instead of vertically
+   * `offset-before` - top/left offset in pixels (defaults to 0)
+   * `offset-after` - bottom/right offset in pixels (defaults to 0)
+   * `scroll-margin` - how many pixels ahead should elements be rendered while scrolling
+   * `latch` - if true, elements will be rendered gradually but won't be removed when scrolled away (defaults to false)
+    * `size` - a property name of the items in collection that is a number denoting the element size (in pixels)
+   * `autoresize` - use this attribute without vs-size and without specifying element's size. The automatically computed element style will
+   *              readjust upon window resize if the size is dependable on the viewport size
+   * `scrolled-to-end` - callback will be called when the last item of the list is rendered
+   * `scrolled-to-end-offset` - set this number to trigger the scrolledToEnd callback n items before the last gets rendered
+   * `scrolled-to-beginning` - callback will be called when the first item of the list is rendered
+   * `scrolled-to-beginning-offset` - set this number to trigger the scrolledToBeginning callback n items before the first gets rendered
+    * EVENTS:
+   * - `vsRepeatTrigger` - an event the directive listens for to manually trigger reinitialization
+   * - `vsRepeatReinitialized` - an event the directive emits upon reinitialization done
+   */
   var closestElement = angular.element.prototype.closest;
 
   if (!closestElement) {
@@ -158,7 +158,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
   }
 
   function attrDeprecated(attrname) {
-    printDeprecationWarning("".concat(attrname, " attribute is deprecated. Use vs-repeat-options <link> instead."));
+    printDeprecationWarning("".concat(attrname, " attribute is deprecated. Pass the options object to vs-repeat attribute instead <link>."));
   }
 
   var defaultOptions = {
@@ -195,10 +195,6 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
           }
         });
 
-        if (compileAttrs.vsRepeat) {
-          attrDeprecated('vsRepeat');
-        }
-
         var _analyzeNgRepeatUsage = analyzeNgRepeatUsage(ngRepeatChild),
             _analyzeNgRepeatUsage2 = _slicedToArray(_analyzeNgRepeatUsage, 3),
             originalNgRepeatAttr = _analyzeNgRepeatUsage2[0],
@@ -226,6 +222,8 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
         compileRepeatContainer.empty();
         return {
           pre: function pre($scope, $element, $attrs) {
+            var _$scope$$eval;
+
             function _parseSize(options) {
               if (typeof options.size === 'number') {
                 options.getSize = function () {
@@ -241,7 +239,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
             }
 
             $scope.vsRepeat = {
-              options: _extends({}, defaultOptions, 'vsRepeatOptions' in $attrs ? $scope.$eval($attrs.vsRepeatOptions) : {})
+              options: _extends({}, defaultOptions, (_$scope$$eval = $scope.$eval($attrs.vsRepeat)) !== null && _$scope$$eval !== void 0 ? _$scope$$eval : {})
             };
             var options = $scope.vsRepeat.options;
 
@@ -520,7 +518,6 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
               var b = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : array.length - 1;
               var d = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 1;
 
-              // console.log(`BF: ${a}, ${b}, ${threshold}, ${array.slice(0, 5)}`);
               if (array[a] === threshold) {
                 return [a, a, d];
               }
@@ -533,13 +530,13 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                 var m = Math.floor((a + b) / 2);
 
                 if (array[m] > threshold) {
-                  return binaryFind(array, threshold, a, m, d++);
+                  return binaryFind(array, threshold, a, m, d + 1);
                 }
 
-                return binaryFind(array, threshold, m, b, d++);
+                return binaryFind(array, threshold, m, b, d + 1);
               }
 
-              return [a, b, d];
+              return [threshold > array[b] ? b : a, threshold < array[a] ? a : b, d];
             }
 
             function updateInnerCollection() {
