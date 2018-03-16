@@ -237,6 +237,15 @@
         compileRepeatContainer.empty();
         return {
           pre: function($scope, $element, $attrs) {
+            function _parseSize(options) {
+              if (typeof options.size === 'number') {
+                options.getSize = () => options.size;
+              } else {
+                const parsed = $parse(String(options.size));
+                options.getSize = (item) => parsed($scope, { [lhs]: item });
+              }
+            }
+
             $scope.vsRepeat = {
               options: {
                 ...defaultOptions,
@@ -245,6 +254,7 @@
             };
 
             const { options } = $scope.vsRepeat;
+            _parseSize(options);
 
             const repeatContainer = angular.isDefined($attrs.vsRepeatContainer) ? angular.element($element[0].querySelector($attrs.vsRepeatContainer)) : $element;
             const childClone = angular.element(childCloneHtml);
@@ -254,7 +264,7 @@
             const $beforeContent = angular.element('<' + childTagName + ' class="vs-repeat-before-content"></' + childTagName + '>');
             const $afterContent = angular.element('<' + childTagName + ' class="vs-repeat-after-content"></' + childTagName + '>');
             let autosizingRequired = options.size === null;
-            let sizesPropertyExists = !autosizingRequired;
+
             let $scrollParent = options.scrollParent ?
                   options.scrollParent === 'window' ? angular.element(window) :
                   closestElement.call(repeatContainer, options.scrollParent) : repeatContainer;
@@ -268,11 +278,9 @@
             if ($scrollParent.length === 0) {
               throw 'Specified scroll parent selector did not match any element';
             }
-            $scope.$scrollParent = $scrollParent;
 
-            if (sizesPropertyExists) {
-              $scope.sizesCumulative = [];
-            }
+            $scope.$scrollParent = $scrollParent;
+            $scope.vsRepeat.sizesCumulative = [];
 
             if (options.debug) {
               const $debugParent = options.scrollParent === 'window' ? angular.element(document.body) : $scrollParent;
@@ -285,9 +293,7 @@
               });
             }
 
-            //initial defaults
-            $scope.elementSize = getClientSize($scrollParent[0], clientSize) || 50;
-            options.excess = 2;
+            $scope.vsRepeat.elementSize = getClientSize($scrollParent[0], clientSize) || 50;
 
             if (options.horizontal) {
               $beforeContent.css('height', '100%');
@@ -306,6 +312,7 @@
 
                 if (JSON.stringify(mergedOptions) !== JSON.stringify(options)) {
                   Object.assign(options, newOpts);
+                  _parseSize(options);
                   reinitialize();
                 }
               });
@@ -320,27 +327,19 @@
               if (!originalCollection || originalCollection.length < 1) {
                 $scope[collectionName] = [];
                 originalLength = 0;
-                $scope.sizesCumulative = [0];
+                $scope.vsRepeat.sizesCumulative = [0];
               } else {
                 originalLength = originalCollection.length;
-                if (sizesPropertyExists) {
-                  $scope.sizes = originalCollection.map(function(item) {
-                    const s = $scope.$new(false);
-                    angular.extend(s, item);
-                    s[lhs] = item;
-                    const size = sizesPropertyExists ?
-                      s.$eval(String(options.size)) :
-                      $scope.elementSize;
-                    s.$destroy();
-                    return size;
-                  });
+                if (options.size) {
+                  const sizes = originalCollection.map(item => options.getSize(item));
                   let sum = 0;
-                  $scope.sizesCumulative = $scope.sizes.map(function(size) {
+                  $scope.vsRepeat.sizesCumulative = sizes.map(function(size) {
                     const res = sum;
                     sum += size;
                     return res;
                   });
-                  $scope.sizesCumulative.push(sum);
+                  $scope.vsRepeat.sizesCumulative.push(sum);
+                  console.log($scope.vsRepeat.sizesCumulative);
                 } else {
                   setAutoSize();
                 }
@@ -361,12 +360,12 @@
                     while (i < children.length) {
                       if (children[i].attributes[originalNgRepeatAttr] != null || insideStartEndSequence) {
                         if (!gotSomething) {
-                          $scope.elementSize = 0;
+                          $scope.vsRepeat.elementSize = 0;
                         }
 
                         gotSomething = true;
                         if (children[i][offsetSize]) {
-                          $scope.elementSize += children[i][offsetSize];
+                          $scope.vsRepeat.elementSize += children[i][offsetSize];
                         }
 
                         if (isNgRepeatStart) {
@@ -422,9 +421,9 @@
               if (updateInnerCollection()) {
                 $scope.$digest();
 
-                const expectedSize = sizesPropertyExists ?
-                  $scope.sizesCumulative[originalLength] :
-                  $scope.elementSize * originalLength;
+                const expectedSize = options.size ?
+                  $scope.vsRepeat.sizesCumulative[originalLength] :
+                  $scope.vsRepeat.elementSize * originalLength;
 
                 if (expectedSize !== repeatContainer[0][scrollSize]) {
                   console.warn('vsRepeat: size mismatch. Expected size ' + expectedSize + 'px whereas actual size is ' + repeatContainer[0][scrollSize] + 'px. Fix vsSize on element:', $element[0]);
@@ -492,9 +491,9 @@
               _prevEndIndex = void 0;
               _minStartIndex = originalLength;
               _maxEndIndex = 0;
-              updateTotalSize(sizesPropertyExists ?
-                $scope.sizesCumulative[originalLength] :
-                $scope.elementSize * originalLength
+              updateTotalSize(options.size ?
+                $scope.vsRepeat.sizesCumulative[originalLength] :
+                $scope.vsRepeat.elementSize * originalLength
               );
               updateInnerCollection();
 
@@ -542,9 +541,9 @@
               let __startIndex = $scope.startIndex;
               let __endIndex = $scope.endIndex;
 
-              if (sizesPropertyExists) {
+              if (options.size) {
                 __startIndex = 0;
-                while ($scope.sizesCumulative[__startIndex] < $scrollPosition - options.offsetBefore - scrollOffset - options.scrollMargin) {
+                while ($scope.vsRepeat.sizesCumulative[__startIndex] < $scrollPosition - options.offsetBefore - scrollOffset - options.scrollMargin) {
                   __startIndex++;
                 }
                 if (__startIndex > 0) {
@@ -558,7 +557,7 @@
                 );
 
                 __endIndex = __startIndex;
-                while ($scope.sizesCumulative[__endIndex] < $scrollPosition - options.offsetBefore - scrollOffset + options.scrollMargin + $clientSize) {
+                while ($scope.vsRepeat.sizesCumulative[__endIndex] < $scrollPosition - options.offsetBefore - scrollOffset + options.scrollMargin + $clientSize) {
                   __endIndex++;
                 }
 
@@ -570,14 +569,14 @@
               } else {
                 __startIndex = Math.max(
                   Math.floor(
-                    ($scrollPosition - options.offsetBefore - scrollOffset - options.scrollMargin) / $scope.elementSize
+                    ($scrollPosition - options.offsetBefore - scrollOffset - options.scrollMargin) / $scope.vsRepeat.elementSize
                   ) - options.excess / 2,
                   0
                 );
 
                 __endIndex = Math.min(
                   __startIndex + Math.ceil(
-                    $clientSize / $scope.elementSize
+                    $clientSize / $scope.vsRepeat.elementSize
                   ) + options.excess,
                   originalLength
                 );
@@ -642,7 +641,7 @@
                 _prevStartIndex = $scope.startIndex;
                 _prevEndIndex = $scope.endIndex;
 
-                const offsetCalculationString = sizesPropertyExists ?
+                const offsetCalculationString = options.size ?
                   '(sizesCumulative[$index + startIndex] + offsetBefore)' :
                   '(($index + startIndex) * elementSize + offsetBefore)';
 
