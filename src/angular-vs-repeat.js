@@ -3,7 +3,7 @@
  * Angular Virtual Scroll Repeat v2.0.0 2018/03/15
  */
 
- /* global console */
+/* global console, setTimeout, module */
 
 ((window, angular) => {
   // DESCRIPTION:
@@ -162,7 +162,6 @@
 
   const defaultOptions = {
     latch: false,
-    hunked: false,
     container: null,
     scrollParent: null,
     size: null,
@@ -175,7 +174,8 @@
     scrollMargin: 0,
     horizontal: false,
     autoresize: false,
-    excess: 0,
+    hunked: false,
+    hunkSize: 0,
   };
 
   const vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', function($compile, $parse) {
@@ -209,16 +209,6 @@
         if (compileAttrs.vsRepeat) {
           attrDeprecated('vsRepeat');
         }
-
-        const attributesDictionary = {
-          'vsRepeat': 'elementSize',
-          'vsOffsetBefore': 'offsetBefore',
-          'vsOffsetAfter': 'offsetAfter',
-          'vsScrolledToEndOffset': 'scrolledToEndOffset',
-          'vsScrolledToBeginningOffset': 'scrolledToBeginningOffset',
-          'vsExcess': 'excess',
-          'vsScrollMargin': 'scrollMargin',
-        };
 
         const [originalNgRepeatAttr, ngRepeatExpression, isNgRepeatStart] = analyzeNgRepeatUsage(ngRepeatChild);
 
@@ -349,12 +339,12 @@
 
             function getFromMeasured() {
               if (autosizingRequired) {
-                $scope.$$postDigest(function() {
+                $scope.$$postDigest(() => {
                   if (repeatContainer[0].offsetHeight || repeatContainer[0].offsetWidth) { // element is visible
-                    let children = repeatContainer.children(),
-                      i = 0,
-                      gotSomething = false,
-                      insideStartEndSequence = false;
+                    const children = repeatContainer.children();
+                    let i = 0;
+                    let gotSomething = false;
+                    let insideStartEndSequence = false;
 
                     while (i < children.length) {
                       if (children[i].attributes[originalNgRepeatAttr] != null || insideStartEndSequence) {
@@ -441,8 +431,9 @@
                   $scope.$apply();
                 }
               }
+
               if (updateInnerCollection()) {
-                $scope.$apply();
+                $scope.$digest();
               }
             }
 
@@ -466,20 +457,22 @@
 
             $scope.$on('vsRenderAll', function() {//e , quantum) {
               if (options.latch) {
-                setTimeout(function() {
+                setTimeout(() => {
                   // var __endIndex = Math.min($scope.vsRepeat.endIndex + (quantum || 1), originalLength);
                   const __endIndex = originalLength;
                   _maxEndIndex = Math.max(__endIndex, _maxEndIndex);
+
                   $scope.vsRepeat.endIndex = options.latch ? _maxEndIndex : __endIndex;
                   $scope[collectionName] = originalCollection.slice($scope.vsRepeat.startIndex, $scope.vsRepeat.endIndex);
+
                   _prevEndIndex = $scope.vsRepeat.endIndex;
 
-                  $scope.$$postDigest(function() {
+                  $scope.$$postDigest(() => {
                     $beforeContent.css(getLayoutProp(), 0);
                     $afterContent.css(getLayoutProp(), 0);
                   });
 
-                  $scope.$apply(function() {
+                  $scope.$apply(() => {
                     $scope.$emit('vsRenderAllDone');
                   });
                 });
@@ -513,7 +506,7 @@
               _prevClientSize = ch;
             }
 
-            $scope.$watch(function() {
+            $scope.$watch(() => {
               if (typeof window.requestAnimationFrame === 'function') {
                 window.requestAnimationFrame(reinitOnClientHeightChange);
               } else {
@@ -543,29 +536,21 @@
                 __endIndex = 1;
               } else {
                 __startIndex = 0;
-                while ($scope.vsRepeat.sizesCumulative[__startIndex] < $scrollPosition - options.offsetBefore - scrollOffset - options.scrollMargin) {
+                while ($scope.vsRepeat.sizesCumulative[__startIndex] <= $scrollPosition - options.offsetBefore - scrollOffset - options.scrollMargin) {
                   __startIndex++;
                 }
                 if (__startIndex > 0) {
                   __startIndex--;
                 }
 
-                // Adjust the start index according to the excess
-                __startIndex = Math.max(
-                  Math.floor(__startIndex - options.excess / 2),
-                  0
-                );
+                __startIndex = Math.max(__startIndex, 0);
 
                 __endIndex = __startIndex;
                 while ($scope.vsRepeat.sizesCumulative[__endIndex] < $scrollPosition - options.offsetBefore - scrollOffset + options.scrollMargin + $clientSize) {
                   __endIndex++;
                 }
 
-                // Adjust the end index according to the excess
-                __endIndex = Math.min(
-                  Math.ceil(__endIndex + options.excess / 2),
-                  originalLength
-                );
+                __endIndex = Math.min(__endIndex, originalLength);
               }
 
               _minStartIndex = Math.min(__startIndex, _minStartIndex);
@@ -587,16 +572,15 @@
 
               if (!digestRequired) {
                 if (options.hunked) {
-                  if (Math.abs($scope.vsRepeat.startIndex - _prevStartIndex) >= options.excess / 2 ||
+                  if (Math.abs($scope.vsRepeat.startIndex - _prevStartIndex) >= options.hunkSize ||
                                         ($scope.vsRepeat.startIndex === 0 && _prevStartIndex !== 0)) {
                     digestRequired = true;
-                  } else if (Math.abs($scope.vsRepeat.endIndex - _prevEndIndex) >= options.excess / 2 ||
+                  } else if (Math.abs($scope.vsRepeat.endIndex - _prevEndIndex) >= options.hunkSize ||
                                         ($scope.vsRepeat.endIndex === originalLength && _prevEndIndex !== originalLength)) {
                     digestRequired = true;
                   }
                 } else {
-                  digestRequired = $scope.vsRepeat.startIndex !== _prevStartIndex ||
-                                                        $scope.vsRepeat.endIndex !== _prevEndIndex;
+                  digestRequired = $scope.vsRepeat.startIndex !== _prevStartIndex || $scope.vsRepeat.endIndex !== _prevEndIndex;
                 }
               }
 
@@ -605,6 +589,7 @@
 
                 // Emit the event
                 $scope.$emit('vsRepeatInnerCollectionUpdated', $scope.vsRepeat.startIndex, $scope.vsRepeat.endIndex, _prevStartIndex, _prevEndIndex);
+
                 let triggerIndex;
                 if (options.scrolledToEnd) {
                   triggerIndex = originalCollection.length - options.scrolledToEndOffset;

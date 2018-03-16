@@ -364,7 +364,7 @@ this.timeout(99999999999);
 
     it('should work with ng-repeat-start', function (done) {
       $element = angular.element([
-        '	<div vs-repeat vs-repeat-container=".container" vs-repeat-options="{excess: 0}">',
+        '	<div vs-repeat vs-repeat-container=".container">',
         '	    <div class="container">',
         '		    <div ng-repeat-start="foo in bar" class="item">',
         '			    <span class="value">{{foo.value}}</span>',
@@ -465,6 +465,70 @@ this.timeout(99999999999);
       $scope.$digest();
 
       expect(counter).to.equal(1);
+
+      done();
+    });
+
+    it('should properly calculate start and end index', function (done) {
+      $element = angular.element(`
+        <div vs-repeat vs-repeat-options="{size: 20}" class="container" style="height: 200px">
+          <div ng-repeat="foo in bar" class="item">
+            <span class="value">{{foo.value}}</span>
+          </div>
+        </div>
+      `);
+
+      angular.element(document.body).append($element);
+      $compile($element)($scope);
+      $scope.bar = getArray(100);
+      $scope.$digest();
+
+      let elems = getElements($element);
+      let count = elems.length;
+      expect(count).to.equal(10);
+      expect($element.scope().vsRepeat.startIndex).to.equal(0);
+      expect($element.scope().vsRepeat.endIndex).to.equal(10);
+
+      $element[0].scrollTop += 400;
+      $element.triggerHandler('scroll');
+
+      elems = getElements($element);
+      count = elems.length;
+      expect(count).to.equal(10);
+      expect($element.scope().vsRepeat.startIndex).to.equal(20);
+      expect($element.scope().vsRepeat.endIndex).to.equal(30);
+
+      done();
+    });
+
+    it('should properly calculate start and end index with scroll margin', function (done) {
+      $element = angular.element(`
+        <div vs-repeat vs-repeat-options="{size: 20, scrollMargin: 40}" class="container" style="height: 200px">
+          <div ng-repeat="foo in bar" class="item">
+            <span class="value">{{foo.value}}</span>
+          </div>
+        </div>
+      `);
+
+      angular.element(document.body).append($element);
+      $compile($element)($scope);
+      $scope.bar = getArray(100);
+      $scope.$digest();
+
+      let elems = getElements($element);
+      let count = elems.length;
+      expect(count).to.equal(12);
+      expect($element.scope().vsRepeat.startIndex).to.equal(0);
+      expect($element.scope().vsRepeat.endIndex).to.equal(12);
+
+      $element[0].scrollTop += 400;
+      $element.triggerHandler('scroll');
+
+      elems = getElements($element);
+      count = elems.length;
+      expect(count).to.equal(14);
+      expect($element.scope().vsRepeat.startIndex).to.equal(18);
+      expect($element.scope().vsRepeat.endIndex).to.equal(32);
 
       done();
     });

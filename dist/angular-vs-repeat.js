@@ -13,7 +13,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
  * Angular Virtual Scroll Repeat v2.0.0 2018/03/15
  */
 
-/* global console */
+/* global console, setTimeout, module */
 (function (window, angular) {
   // DESCRIPTION:
   // vsRepeat directive stands for Virtual Scroll Repeat. It turns a standard ngRepeated set of elements in a scrollable container
@@ -163,7 +163,6 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
 
   var defaultOptions = {
     latch: false,
-    hunked: false,
     container: null,
     scrollParent: null,
     size: null,
@@ -176,7 +175,8 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
     scrollMargin: 0,
     horizontal: false,
     autoresize: false,
-    excess: 0
+    hunked: false,
+    hunkSize: 0
   };
   var vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', function ($compile, $parse) {
     return {
@@ -198,16 +198,6 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
         if (compileAttrs.vsRepeat) {
           attrDeprecated('vsRepeat');
         }
-
-        var attributesDictionary = {
-          'vsRepeat': 'elementSize',
-          'vsOffsetBefore': 'offsetBefore',
-          'vsOffsetAfter': 'offsetAfter',
-          'vsScrolledToEndOffset': 'scrolledToEndOffset',
-          'vsScrolledToBeginningOffset': 'scrolledToBeginningOffset',
-          'vsExcess': 'excess',
-          'vsScrollMargin': 'scrollMargin'
-        };
 
         var _analyzeNgRepeatUsage = analyzeNgRepeatUsage(ngRepeatChild),
             _analyzeNgRepeatUsage2 = _slicedToArray(_analyzeNgRepeatUsage, 3),
@@ -355,10 +345,10 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                 $scope.$$postDigest(function () {
                   if (repeatContainer[0].offsetHeight || repeatContainer[0].offsetWidth) {
                     // element is visible
-                    var children = repeatContainer.children(),
-                        i = 0,
-                        gotSomething = false,
-                        insideStartEndSequence = false;
+                    var children = repeatContainer.children();
+                    var i = 0;
+                    var gotSomething = false;
+                    var insideStartEndSequence = false;
 
                     while (i < children.length) {
                       if (children[i].attributes[originalNgRepeatAttr] != null || insideStartEndSequence) {
@@ -449,7 +439,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
               }
 
               if (updateInnerCollection()) {
-                $scope.$apply();
+                $scope.$digest();
               }
             }
 
@@ -543,24 +533,22 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
               } else {
                 __startIndex = 0;
 
-                while ($scope.vsRepeat.sizesCumulative[__startIndex] < $scrollPosition - options.offsetBefore - scrollOffset - options.scrollMargin) {
+                while ($scope.vsRepeat.sizesCumulative[__startIndex] <= $scrollPosition - options.offsetBefore - scrollOffset - options.scrollMargin) {
                   __startIndex++;
                 }
 
                 if (__startIndex > 0) {
                   __startIndex--;
-                } // Adjust the start index according to the excess
+                }
 
-
-                __startIndex = Math.max(Math.floor(__startIndex - options.excess / 2), 0);
+                __startIndex = Math.max(__startIndex, 0);
                 __endIndex = __startIndex;
 
                 while ($scope.vsRepeat.sizesCumulative[__endIndex] < $scrollPosition - options.offsetBefore - scrollOffset + options.scrollMargin + $clientSize) {
                   __endIndex++;
-                } // Adjust the end index according to the excess
+                }
 
-
-                __endIndex = Math.min(Math.ceil(__endIndex + options.excess / 2), originalLength);
+                __endIndex = Math.min(__endIndex, originalLength);
               }
 
               _minStartIndex = Math.min(__startIndex, _minStartIndex);
@@ -579,9 +567,9 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
 
               if (!digestRequired) {
                 if (options.hunked) {
-                  if (Math.abs($scope.vsRepeat.startIndex - _prevStartIndex) >= options.excess / 2 || $scope.vsRepeat.startIndex === 0 && _prevStartIndex !== 0) {
+                  if (Math.abs($scope.vsRepeat.startIndex - _prevStartIndex) >= options.hunkSize || $scope.vsRepeat.startIndex === 0 && _prevStartIndex !== 0) {
                     digestRequired = true;
-                  } else if (Math.abs($scope.vsRepeat.endIndex - _prevEndIndex) >= options.excess / 2 || $scope.vsRepeat.endIndex === originalLength && _prevEndIndex !== originalLength) {
+                  } else if (Math.abs($scope.vsRepeat.endIndex - _prevEndIndex) >= options.hunkSize || $scope.vsRepeat.endIndex === originalLength && _prevEndIndex !== originalLength) {
                     digestRequired = true;
                   }
                 } else {
