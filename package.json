@@ -3,6 +3,7 @@
   "version": "2.0.6",
   "description": "Virtual Scroll for AngularJS ngRepeat directive",
   "homepage": "http://kamilkp.github.io/angular-vs-repeat",
+  "license": "MIT",
   "author": {
     "name": "Kamil Pekala",
     "email": "kamilkp@gmail.com",
