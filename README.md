@@ -1,4 +1,4 @@
-angular-vs-repeat v2.0.3
+angular-vs-repeat v2.0.7
 =================
 
 Looking for a version for Angular 2?
@@ -8,7 +8,7 @@ Check out https://github.com/kamilkp/ng2-vs-for
 
 ---
 
-### Breaking changes in v2.0.3
+### Breaking changes in v2.x
   * API changes for passing options. Options are now passed as an object to the `vs-repeat` attribute
     instead of using separate attributes for each option (except for `vs-repeat-container`)
 

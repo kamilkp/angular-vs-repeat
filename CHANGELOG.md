@@ -1,3 +1,8 @@
+Version 2.0.7 (2018/03/20)
+=================
+
+  * fixed bower.json and added license fields to package.json
+
 Version 2.0.3 (2018/03/16)
 =================
 
