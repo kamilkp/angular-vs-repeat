@@ -153,12 +153,12 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
     throw new Error('angular-vs-repeat: no ng-repeat directive on a child element');
   }
 
-  function printDeprecationWarning(message) {
-    console.warn("vs-repeat deprecation: ".concat(message));
+  function printDeprecationWarning($element, message) {
+    console.warn("vs-repeat deprecation: ".concat(message), $element[0]);
   }
 
-  function attrDeprecated(attrname) {
-    printDeprecationWarning("".concat(attrname, " attribute is deprecated. Pass the options object to vs-repeat attribute instead <link>."));
+  function attrDeprecated(attrname, $element) {
+    printDeprecationWarning($element, "".concat(attrname, " attribute is deprecated. Pass the options object to vs-repeat attribute instead https://github.com/kamilkp/angular-vs-repeat#options"));
   }
 
   var defaultOptions = {
@@ -191,7 +191,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
 
         ['vsSize', 'vsScrollParent', 'vsSizeProperty', 'vsHorizontal', 'vsOffsetBefore', 'vsOffsetAfter', 'vsScrolledToEndOffset', 'vsScrolledToBeginningOffset', 'vsExcess', 'vsScrollMargin'].forEach(function (attrname) {
           if (attrname in compileAttrs) {
-            attrDeprecated(attrname);
+            attrDeprecated(attrname, compileElement);
           }
         });
 
@@ -381,7 +381,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                       autosizingRequired = false;
 
                       if ($scope.$root && !$scope.$root.$$phase) {
-                        $scope.$apply();
+                        $scope.$digest();
                       }
                     }
                   } else {
@@ -416,11 +416,6 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
             function scrollHandler() {
               if (updateInnerCollection()) {
                 $scope.$digest();
-                var expectedSize = $scope.vsRepeat.sizesCumulative[originalLength];
-
-                if (expectedSize !== repeatContainer[0][scrollSize]) {
-                  console.warn('vsRepeat: size mismatch. Expected size ' + expectedSize + 'px whereas actual size is ' + repeatContainer[0][scrollSize] + 'px. Fix vsSize on element:', $element[0]);
-                }
               }
             }
 
@@ -432,7 +427,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                 getFromMeasured();
 
                 if ($scope.$root && !$scope.$root.$$phase) {
-                  $scope.$apply();
+                  $scope.$digest();
                 }
               }
 
@@ -455,24 +450,30 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
             var _prevStartIndex, _prevEndIndex, _minStartIndex, _maxEndIndex;
 
             $scope.$on('vsRenderAll', function () {
-              //e , quantum) {
-              if (options.latch) {
-                setTimeout(function () {
-                  // var __endIndex = Math.min($scope.vsRepeat.endIndex + (quantum || 1), originalLength);
-                  var __endIndex = originalLength;
-                  _maxEndIndex = Math.max(__endIndex, _maxEndIndex);
-                  $scope.vsRepeat.endIndex = options.latch ? _maxEndIndex : __endIndex;
-                  $scope[collectionName] = originalCollection.slice($scope.vsRepeat.startIndex, $scope.vsRepeat.endIndex);
-                  _prevEndIndex = $scope.vsRepeat.endIndex;
-                  $scope.$$postDigest(function () {
-                    $beforeContent.css(getLayoutProp(), 0);
-                    $afterContent.css(getLayoutProp(), 0);
-                  });
-                  $scope.$apply(function () {
-                    $scope.$emit('vsRenderAllDone');
-                  });
-                });
+              if (!options.latch) {
+                return;
               }
+
+              if ($scope.vsRepeat.endIndex === originalLength) {
+                $scope.$emit('vsRenderAllDone');
+                return;
+              }
+
+              setTimeout(function () {
+                // var __endIndex = Math.min($scope.vsRepeat.endIndex + (quantum || 1), originalLength);
+                var __endIndex = originalLength;
+                _maxEndIndex = Math.max(__endIndex, _maxEndIndex);
+                $scope.vsRepeat.endIndex = options.latch ? _maxEndIndex : __endIndex;
+                $scope[collectionName] = originalCollection.slice($scope.vsRepeat.startIndex, $scope.vsRepeat.endIndex);
+                _prevEndIndex = $scope.vsRepeat.endIndex;
+                $beforeContent.css(getLayoutProp(), 0);
+                $afterContent.css(getLayoutProp(), 0);
+                $scope.$emit('vsRenderAllDone');
+
+                if ($scope.$root && !$scope.$root.$$phase) {
+                  $scope.$digest();
+                }
+              });
             });
 
             function reinitialize() {
@@ -498,7 +499,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                 reinitialize();
 
                 if ($scope.$root && !$scope.$root.$$phase) {
-                  $scope.$apply();
+                  $scope.$digest();
                 }
               }
 
@@ -555,6 +556,8 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                 __startIndex = 0;
                 __endIndex = 1;
               } else {
+                _warnMismatch();
+
                 var relativeScroll = $scrollPosition - options.offsetBefore - scrollOffset;
 
                 var _binaryFind = binaryFind($scope.vsRepeat.sizesCumulative, relativeScroll - options.scrollMargin);
@@ -630,6 +633,23 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
               }
 
               return digestRequired;
+            }
+
+            function _warnMismatch() {
+              $scope.$$postDigest(function () {
+                window.requestAnimationFrame(function () {
+                  var expectedSize = $scope.vsRepeat.sizesCumulative[originalLength];
+                  var compStyle = window.getComputedStyle(repeatContainer[0]);
+                  var paddings = options.horizontal ? ['paddingLeft', 'paddingRight'] : ['paddingTop', 'paddingBottom'];
+                  var containerSize = repeatContainer[0][scrollSize] - paddings.reduce(function (acc, prop) {
+                    return acc + Number(compStyle[prop].slice(0, -2));
+                  }, 0);
+
+                  if (repeatContainer[0][scrollSize] && expectedSize !== containerSize) {
+                    console.warn('vsRepeat: size mismatch. Expected size ' + expectedSize + 'px whereas actual size is ' + containerSize + 'px. Fix vsSize on element:', $element[0]);
+                  }
+                });
+              });
             }
           }
         };

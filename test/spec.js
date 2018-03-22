@@ -185,7 +185,7 @@
     it('should support manually provided unique element size', function(done){
       $element = $compile([
         '<div vs-repeat="{size: 150}" class="container">',
-        '	<div ng-repeat="foo in bar" class="item">',
+        '	<div ng-repeat="foo in bar" class="item" ng-style="{height: \'150px\'}">',
         '		<span class="value">{{foo.value}}</span>',
         '	</div>',
         '</div>',
@@ -196,8 +196,7 @@
 
       setTimeout(() => {
         var elems = getElements($element);
-        expect(elems.length).to.be.greaterThan(1);
-        expect(elems.length).to.be.lessThan(5);
+        expect(elems.length).to.equal(2);
         done();
       });
     });
@@ -535,7 +534,7 @@
       done();
     });
 
-    it.only('should properly calculate start and end index with element beyond', function (done) {
+    it('should properly calculate start and end index with element beyond', function (done) {
       $element = angular.element(`
         <div class="container" style="height: 200px;">
           <div vs-repeat="{size: 20, scrollParent: '.container'}" style="margin: 300px 0">

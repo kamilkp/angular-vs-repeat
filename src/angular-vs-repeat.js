@@ -377,7 +377,7 @@
                       reinitialize();
                       autosizingRequired = false;
                       if ($scope.$root && !$scope.$root.$$phase) {
-                        $scope.$apply();
+                        $scope.$digest();
                       }
                     }
                   } else {
@@ -424,7 +424,7 @@
                 autosizingRequired = true;
                 getFromMeasured();
                 if ($scope.$root && !$scope.$root.$$phase) {
-                  $scope.$apply();
+                  $scope.$digest();
                 }
               }
 
@@ -451,28 +451,34 @@
               _minStartIndex,
               _maxEndIndex;
 
-            $scope.$on('vsRenderAll', function() {//e , quantum) {
-              if (options.latch) {
-                setTimeout(() => {
-                  // var __endIndex = Math.min($scope.vsRepeat.endIndex + (quantum || 1), originalLength);
-                  const __endIndex = originalLength;
-                  _maxEndIndex = Math.max(__endIndex, _maxEndIndex);
-
-                  $scope.vsRepeat.endIndex = options.latch ? _maxEndIndex : __endIndex;
-                  $scope[collectionName] = originalCollection.slice($scope.vsRepeat.startIndex, $scope.vsRepeat.endIndex);
-
-                  _prevEndIndex = $scope.vsRepeat.endIndex;
-
-                  $scope.$$postDigest(() => {
-                    $beforeContent.css(getLayoutProp(), 0);
-                    $afterContent.css(getLayoutProp(), 0);
-                  });
-
-                  $scope.$apply(() => {
-                    $scope.$emit('vsRenderAllDone');
-                  });
-                });
+            $scope.$on('vsRenderAll', function() {
+              if (!options.latch) {
+                return;
               }
+
+              if ($scope.vsRepeat.endIndex === originalLength) {
+                $scope.$emit('vsRenderAllDone');
+                return;
+              }
+
+              setTimeout(() => {
+                // var __endIndex = Math.min($scope.vsRepeat.endIndex + (quantum || 1), originalLength);
+                const __endIndex = originalLength;
+                _maxEndIndex = Math.max(__endIndex, _maxEndIndex);
+
+                $scope.vsRepeat.endIndex = options.latch ? _maxEndIndex : __endIndex;
+                $scope[collectionName] = originalCollection.slice($scope.vsRepeat.startIndex, $scope.vsRepeat.endIndex);
+
+                _prevEndIndex = $scope.vsRepeat.endIndex;
+
+                $beforeContent.css(getLayoutProp(), 0);
+                $afterContent.css(getLayoutProp(), 0);
+
+                $scope.$emit('vsRenderAllDone');
+                if ($scope.$root && !$scope.$root.$$phase) {
+                  $scope.$digest();
+                }
+              });
             });
 
             function reinitialize() {
@@ -496,7 +502,7 @@
               if (ch !== _prevClientSize) {
                 reinitialize();
                 if ($scope.$root && !$scope.$root.$$phase) {
-                  $scope.$apply();
+                  $scope.$digest();
                 }
               }
               _prevClientSize = ch;

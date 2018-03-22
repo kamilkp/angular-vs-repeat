@@ -5,12 +5,7 @@ import rename from 'gulp-rename';
 import clean from 'gulp-clean';
 import { Server } from 'karma';
 
-gulp.task('clean', () =>
-  gulp.src('dist', { read: false })
-		.pipe(clean())
-);
-
-gulp.task('babel', ['clean'], () =>
+gulp.task('babel', () =>
   gulp.src('src/angular-vs-repeat.js')
 		.pipe(babel())
 		.pipe(gulp.dest('dist'))
@@ -40,6 +35,6 @@ gulp.task('karma-travis', ['build'], (done) => {
   }, done).start();
 });
 
-gulp.task('build', ['clean', 'babel', 'min']);
+gulp.task('build', ['babel', 'min']);
 gulp.task('test', ['build', 'karma']);
 gulp.task('travis', ['build', 'karma-travis']);
