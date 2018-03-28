@@ -1,4 +1,4 @@
-angular-vs-repeat v2.0.9
+angular-vs-repeat v2.1.0
 =================
 
 Looking for a version for Angular 2?

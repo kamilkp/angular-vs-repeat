@@ -1,6 +1,6 @@
 /**
  * Copyright Kamil Pękala http://github.com/kamilkp
- * Angular Virtual Scroll Repeat v2.0.9 2018/04/02
+ * Angular Virtual Scroll Repeat v2.1.0 2018/04/03
  */
 
 /* global console, setTimeout, module */
