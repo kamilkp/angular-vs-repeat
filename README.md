@@ -107,6 +107,7 @@ Options shall be passed as an object to the `vs-repeat` attribute e.g.:
 - `scrolled-to-end-offset` - set this number to trigger the scrolledToEnd callback n items before the last gets rendered
 - `scrolled-to-beginning` - callback will be called when the first item of the list is rendered
 - `scrolled-to-beginning-offset` - set this number to trigger the scrolledToBeginning callback n items before the first gets rendered
+- `show-console-debug` - if false, suppresses debug messages in console (defaults to true)
 
 ### EVENTS:
 - `vsRepeatTrigger` - an event the directive listens for to manually trigger reinitialization

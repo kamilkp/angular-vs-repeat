@@ -74,6 +74,7 @@
    * `scrolled-to-end-offset` - set this number to trigger the scrolledToEnd callback n items before the last gets rendered
    * `scrolled-to-beginning` - callback will be called when the first item of the list is rendered
    * `scrolled-to-beginning-offset` - set this number to trigger the scrolledToBeginning callback n items before the first gets rendered
+   * `show-console-debug` - if false, suppresses debug messages in console (defaults to true)
 
    * EVENTS:
    * - `vsRepeatTrigger` - an event the directive listens for to manually trigger reinitialization
@@ -182,6 +183,7 @@
     autoresize: false,
     hunked: false,
     hunkSize: 0,
+    showConsoleDebug: true,
   };
 
   const vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', function($compile, $parse) {
@@ -568,7 +570,7 @@
                 __startIndex = 0;
                 __endIndex = 1;
               } else {
-                _warnMismatch();
+                if(options.showConsoleDebug) { _warnMismatch(); }
 
                 const relativeScroll = $scrollPosition - options.offsetBefore - scrollOffset;
 
