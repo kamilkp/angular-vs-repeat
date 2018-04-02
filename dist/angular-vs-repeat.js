@@ -10,7 +10,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
 
 /**
  * Copyright Kamil Pękala http://github.com/kamilkp
- * Angular Virtual Scroll Repeat v2.0.3 2018/03/16
+ * Angular Virtual Scroll Repeat v2.0.9 2018/04/02
  */
 
 /* global console, setTimeout, module */
@@ -398,10 +398,11 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
               }
             }
 
-            function getLayoutProp() {
-              var layoutPropPrefix = childTagName === 'tr' ? '' : 'min-';
-              var layoutProp = options.horizontal ? layoutPropPrefix + 'width' : layoutPropPrefix + 'height';
-              return layoutProp;
+            function getLayoutProps(value) {
+              var layoutProp = options.horizontal ? 'width' : 'height';
+              return ['', 'min-', 'max-'].reduce(function (acc, prop) {
+                return acc["".concat(prop).concat(layoutProp)] = value, acc;
+              }, {});
             }
 
             childClone.eq(0).attr(originalNgRepeatAttr, lhs + ' in ' + collectionName + (rhsSuffix ? ' ' + rhsSuffix : ''));
@@ -414,8 +415,14 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
             $scope.vsRepeat.endIndex = 0;
 
             function scrollHandler() {
+              var pos = $scrollParent[0][scrollPos];
+
               if (updateInnerCollection()) {
                 $scope.$digest();
+
+                if (options._ensureScrollIntegrity) {
+                  $scrollParent[0][scrollPos] = pos;
+                }
               }
             }
 
@@ -466,8 +473,8 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                 $scope.vsRepeat.endIndex = options.latch ? _maxEndIndex : __endIndex;
                 $scope[collectionName] = originalCollection.slice($scope.vsRepeat.startIndex, $scope.vsRepeat.endIndex);
                 _prevEndIndex = $scope.vsRepeat.endIndex;
-                $beforeContent.css(getLayoutProp(), 0);
-                $afterContent.css(getLayoutProp(), 0);
+                $beforeContent.css(getLayoutProps(0));
+                $afterContent.css(getLayoutProps(0));
                 $scope.$emit('vsRenderAllDone');
 
                 if ($scope.$root && !$scope.$root.$$phase) {
@@ -628,8 +635,8 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                 var o1 = $scope.vsRepeat.sizesCumulative[$scope.vsRepeat.startIndex] + options.offsetBefore;
                 var o2 = $scope.vsRepeat.sizesCumulative[$scope.vsRepeat.startIndex + $scope[collectionName].length] + options.offsetBefore;
                 var total = $scope.vsRepeat.totalSize;
-                $beforeContent.css(getLayoutProp(), o1 + 'px');
-                $afterContent.css(getLayoutProp(), total - o2 + 'px');
+                $beforeContent.css(getLayoutProps(o1 + 'px'));
+                $afterContent.css(getLayoutProps(total - o2 + 'px'));
               }
 
               return digestRequired;
@@ -656,7 +663,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
       }
     };
   }]);
-  angular.element(document.head).append("<style id=\"angular-vs-repeat-style\">\n\t  \t.vs-repeat-debug-element {\n        top: 50%;\n        left: 0;\n        right: 0;\n        height: 1px;\n        background: red;\n        z-index: 99999999;\n        box-shadow: 0 0 20px red;\n      }\n\n      .vs-repeat-debug-element + .vs-repeat-debug-element {\n        display: none;\n      }\n    </style>");
+  angular.element(document.head).append("<style id=\"angular-vs-repeat-style\">\n\t  \t.vs-repeat-debug-element {\n        top: 50%;\n        left: 0;\n        right: 0;\n        height: 1px;\n        background: red;\n        z-index: 99999999;\n        box-shadow: 0 0 20px red;\n      }\n\n      .vs-repeat-debug-element + .vs-repeat-debug-element {\n        display: none;\n      }\n\n      .vs-repeat-before-content,\n      .vs-repeat-after-content {\n        border: none !important;\n        padding: 0 !important;\n      }\n    </style>");
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = vsRepeatModule.name;

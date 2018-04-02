@@ -1,3 +1,8 @@
+Version 2.0.9 (2018/04/02)
+=================
+
+  * support for with flex layouts
+
 Version 2.0.7 (2018/03/20)
 =================
 

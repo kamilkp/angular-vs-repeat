@@ -1,6 +1,6 @@
 /**
  * Copyright Kamil Pękala http://github.com/kamilkp
- * Angular Virtual Scroll Repeat v2.0.8 2018/03/22
+ * Angular Virtual Scroll Repeat v2.0.9 2018/04/02
  */
 
 /* global console, setTimeout, module */
@@ -394,10 +394,11 @@
               }
             }
 
-            function getLayoutProp() {
-              const layoutPropPrefix = childTagName === 'tr' ? '' : 'min-';
-              const layoutProp = options.horizontal ? layoutPropPrefix + 'width' : layoutPropPrefix + 'height';
-              return layoutProp;
+            function getLayoutProps(value) {
+              const layoutProp = options.horizontal ? 'width' : 'height';
+              return ['', 'min-', 'max-'].reduce((acc, prop) =>
+                (acc[`${prop}${layoutProp}`] = value, acc)
+                , {});
             }
 
             childClone.eq(0).attr(originalNgRepeatAttr, lhs + ' in ' + collectionName + (rhsSuffix ? ' ' + rhsSuffix : ''));
@@ -412,8 +413,13 @@
             $scope.vsRepeat.endIndex = 0;
 
             function scrollHandler() {
+              const pos = $scrollParent[0][scrollPos];
               if (updateInnerCollection()) {
                 $scope.$digest();
+
+                if (options._ensureScrollIntegrity) {
+                  $scrollParent[0][scrollPos] = pos;
+                }
               }
             }
 
@@ -471,8 +477,8 @@
 
                 _prevEndIndex = $scope.vsRepeat.endIndex;
 
-                $beforeContent.css(getLayoutProp(), 0);
-                $afterContent.css(getLayoutProp(), 0);
+                $beforeContent.css(getLayoutProps(0));
+                $afterContent.css(getLayoutProps(0));
 
                 $scope.$emit('vsRenderAllDone');
                 if ($scope.$root && !$scope.$root.$$phase) {
@@ -631,8 +637,8 @@
                 const o2 = $scope.vsRepeat.sizesCumulative[$scope.vsRepeat.startIndex + $scope[collectionName].length] + options.offsetBefore;
                 const total = $scope.vsRepeat.totalSize;
 
-                $beforeContent.css(getLayoutProp(), o1 + 'px');
-                $afterContent.css(getLayoutProp(), (total - o2) + 'px');
+                $beforeContent.css(getLayoutProps(o1 + 'px'));
+                $afterContent.css(getLayoutProps((total - o2) + 'px'));
               }
 
               return digestRequired;
@@ -674,6 +680,12 @@
 
       .vs-repeat-debug-element + .vs-repeat-debug-element {
         display: none;
+      }
+
+      .vs-repeat-before-content,
+      .vs-repeat-after-content {
+        border: none !important;
+        padding: 0 !important;
       }
     </style>`
   );
