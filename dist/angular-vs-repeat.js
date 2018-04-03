@@ -10,7 +10,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
 
 /**
  * Copyright Kamil Pękala http://github.com/kamilkp
- * Angular Virtual Scroll Repeat v2.0.9 2018/04/02
+ * Angular Virtual Scroll Repeat v2.1.0 2018/04/03
  */
 
 /* global console, setTimeout, module */
@@ -74,6 +74,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
    * `scrolled-to-end-offset` - set this number to trigger the scrolledToEnd callback n items before the last gets rendered
    * `scrolled-to-beginning` - callback will be called when the first item of the list is rendered
    * `scrolled-to-beginning-offset` - set this number to trigger the scrolledToBeginning callback n items before the first gets rendered
+   * `show-console-debug` - if false, suppresses debug messages in console (defaults to true)
     * EVENTS:
    * - `vsRepeatTrigger` - an event the directive listens for to manually trigger reinitialization
    * - `vsRepeatReinitialized` - an event the directive emits upon reinitialization done
@@ -176,7 +177,8 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
     horizontal: false,
     autoresize: false,
     hunked: false,
-    hunkSize: 0
+    hunkSize: 0,
+    showConsoleDebug: true
   };
   var vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', function ($compile, $parse) {
     return {
@@ -563,7 +565,9 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                 __startIndex = 0;
                 __endIndex = 1;
               } else {
-                _warnMismatch();
+                if (options.showConsoleDebug) {
+                  _warnMismatch();
+                }
 
                 var relativeScroll = $scrollPosition - options.offsetBefore - scrollOffset;
 
