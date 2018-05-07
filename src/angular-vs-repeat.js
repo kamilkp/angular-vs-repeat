@@ -654,8 +654,10 @@
                     : ['paddingTop', 'paddingBottom'];
                   const containerSize = repeatContainer[0][scrollSize] - paddings.reduce((acc, prop) => acc + Number(compStyle[prop].slice(0, -2)), 0);
 
-                  if (repeatContainer[0][scrollSize] && expectedSize !== containerSize) {
-                    console.warn('vsRepeat: size mismatch. Expected size ' + expectedSize + 'px whereas actual size is ' + containerSize + 'px. Fix vsSize on element:', $element[0]);
+                  if (expectedSize >= containerSize) {
+                    if (repeatContainer[0][scrollSize] && expectedSize !== containerSize) {
+                      console.warn('vsRepeat: size mismatch. Expected size ' + expectedSize + 'px whereas actual size is ' + containerSize + 'px. Fix vsSize on element:', $element[0]);
+                    }
                   }
                 });
               });
