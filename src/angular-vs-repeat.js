@@ -214,7 +214,7 @@
 
         const [originalNgRepeatAttr, ngRepeatExpression, isNgRepeatStart] = analyzeNgRepeatUsage(ngRepeatChild);
 
-        const expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+\S+)?$/.exec(ngRepeatExpression);
+        const expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+\.+)?$/.exec(ngRepeatExpression);
         const [, lhs, rhs, rhsSuffix] = expressionMatches;
 
         if (isNgRepeatStart) {
