@@ -201,7 +201,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
             ngRepeatExpression = _analyzeNgRepeatUsage2[1],
             isNgRepeatStart = _analyzeNgRepeatUsage2[2];
 
-        var expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+\.+)?$/.exec(ngRepeatExpression);
+        var expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+.+)?$/.exec(ngRepeatExpression);
 
         var _expressionMatches = _slicedToArray(expressionMatches, 4),
             lhs = _expressionMatches[1],
