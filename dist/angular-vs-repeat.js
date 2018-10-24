@@ -669,3 +669,4 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
     module.exports = vsRepeatModule.name;
   }
 })(window, window.angular);
+//# sourceMappingURL=angular-vs-repeat.js.map

@@ -2,19 +2,23 @@ import gulp from 'gulp';
 import babel from 'gulp-babel';
 import uglify from 'gulp-uglify';
 import rename from 'gulp-rename';
-import clean from 'gulp-clean';
+import sourcemaps from 'gulp-sourcemaps';
 import { Server } from 'karma';
 
 gulp.task('babel', () =>
   gulp.src('src/angular-vs-repeat.js')
-		.pipe(babel())
-		.pipe(gulp.dest('dist'))
+    .pipe(sourcemaps.init())
+    .pipe(babel())
+    .pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest('dist'))
 );
 
 gulp.task('min', ['babel'], () =>
   gulp.src('dist/angular-vs-repeat.js')
-		.pipe(uglify())
-		.pipe(rename('angular-vs-repeat.min.js'))
+    .pipe(sourcemaps.init({loadMaps: true}))
+    .pipe(uglify())
+    .pipe(rename('angular-vs-repeat.min.js'))
+    .pipe(sourcemaps.write('.'))
 		.pipe(gulp.dest('dist'))
 );
 
