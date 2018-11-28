@@ -100,7 +100,7 @@ Options shall be passed as an object to the `vs-repeat` attribute e.g.:
 - `scroll-margin` - how many pixels ahead should elements be rendered while scrolling (defaults to 0)
 - `latch` - if true, elements will be rendered gradually but won't be removed when scrolled away (defaults to false)
 
-- `size` - an angular expression evaluating to the element's size (in pixels) - **it is possible to use the ngRepeat's local repeaing variable in this expression**
+- `size` - an angular expression evaluating to the element's size (in pixels) - **it is possible to use the ngRepeat's local repeating variable in this expression**
 - `autoresize` - use this attribute without vs-size and without specifying element's size. The automatically computed element style will
               readjust upon window resize if the size is dependable on the viewport size
 - `scrolled-to-end` - callback will be called when the last item of the list is rendered
