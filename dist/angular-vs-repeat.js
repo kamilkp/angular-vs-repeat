@@ -10,7 +10,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
 
 /**
  * Copyright Kamil Pękala http://github.com/kamilkp
- * Angular Virtual Scroll Repeat v2.0.12 2018/04/02
+ * Angular Virtual Scroll Repeat v2.0.13 2018/04/02
  */
 
 /* global console, setTimeout, module */
@@ -163,7 +163,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
 
   var defaultOptions = {
     latch: false,
-    perserveLatchOnRefresh: false,
+    preserveLatchOnRefresh: false,
     container: null,
     scrollParent: null,
     size: null,
@@ -488,7 +488,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
               _prevStartIndex = void 0;
               _prevEndIndex = void 0;
 
-              if (!options.perserveLatchOnRefresh && _minStartIndex !== undefined && _maxEndIndex !== undefined) {
+              if (!options.preserveLatchOnRefresh || _minStartIndex === undefined || _maxEndIndex === undefined) {
                 _minStartIndex = originalLength;
                 _maxEndIndex = 0;
               }
