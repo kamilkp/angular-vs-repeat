@@ -1,6 +1,6 @@
 {
   "name": "angular-vs-repeat",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "Virtual Scroll for AngularJS ngRepeat directive",
   "homepage": "http://kamilkp.github.io/angular-vs-repeat",
   "license": "MIT",
