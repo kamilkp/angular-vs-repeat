@@ -1,6 +1,6 @@
 /**
  * Copyright Kamil Pękala http://github.com/kamilkp
- * Angular Virtual Scroll Repeat v2.0.11 2018/04/02
+ * Angular Virtual Scroll Repeat v2.0.12 2018/04/02
  */
 
 /* global console, setTimeout, module */
@@ -492,7 +492,7 @@
               _prevStartIndex = void 0;
               _prevEndIndex = void 0;
 
-              if (!options.perserveLatchOnRefresh) {
+              if (!options.perserveLatchOnRefresh && _minStartIndex !== undefined && _maxEndIndex !== undefined) {
                 _minStartIndex = originalLength;
                 _maxEndIndex = 0;
               }
