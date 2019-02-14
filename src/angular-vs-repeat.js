@@ -168,6 +168,7 @@
 
   const defaultOptions = {
     latch: false,
+    perserveLatchOnRefresh: false,
     container: null,
     scrollParent: null,
     size: null,
@@ -490,8 +491,12 @@
             function reinitialize() {
               _prevStartIndex = void 0;
               _prevEndIndex = void 0;
-              _minStartIndex = originalLength;
-              _maxEndIndex = 0;
+
+              if (!options.perserveLatchOnRefresh) {
+                _minStartIndex = originalLength;
+                _maxEndIndex = 0;
+              }
+
               updateTotalSize($scope.vsRepeat.sizesCumulative[originalLength]);
               updateInnerCollection();
 
