@@ -166,6 +166,13 @@
     printDeprecationWarning($element, `${attrname} attribute is deprecated. Pass the options object to vs-repeat attribute instead https://github.com/kamilkp/angular-vs-repeat#options`);
   }
 
+  function safeDigest(scope) {
+    const phase = scope.$root.$$phase;
+    if (phase !== "$apply" && phase !== "$digest") {
+      scope.$digest();
+    }
+  }
+
   const defaultOptions = {
     latch: false,
     preserveLatchOnRefresh: false,
@@ -377,8 +384,8 @@
                       _mapSize(measuredSize);
                       reinitialize();
                       autosizingRequired = false;
-                      if ($scope.$root && !$scope.$root.$$phase) {
-                        $scope.$digest();
+                      if ($scope.$root) {
+                        safeDigest($scope);
                       }
                     }
                   } else {
@@ -416,7 +423,7 @@
             function scrollHandler() {
               const pos = $scrollParent[0][scrollPos];
               if (updateInnerCollection()) {
-                $scope.$digest();
+                safeDigest($scope);
 
                 if (options._ensureScrollIntegrity) {
                   $scrollParent[0][scrollPos] = pos;
@@ -430,13 +437,13 @@
               if (options.autoresize) {
                 autosizingRequired = true;
                 getFromMeasured();
-                if ($scope.$root && !$scope.$root.$$phase) {
-                  $scope.$digest();
+                if ($scope.$root) {
+                  safeDigest($scope);
                 }
               }
 
               if (updateInnerCollection()) {
-                $scope.$digest();
+                safeDigest($scope);
               }
             }
 
@@ -482,8 +489,8 @@
                 $afterContent.css(getLayoutProps(0));
 
                 $scope.$emit('vsRenderAllDone');
-                if ($scope.$root && !$scope.$root.$$phase) {
-                  $scope.$digest();
+                if ($scope.$root) {
+                  safeDigest($scope);
                 }
               });
             });
@@ -512,8 +519,8 @@
               const ch = getClientSize($scrollParent[0], clientSize);
               if (ch !== _prevClientSize) {
                 reinitialize();
-                if ($scope.$root && !$scope.$root.$$phase) {
-                  $scope.$digest();
+                if ($scope.$root) {
+                  safeDigest($scope);
                 }
               }
               _prevClientSize = ch;
