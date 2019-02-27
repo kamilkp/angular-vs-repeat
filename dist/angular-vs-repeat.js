@@ -21,10 +21,10 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
    * into a component, where the user thinks he has all the elements rendered and all he needs to do is scroll (without any kind of
    * pagination - which most users loath) and at the same time the browser isn't overloaded by that many elements/angular bindings etc.
    * The directive renders only so many elements that can fit into current container's clientHeight/clientWidth.
-    * LIMITATIONS:
+     * LIMITATIONS:
    * - current version only supports an Array as a right-hand-side object for ngRepeat
    * - all rendered elements must have the same height/width or the sizes of the elements must be known up front
-    * USAGE:
+     * USAGE:
    * In order to use the vsRepeat directive you need to place a vs-repeat attribute on a direct parent of an element with ng-repeat
    * example:
    * <div vs-repeat="options">
@@ -32,7 +32,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
    *          <!-- content -->
    *      </div>
    * </div>
-    * or:
+     * or:
    * <div vs-repeat="options">
    *      <div ng-repeat-start="item in someArray">
    *          <!-- content -->
@@ -44,7 +44,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
    *          <!-- content -->
    *      </div>
    * </div>
-    * You can also measure the single element's height/width (including all paddings and margins), and then speficy it as a value
+     * You can also measure the single element's height/width (including all paddings and margins), and then speficy it as a value
    * of the option's `size` property. This can be used if one wants to override the automatically computed element size.
    * example:
    * <div vs-repeat="{size: 50}"> <!-- the specified element height is 50px -->
@@ -52,13 +52,13 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
    *          <!-- content -->
    *      </div>
    * </div>
-    * IMPORTANT!
-    * - the vsRepeat directive must be applied to a direct parent of an element with ngRepeat
+     * IMPORTANT!
+     * - the vsRepeat directive must be applied to a direct parent of an element with ngRepeat
    * - the value of vsRepeat attribute is the single element's height/width measured in pixels. If none provided, the directive
    *      will compute it automatically
-    * OPTIONAL PARAMETERS (attributes):
+     * OPTIONAL PARAMETERS (attributes):
    * vs-repeat-container="selector" - selector for element containing ng-repeat. (defaults to the current element)
-    * OPTIONS:
+     * OPTIONS:
    * Options shall be passed as an object to the `vs-repeat` attribute e.g.: `<div vs-repeat="{scrollParent: 'window', size: 20}"></div>`
    *
    * Available options:
@@ -67,14 +67,14 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
    * `offset-after` - bottom/right offset in pixels (defaults to 0)
    * `scroll-margin` - how many pixels ahead should elements be rendered while scrolling
    * `latch` - if true, elements will be rendered gradually but won't be removed when scrolled away (defaults to false)
-    * `size` - a property name of the items in collection that is a number denoting the element size (in pixels)
+     * `size` - a property name of the items in collection that is a number denoting the element size (in pixels)
    * `autoresize` - use this attribute without vs-size and without specifying element's size. The automatically computed element style will
    *              readjust upon window resize if the size is dependable on the viewport size
    * `scrolled-to-end` - callback will be called when the last item of the list is rendered
    * `scrolled-to-end-offset` - set this number to trigger the scrolledToEnd callback n items before the last gets rendered
    * `scrolled-to-beginning` - callback will be called when the first item of the list is rendered
    * `scrolled-to-beginning-offset` - set this number to trigger the scrolledToBeginning callback n items before the first gets rendered
-    * EVENTS:
+     * EVENTS:
    * - `vsRepeatTrigger` - an event the directive listens for to manually trigger reinitialization
    * - `vsRepeatReinitialized` - an event the directive emits upon reinitialization done
    */
@@ -159,6 +159,14 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
 
   function attrDeprecated(attrname, $element) {
     printDeprecationWarning($element, "".concat(attrname, " attribute is deprecated. Pass the options object to vs-repeat attribute instead https://github.com/kamilkp/angular-vs-repeat#options"));
+  }
+
+  function safeDigest(scope) {
+    var phase = scope.$root.$$phase;
+
+    if (phase !== "$apply" && phase !== "$digest") {
+      scope.$digest();
+    }
   }
 
   var defaultOptions = {
@@ -381,8 +389,8 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                       reinitialize();
                       autosizingRequired = false;
 
-                      if ($scope.$root && !$scope.$root.$$phase) {
-                        $scope.$digest();
+                      if ($scope.$root) {
+                        safeDigest($scope);
                       }
                     }
                   } else {
@@ -419,7 +427,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
               var pos = $scrollParent[0][scrollPos];
 
               if (updateInnerCollection()) {
-                $scope.$digest();
+                safeDigest($scope);
 
                 if (options._ensureScrollIntegrity) {
                   $scrollParent[0][scrollPos] = pos;
@@ -434,13 +442,13 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                 autosizingRequired = true;
                 getFromMeasured();
 
-                if ($scope.$root && !$scope.$root.$$phase) {
-                  $scope.$digest();
+                if ($scope.$root) {
+                  safeDigest($scope);
                 }
               }
 
               if (updateInnerCollection()) {
-                $scope.$digest();
+                safeDigest($scope);
               }
             }
 
@@ -478,8 +486,8 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                 $afterContent.css(getLayoutProps(0));
                 $scope.$emit('vsRenderAllDone');
 
-                if ($scope.$root && !$scope.$root.$$phase) {
-                  $scope.$digest();
+                if ($scope.$root) {
+                  safeDigest($scope);
                 }
               });
             });
@@ -510,8 +518,8 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
               if (ch !== _prevClientSize) {
                 reinitialize();
 
-                if ($scope.$root && !$scope.$root.$$phase) {
-                  $scope.$digest();
+                if ($scope.$root) {
+                  safeDigest($scope);
                 }
               }
 
