@@ -44,5 +44,7 @@
     "unit": "gulp test",
     "build": "gulp build"
   },
-  "dependencies": {}
+  "dependencies": {
+    "natives": "^1.1.6"
+  }
 }
