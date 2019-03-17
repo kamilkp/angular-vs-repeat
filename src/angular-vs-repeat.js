@@ -426,6 +426,10 @@
 
             $scrollParent.on('scroll', scrollHandler);
 
+            setInterval(function(){
+              $scope.$digest();
+            }, 150);
+
             function onWindowResize() {
               if (options.autoresize) {
                 autosizingRequired = true;
