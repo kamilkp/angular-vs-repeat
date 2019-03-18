@@ -429,6 +429,10 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
 
             $scrollParent.on('scroll', scrollHandler);
 
+            setInterval(function(){
+              $scope.$digest();
+            }, 150);
+
             function onWindowResize() {
               if (options.autoresize) {
                 autosizingRequired = true;
