@@ -572,7 +572,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                 __startIndex = 0;
                 __endIndex = 1;
               } else {
-                _warnMismatch();
+                // _warnMismatch();
 
                 var relativeScroll = $scrollPosition - options.offsetBefore - scrollOffset;
 

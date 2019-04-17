@@ -577,7 +577,7 @@
                 __startIndex = 0;
                 __endIndex = 1;
               } else {
-                _warnMismatch();
+                // _warnMismatch();
 
                 const relativeScroll = $scrollPosition - options.offsetBefore - scrollOffset;
 
