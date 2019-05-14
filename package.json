@@ -23,6 +23,8 @@
     "@babel/plugin-proposal-pipeline-operator": "7.0.0-beta.40",
     "@babel/preset-env": "7.0.0-beta.40",
     "@babel/register": "7.0.0-beta.40",
+    "angular": "1.7.8",
+    "angular-mocks": "1.7.8",
     "babel-eslint": "8.2.2",
     "chai": "4.1.2",
     "eslint": "git+https://github.com/kamilkp/eslint.git#bc9ae3fb6f4ea8a001b8b656fcd2a27b742583ef",

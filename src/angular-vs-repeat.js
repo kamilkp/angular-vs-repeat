@@ -185,7 +185,9 @@
     hunkSize: 0,
   };
 
-  const vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', function($compile, $parse) {
+  const vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', '$injector', function($compile, $parse, $injector) {
+    const angularHybridMode = '$$UpgradeModule' in $injector.modules;
+
     return {
       restrict: 'A',
       scope: true,
@@ -520,7 +522,7 @@
             }
 
             $scope.$watch(() => {
-              if (typeof window.requestAnimationFrame === 'function') {
+              if (typeof window.requestAnimationFrame === 'function' && !angularHybridMode) {
                 window.requestAnimationFrame(reinitOnClientHeightChange);
               } else {
                 reinitOnClientHeightChange();

@@ -179,7 +179,8 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
     hunked: false,
     hunkSize: 0
   };
-  var vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', function ($compile, $parse) {
+  var vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', '$injector', function ($compile, $parse, $injector) {
+    var angularHybridMode = '$$UpgradeModule' in $injector.modules;
     return {
       restrict: 'A',
       scope: true,
@@ -519,7 +520,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
             }
 
             $scope.$watch(function () {
-              if (typeof window.requestAnimationFrame === 'function') {
+              if (typeof window.requestAnimationFrame === 'function' && !angularHybridMode) {
                 window.requestAnimationFrame(reinitOnClientHeightChange);
               } else {
                 reinitOnClientHeightChange();
