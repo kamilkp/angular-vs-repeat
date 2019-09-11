@@ -202,7 +202,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
             ngRepeatExpression = _analyzeNgRepeatUsage2[1],
             isNgRepeatStart = _analyzeNgRepeatUsage2[2];
 
-        var expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+\S+)?$/.exec(ngRepeatExpression);
+        var expressionMatches = /^\s*(\S+)\s+in\s+([\S\s]+?)(track\s+by\s+.+)?$/.exec(ngRepeatExpression);
 
         var _expressionMatches = _slicedToArray(expressionMatches, 4),
             lhs = _expressionMatches[1],
@@ -222,7 +222,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
 
         compileRepeatContainer.empty();
         return {
-          pre: function pre($scope, $element, $attrs) {
+          pre: function pre($scope, $element, $attrs, _controller, transclude) {
             var _$scope$$eval;
 
             function _parseSize(options) {
@@ -410,7 +410,9 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
             childClone.addClass('vs-repeat-repeated-element');
             repeatContainer.append($beforeContent);
             repeatContainer.append(childClone);
-            $compile(childClone)($scope);
+            $compile(childClone)($scope, null, {
+              parentBoundTranscludeFn: transclude
+            });
             repeatContainer.append($afterContent);
             $scope.vsRepeat.startIndex = 0;
             $scope.vsRepeat.endIndex = 0;
