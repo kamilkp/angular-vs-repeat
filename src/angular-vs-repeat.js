@@ -230,7 +230,7 @@
 
         compileRepeatContainer.empty();
         return {
-          pre: function($scope, $element, $attrs) {
+          pre: function($scope, $element, $attrs, _controller, transclude) {
             function _parseSize(options) {
               if (typeof options.size === 'number') {
                 options.getSize = () => options.size;
@@ -407,7 +407,7 @@
 
             repeatContainer.append($beforeContent);
             repeatContainer.append(childClone);
-            $compile(childClone)($scope);
+            $compile(childClone)($scope, null, { parentBoundTranscludeFn: transclude });
             repeatContainer.append($afterContent);
 
             $scope.vsRepeat.startIndex = 0;
