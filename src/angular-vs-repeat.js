@@ -1,6 +1,6 @@
 /**
  * Copyright Kamil Pękala http://github.com/kamilkp
- * Angular Virtual Scroll Repeat v2.0.9 2018/04/02
+ * Angular Virtual Scroll Repeat v2.0.13 2018/04/02
  */
 
 /* global console, setTimeout, module */
@@ -168,6 +168,7 @@
 
   const defaultOptions = {
     latch: false,
+    preserveLatchOnRefresh: false,
     container: null,
     scrollParent: null,
     size: null,
@@ -490,8 +491,12 @@
             function reinitialize() {
               _prevStartIndex = void 0;
               _prevEndIndex = void 0;
-              _minStartIndex = originalLength;
-              _maxEndIndex = 0;
+
+              if (!options.preserveLatchOnRefresh || _minStartIndex === undefined || _maxEndIndex === undefined) {
+                _minStartIndex = originalLength;
+                _maxEndIndex = 0;
+              }
+
               updateTotalSize($scope.vsRepeat.sizesCumulative[originalLength]);
               updateInnerCollection();
 
