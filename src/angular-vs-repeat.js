@@ -374,8 +374,8 @@
 
                     if (gotSomething) {
                       _mapSize(measuredSize);
-                      reinitialize();
                       autosizingRequired = false;
+                      reinitialize();
                       if ($scope.$root && !$scope.$root.$$phase) {
                         $scope.$digest();
                       }
