@@ -1,6 +1,6 @@
 /**
  * Copyright Kamil Pękala http://github.com/kamilkp
- * Angular Virtual Scroll Repeat v2.0.13 2018/04/02
+ * Angular Virtual Scroll Repeat v2.0.14 2020/11/11
  */
 
 /* global console, setTimeout, module */
@@ -185,7 +185,8 @@
     hunkSize: 0,
   };
 
-  const vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', function($compile, $parse) {
+  const vsRepeatModule = angular.module('vs-repeat', []);
+  vsRepeatModule.directive('vsRepeat', ['$compile', '$parse', 'vsRepeatConfig', function($compile, $parse, vsRepeatConfig) {
     return {
       restrict: 'A',
       scope: true,
@@ -659,7 +660,7 @@
                     : ['paddingTop', 'paddingBottom'];
                   const containerSize = repeatContainer[0][scrollSize] - paddings.reduce((acc, prop) => acc + Number(compStyle[prop].slice(0, -2)), 0);
 
-                  if (repeatContainer[0][scrollSize] && expectedSize !== containerSize) {
+                  if (!vsRepeatConfig.sizeMismatchWarningsSilenced && repeatContainer[0][scrollSize] && expectedSize !== containerSize) {
                     console.warn('vsRepeat: size mismatch. Expected size ' + expectedSize + 'px whereas actual size is ' + containerSize + 'px. Fix vsSize on element:', $element[0]);
                   }
                 });
@@ -670,6 +671,24 @@
       },
     };
   }]);
+
+  vsRepeatModule.provider('vsRepeatConfig', function() {
+    let sizeMismatchWarningsSilenced = false;
+
+    return {
+      silenceSizeMismatchWarnings() {
+        console.warn('vsRepeat size mismatch warnings silenced - not recommended');
+        sizeMismatchWarningsSilenced = true;
+      },
+      $get: function() {
+        return {
+          get sizeMismatchWarningsSilenced() {
+            return sizeMismatchWarningsSilenced;
+          }
+        }
+      },
+    }
+  });
 
   angular.element(document.head).append(
     `<style id="angular-vs-repeat-style">

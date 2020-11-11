@@ -10,7 +10,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
 
 /**
  * Copyright Kamil Pękala http://github.com/kamilkp
- * Angular Virtual Scroll Repeat v2.0.13 2018/04/02
+ * Angular Virtual Scroll Repeat v2.0.14 2020/11/11
  */
 
 /* global console, setTimeout, module */
@@ -179,7 +179,8 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
     hunked: false,
     hunkSize: 0
   };
-  var vsRepeatModule = angular.module('vs-repeat', []).directive('vsRepeat', ['$compile', '$parse', function ($compile, $parse) {
+  var vsRepeatModule = angular.module('vs-repeat', []);
+  vsRepeatModule.directive('vsRepeat', ['$compile', '$parse', 'vsRepeatConfig', function ($compile, $parse, vsRepeatConfig) {
     return {
       restrict: 'A',
       scope: true,
@@ -657,7 +658,7 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
                     return acc + Number(compStyle[prop].slice(0, -2));
                   }, 0);
 
-                  if (repeatContainer[0][scrollSize] && expectedSize !== containerSize) {
+                  if (!vsRepeatConfig.sizeMismatchWarningsSilenced && repeatContainer[0][scrollSize] && expectedSize !== containerSize) {
                     console.warn('vsRepeat: size mismatch. Expected size ' + expectedSize + 'px whereas actual size is ' + containerSize + 'px. Fix vsSize on element:', $element[0]);
                   }
                 });
@@ -668,6 +669,23 @@ function _slicedToArray(arr, i) { if (Array.isArray(arr)) { return arr; } else i
       }
     };
   }]);
+  vsRepeatModule.provider('vsRepeatConfig', function () {
+    var sizeMismatchWarningsSilenced = false;
+    return {
+      silenceSizeMismatchWarnings: function silenceSizeMismatchWarnings() {
+        console.warn('vsRepeat size mismatch warnings silenced - not recommended');
+        sizeMismatchWarningsSilenced = true;
+      },
+      $get: function $get() {
+        return {
+          get sizeMismatchWarningsSilenced() {
+            return sizeMismatchWarningsSilenced;
+          }
+
+        };
+      }
+    };
+  });
   angular.element(document.head).append("<style id=\"angular-vs-repeat-style\">\n\t  \t.vs-repeat-debug-element {\n        top: 50%;\n        left: 0;\n        right: 0;\n        height: 1px;\n        background: red;\n        z-index: 99999999;\n        box-shadow: 0 0 20px red;\n      }\n\n      .vs-repeat-debug-element + .vs-repeat-debug-element {\n        display: none;\n      }\n\n      .vs-repeat-before-content,\n      .vs-repeat-after-content {\n        border: none !important;\n        padding: 0 !important;\n      }\n    </style>");
 
   if (typeof module !== 'undefined' && module.exports) {
