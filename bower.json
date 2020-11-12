@@ -4,6 +4,9 @@
   "description": "Virtual Scroll for AngularJS ngRepeat directive",
   "homepage": "http://kamilkp.github.io/angular-vs-repeat",
   "main": "dist/angular-vs-repeat.min.js",
+  "dependencies": {
+    "angular": ">= 1.2.0"
+  },
   "keywords": [
     "angularjs",
     "javascript",
