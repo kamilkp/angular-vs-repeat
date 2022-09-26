@@ -31,7 +31,7 @@
     "gulp-clean": "0.4.0",
     "gulp-rename": "1.2.2",
     "gulp-uglify": "3.0.0",
-    "karma": "2.0.0",
+    "karma": "6.4.1",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "~0.1.4",
     "karma-firefox-launcher": "~0.1.3",
